@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktris", "Aktris\Aktris.csproj", "{3A9C3781-27D2-4513-975F-064DB4FD81C1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktris.Test", "Aktris.Test\Aktris.Test.csproj", "{AE9925B8-6E77-456D-A404-209201E81C7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +15,6 @@ Global
 		{3A9C3781-27D2-4513-975F-064DB4FD81C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A9C3781-27D2-4513-975F-064DB4FD81C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A9C3781-27D2-4513-975F-064DB4FD81C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AE9925B8-6E77-456D-A404-209201E81C7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE9925B8-6E77-456D-A404-209201E81C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AE9925B8-6E77-456D-A404-209201E81C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AE9925B8-6E77-456D-A404-209201E81C7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
