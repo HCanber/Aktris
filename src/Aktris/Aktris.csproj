@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="ActorRef.cs" />
     <Compile Include="ActorSystem.cs" />
+    <Compile Include="ActorSystemFactory.cs" />
+    <Compile Include="DefaultActorSystemFactory.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

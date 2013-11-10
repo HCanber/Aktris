@@ -28,3 +28,8 @@ let ``Given a InternalActorSystem Then its´ name can be retrieved``() =
 let ``When creating a ActorSystem using static Create method and null as name, then "default" is used as name``() =
   let system = ActorSystem.Create(null)
   system.Name |> should equal "default"
+
+[<Fact>]
+let ``When creating a ActorSystem using static Create method and no name, then "default" is used as name``() =
+  let system = ActorSystem.Create()
+  system.Name |> should equal "default"

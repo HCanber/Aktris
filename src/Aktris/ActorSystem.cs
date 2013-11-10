@@ -7,7 +7,6 @@ namespace Aktris
 {
 	public abstract class ActorSystem
 	{
-		private const string _DefaultName = "default";
 		private readonly string _name;
 
 		protected ActorSystem([NotNull] string name)
@@ -29,9 +28,17 @@ namespace Aktris
 
 		public string Name { get { return _name; } }
 
-		public static ActorSystem Create(string name = _DefaultName)
+
+		/// <summary>
+		/// Creates a new <see cref="ActorSystem"/> with an optional name.
+		/// </summary>
+		/// <param name="name">[Optional] The name of the system. If left out or if <c>null</c> then the system will get the name "default".</param>
+		/// <returns>The new system.</returns>
+		public static ActorSystem Create(string name = null)
 		{
-			return new InternalActorSystem(name ?? _DefaultName);
+			var systemFactory = DefaultActorSystemFactory.Instance;
+			var system = systemFactory.Create(name ?? "default");
+			return system;
 		}
 	}
 }
