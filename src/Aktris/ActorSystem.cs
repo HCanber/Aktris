@@ -29,6 +29,12 @@ namespace Aktris
 		public string Name { get { return _name; } }
 
 
+		public ActorRef CreateActor()
+		{
+			return new LocalActorRef();
+		}
+
+
 		/// <summary>
 		/// Creates a new <see cref="ActorSystem"/> with an optional name.
 		/// </summary>

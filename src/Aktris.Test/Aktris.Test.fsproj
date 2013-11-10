@@ -54,9 +54,14 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="App.config" />
-    <Compile Include="ActorSystem_Tests.fs" />
+    <Compile Include="ActorSystem_NewSystem_Tests.fs" />
+    <Compile Include="ActorSystem_CreateActor_Tests.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FluentAssertions">
+      <HintPath>..\packages\FluentAssertions.2.1.0.0\lib\net45\FluentAssertions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FsUnit.CustomMatchers">
       <HintPath>..\packages\FsUnit.xUnit.1.2.1.2\Lib\Net40\FsUnit.CustomMatchers.dll</HintPath>
       <Private>True</Private>
@@ -76,6 +81,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="xunit">
       <HintPath>..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
       <Private>True</Private>
