@@ -1,8 +1,10 @@
-﻿namespace Aktris.Internals
+﻿using Aktris.JetBrainsAnnotations;
+
+namespace Aktris.Internals
 {
 	public class InternalActorSystem : ActorSystem
 	{
-		public InternalActorSystem()
+		public InternalActorSystem([NotNull] string name) : base(name)
 		{
 		}
 	}

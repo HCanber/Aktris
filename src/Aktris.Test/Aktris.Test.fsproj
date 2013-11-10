@@ -54,6 +54,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="App.config" />
+    <Compile Include="ActorSystem_Tests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FsUnit.CustomMatchers">
@@ -79,8 +80,6 @@
       <HintPath>..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Aktris\Aktris.csproj">
       <Name>Aktris</Name>
       <Project>{3a9c3781-27d2-4513-975f-064db4fd81c1}</Project>
