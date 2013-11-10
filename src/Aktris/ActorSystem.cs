@@ -7,6 +7,7 @@ namespace Aktris
 {
 	public abstract class ActorSystem
 	{
+		private const string _DefaultName = "default";
 		private readonly string _name;
 
 		protected ActorSystem([NotNull] string name)
@@ -27,5 +28,10 @@ namespace Aktris
 		}
 
 		public string Name { get { return _name; } }
+
+		public static ActorSystem Create(string name = _DefaultName)
+		{
+			return new InternalActorSystem(name ?? _DefaultName);
+		}
 	}
 }
