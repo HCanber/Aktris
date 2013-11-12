@@ -47,6 +47,14 @@ namespace Aktris.Test
 			var system = ActorSystem.Create();
 			system.Name.Should().BeEquivalentTo("default");
 		}
+
+
+		[Fact]
+		public void When_creating_a_ActorSystem_Then_an_InternalActorSystem_is_created()
+		{
+			var system = ActorSystem.Create();
+			system.Should().BeOfType<InternalActorSystem>();
+		}
 	}
 	// ReSharper restore InconsistentNaming
 
