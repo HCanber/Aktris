@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktris", "Aktris\Aktris.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktris.Test", "Aktris.Test\Aktris.Test.csproj", "{F25AFAD7-3FE9-4C3A-A7AA-0FCF96EAB632}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{CC8946DF-A0AB-42BA-8EBA-8C085B7EEF24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktris.Samples.HelloWorld", "Samples\Aktris.Samples.HelloWorld\Aktris.Samples.HelloWorld.csproj", "{4D42DDB5-A8A3-44DE-B564-F9AF9F67C497}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +25,15 @@ Global
 		{F25AFAD7-3FE9-4C3A-A7AA-0FCF96EAB632}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F25AFAD7-3FE9-4C3A-A7AA-0FCF96EAB632}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F25AFAD7-3FE9-4C3A-A7AA-0FCF96EAB632}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D42DDB5-A8A3-44DE-B564-F9AF9F67C497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D42DDB5-A8A3-44DE-B564-F9AF9F67C497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D42DDB5-A8A3-44DE-B564-F9AF9F67C497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D42DDB5-A8A3-44DE-B564-F9AF9F67C497}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D42DDB5-A8A3-44DE-B564-F9AF9F67C497} = {CC8946DF-A0AB-42BA-8EBA-8C085B7EEF24}
 	EndGlobalSection
 EndGlobal
