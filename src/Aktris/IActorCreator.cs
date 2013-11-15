@@ -2,6 +2,6 @@
 {
 	public interface IActorCreator
 	{
-		ActorRef CreateActor(ActorFactory actorFactory, string name=null);
+		ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null);
 	}
 }

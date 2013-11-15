@@ -5,14 +5,14 @@ namespace Aktris.Internals
 {
 	public class LocalActorRef : ILocalActorRef
 	{
-		private readonly ActorFactory _actorFactory;
+		private readonly ActorCreationProperties _actorCreationProperties;
 		private readonly string _name;
 
-		public LocalActorRef([NotNull] ActorFactory actorFactory, [NotNull] string name)
+		public LocalActorRef([NotNull] ActorCreationProperties actorCreationProperties, [NotNull] string name)
 		{
-			if(actorFactory == null) throw new ArgumentNullException("actorFactory");
+			if(actorCreationProperties == null) throw new ArgumentNullException("actorCreationProperties");
 			if(name == null) throw new ArgumentNullException("name");
-			_actorFactory = actorFactory;
+			_actorCreationProperties = actorCreationProperties;
 			_name = name;
 		}
 

@@ -39,14 +39,14 @@ namespace Aktris
 		public string Name { get { return _name; } }
 
 
-		public ActorRef CreateActor(ActorFactory actorFactory, string name=null)
+		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
 		{
 			if(name != null)
 			{
 				EnsureNameIsValid(name);
 			}
 			else name = _uniqueNameCreator.GetNextRandomName();
-			var actorRef = _localActorRefFactory.CreateActor(actorFactory, name);
+			var actorRef = _localActorRefFactory.CreateActor(actorCreationProperties, name);
 			actorRef.Start();
 			return actorRef;
 		}

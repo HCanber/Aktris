@@ -17,7 +17,7 @@ namespace Aktris.Test
 		[Fact]
 		public void Given_an_ActorCreator_When_creating_actors_with_no_names_Then_they_are_assigned_random_different_names()
 		{
-			var delegateActorFactory = new DelegateActorFactory(() => new FakeActor());
+			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
 			var actorCreator = GetActorCreator();
 			var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
 			var actorRef2 = actorCreator.CreateActor(delegateActorFactory, name: null);
@@ -34,7 +34,7 @@ namespace Aktris.Test
 		[InlineData("ÅÄÖNonAsciiCharacters")]
 		public void Given_an_ActorCreator_When_creating_actors_with_invalid_name_Then_it_fails(string name)
 		{
-			var delegateActorFactory = new DelegateActorFactory(() => new FakeActor());
+			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
 			var actorCreator = GetActorCreator();
 			Assert.Throws<InvalidActorNameException>(() => actorCreator.CreateActor(delegateActorFactory, name: name));
 		}
@@ -47,7 +47,7 @@ namespace Aktris.Test
 		[InlineData("testing-characters-_=+,.!~")]
 		public void Given_an_ActorCreator_When_creating_actors_with_valid_name_Then_it_succeeds(string name)
 		{
-			var delegateActorFactory = new DelegateActorFactory(() => new FakeActor());
+			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
 			var actorCreator = GetActorCreator();
 			Assert.Throws<InvalidActorNameException>(() => actorCreator.CreateActor(delegateActorFactory, name: name));
 		}
@@ -58,12 +58,12 @@ namespace Aktris.Test
 			var bootstrapper = DefaultActorSystemFactory.Instance;
 			var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
 			var fakeActorRef = A.Fake<ILocalActorRef>();
-			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(A<ActorFactory>.Ignored, A<string>.Ignored)).Returns(fakeActorRef);
+			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(A<ActorCreationProperties>.Ignored, A<string>.Ignored)).Returns(fakeActorRef);
 			bootstrapper.LocalActorRefFactory = fakeLocalActorRefFactory;
 
 			var actorCreator = GetActorCreator(bootstrapper);
 
-			var actorRef = actorCreator.CreateActor(new DelegateActorFactory(() => new FakeActor()));
+			var actorRef = actorCreator.CreateActor(new DelegateActorCreationProperties(() => new FakeActor()));
 
 			A.CallTo(() => fakeActorRef.Start()).MustHaveHappened();
 		}

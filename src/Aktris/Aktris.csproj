@@ -40,12 +40,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actor.cs" />
-    <Compile Include="ActorFactory.cs" />
+    <Compile Include="ActorCreationProperties.cs" />
     <Compile Include="ActorRef.cs" />
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
-    <Compile Include="DelegateActorFactory.cs" />
+    <Compile Include="DelegateActorCreationProperties.cs" />
     <Compile Include="Exceptions\InvalidActorNameException.cs" />
     <Compile Include="IActorCreator.cs" />
     <Compile Include="IBootstrapper.cs" />

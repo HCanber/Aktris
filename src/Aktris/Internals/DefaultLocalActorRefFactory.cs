@@ -2,9 +2,9 @@
 {
 	public class DefaultLocalActorRefFactory : LocalActorRefFactory
 	{
-		public override ILocalActorRef CreateActor(ActorFactory actorFactory, string name)
+		public override ILocalActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name)
 		{
-			return new LocalActorRef(actorFactory, name);
+			return new LocalActorRef(actorCreationProperties, name);
 		}
 	}
 }
