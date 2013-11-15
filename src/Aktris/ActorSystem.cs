@@ -46,7 +46,8 @@ namespace Aktris
 				EnsureNameIsValid(name);
 			}
 			else name = _uniqueNameCreator.GetNextRandomName();
-			return new LocalActorRef(actorFactory,name);
+			var actorRef = _localActorRefFactory.CreateActor(actorFactory, name);
+			return actorRef;
 		}
 
 		private void EnsureNameIsValid(string name)
