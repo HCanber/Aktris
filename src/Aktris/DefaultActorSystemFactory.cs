@@ -22,6 +22,6 @@ namespace Aktris
 		}
 
 		public IUniqueNameCreator UniqueNameCreator { get; set; }
-		public DefaultLocalActorRefFactory LocalActorRefFactory { get; set; }
+		public LocalActorRefFactory LocalActorRefFactory { get; set; }
 	}
 }

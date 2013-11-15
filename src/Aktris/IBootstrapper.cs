@@ -5,6 +5,6 @@ namespace Aktris
 	public interface IBootstrapper
 	{
 		IUniqueNameCreator UniqueNameCreator { get; }
-		DefaultLocalActorRefFactory LocalActorRefFactory { get; }
+		LocalActorRefFactory LocalActorRefFactory { get; }
 	}
 }

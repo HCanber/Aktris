@@ -1,14 +1,16 @@
 ﻿using Aktris.Exceptions;
+using Aktris.Internals;
+using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 using Xunit.Extensions;
 
 namespace Aktris.Test
 {
-// ReSharper disable InconsistentNaming
+	// ReSharper disable InconsistentNaming
 	public abstract class ActorCreator_Tests_Helper
 	{
-		protected abstract IActorCreator GetActorCreator();
+		protected abstract IActorCreator GetActorCreator(IBootstrapper bootstrapper=null);
 
 
 		[Fact]
@@ -16,7 +18,7 @@ namespace Aktris.Test
 		{
 			var delegateActorFactory = new DelegateActorFactory(() => new FakeActor());
 			var actorCreator = GetActorCreator();
-			var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
+		var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
 			var actorRef2 = actorCreator.CreateActor(delegateActorFactory, name: null);
 			actorRef1.Name.Should().NotBe(actorRef2.Name);
 		}
@@ -46,6 +48,22 @@ namespace Aktris.Test
 			var delegateActorFactory = new DelegateActorFactory(() => new FakeActor());
 			var actorCreator = GetActorCreator();
 			Assert.Throws<InvalidActorNameException>(() => actorCreator.CreateActor(delegateActorFactory, name: name));
+		}
+
+		[Fact]
+		public void When_created_actor_Then_start_is_called_on_LocalActorRef()
+		{
+			var bootstrapper = DefaultActorSystemFactory.Instance;
+			var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
+			var fakeActorRef = A.Fake<ILocalActorRef>();
+			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(A<ActorFactory>.Ignored, A<string>.Ignored)).Returns(fakeActorRef);
+			bootstrapper.LocalActorRefFactory = fakeLocalActorRefFactory;
+
+			var actorCreator = GetActorCreator(bootstrapper);
+
+			var actorRef = actorCreator.CreateActor(new DelegateActorFactory(() => new FakeActor()));
+
+			A.CallTo(() => fakeActorRef.Start()).MustHaveHappened();
 		}
 	}
 	// ReSharper restore InconsistentNaming

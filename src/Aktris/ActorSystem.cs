@@ -47,6 +47,7 @@ namespace Aktris
 			}
 			else name = _uniqueNameCreator.GetNextRandomName();
 			var actorRef = _localActorRefFactory.CreateActor(actorFactory, name);
+			actorRef.Start();
 			return actorRef;
 		}
 

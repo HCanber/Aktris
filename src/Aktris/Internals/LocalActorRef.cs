@@ -3,7 +3,7 @@ using Aktris.JetBrainsAnnotations;
 
 namespace Aktris.Internals
 {
-	public class LocalActorRef : ActorRef
+	public class LocalActorRef : ILocalActorRef
 	{
 		private readonly ActorFactory _actorFactory;
 		private readonly string _name;
@@ -17,5 +17,9 @@ namespace Aktris.Internals
 		}
 
 		public string Name { get { return _name; } }
+
+		public void Start()
+		{
+		}
 	}
 }
