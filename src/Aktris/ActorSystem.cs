@@ -5,7 +5,7 @@ using Aktris.JetBrainsAnnotations;
 
 namespace Aktris
 {
-	public abstract class ActorSystem
+	public abstract class ActorSystem : IActorCreator
 	{
 		private readonly string _name;
 		private readonly IUniqueNameCreator _uniqueNameCreator;
