@@ -2,7 +2,7 @@
 
 namespace Aktris
 {
-	public class DefaultActorSystemFactory : ActorSystemFactory
+	public class DefaultActorSystemFactory : ActorSystemFactory, IBootstrapper
 	{
 		private static readonly DefaultActorSystemFactory _Instance = new DefaultActorSystemFactory();
 
@@ -10,6 +10,7 @@ namespace Aktris
 		private DefaultActorSystemFactory()
 		{
 			UniqueNameCreator=new UniqueNameCreator();
+			LocalActorRefFactory = new DefaultLocalActorRefFactory();
 		}
 
 		public static DefaultActorSystemFactory Instance { get { return _Instance; } }
@@ -17,9 +18,10 @@ namespace Aktris
 
 		public ActorSystem Create(string name)
 		{
-			return new InternalActorSystem(name,UniqueNameCreator);
+			return new InternalActorSystem(name, this);
 		}
 
 		public IUniqueNameCreator UniqueNameCreator { get; set; }
+		public DefaultLocalActorRefFactory LocalActorRefFactory { get; set; }
 	}
 }

@@ -10,14 +10,18 @@ namespace Aktris
 	{
 		private readonly string _name;
 		private readonly IUniqueNameCreator _uniqueNameCreator;
+		private readonly LocalActorRefFactory _localActorRefFactory;
 		private const string _NameExtraCharacter = @"-_=+,.!~";
 		private static readonly Regex _ValidNameRegex = new Regex(@"^[[:alnum:]]([[:alnum:]" + _NameExtraCharacter + @"])*", RegexOptions.Compiled);
 
-		protected ActorSystem([NotNull] string name, IUniqueNameCreator uniqueNameCreator)
+		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
+			if(bootstrapper == null) throw new ArgumentNullException("bootstrapper");
+			if(bootstrapper.UniqueNameCreator == null) throw new ArgumentException("IBootstrapper.UniqueNameCreator was null", "bootstrapper");
+			if(bootstrapper.LocalActorRefFactory == null) throw new ArgumentException("IBootstrapper.LocalActorRefFactory was null", "bootstrapper");
+
 			if(name == null) throw new ArgumentNullException("name");
 			if(name.Length == 0) throw new ArgumentException("name");
-
 			var nameLegal = new Regex("^[a-zA-Z0-9][a-zA-Z0-9-]*$");
 			if(!nameLegal.IsMatch(name))
 			{
@@ -28,7 +32,8 @@ namespace Aktris
 			}
 
 			_name = name;
-			_uniqueNameCreator = uniqueNameCreator;
+			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
+			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 		}
 
 		public string Name { get { return _name; } }
