@@ -8,8 +8,9 @@ namespace Aktris
 	public abstract class ActorSystem
 	{
 		private readonly string _name;
+		private readonly IUniqueNameCreator _uniqueNameCreator;
 
-		protected ActorSystem([NotNull] string name)
+		protected ActorSystem([NotNull] string name, IUniqueNameCreator uniqueNameCreator)
 		{
 			if(name == null) throw new ArgumentNullException("name");
 			if(name.Length == 0) throw new ArgumentException("name");
@@ -24,14 +25,16 @@ namespace Aktris
 			}
 
 			_name = name;
+			_uniqueNameCreator = uniqueNameCreator;
 		}
 
 		public string Name { get { return _name; } }
 
 
-		public ActorRef CreateActor()
+		public ActorRef CreateActor(ActorFactory actorFactory, string name=null)
 		{
-			return new LocalActorRef();
+			name = name ?? _uniqueNameCreator.GetNextRandomName();
+			return new LocalActorRef(actorFactory,name);
 		}
 
 

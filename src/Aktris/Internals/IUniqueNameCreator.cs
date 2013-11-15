@@ -1,6 +1,6 @@
 ﻿namespace Aktris.Internals
 {
-	public interface IRandomNameCreator
+	public interface IUniqueNameCreator
 	{
 		string GetNextRandomName();
 	}

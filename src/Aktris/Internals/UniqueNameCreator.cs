@@ -2,7 +2,7 @@
 
 namespace Aktris.Internals
 {
-	public class RandomNameCreator : IRandomNameCreator
+	public class UniqueNameCreator : IUniqueNameCreator
 	{
 		private static long _nextRandomNameNumber;
 

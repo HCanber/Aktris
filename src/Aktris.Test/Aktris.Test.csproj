@@ -51,7 +51,7 @@
     <Compile Include="ActorSystem_CreateActor_Tests.cs" />
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
     <Compile Include="DelegateActorFactory_Tests.cs" />
-    <Compile Include="Internals\RandomNameCreator_Tests.cs" />
+    <Compile Include="Internals\UniqueNameCreator_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

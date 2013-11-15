@@ -48,8 +48,9 @@
     <Compile Include="DelegateActorFactory.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
+    <Compile Include="Internals\IUniqueNameCreator.cs" />
     <Compile Include="Internals\LocalActorRef.cs" />
-    <Compile Include="Internals\RandomNameCreator.cs" />
+    <Compile Include="Internals\UniqueNameCreator.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
