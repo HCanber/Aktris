@@ -49,9 +49,11 @@
     <Compile Include="Exceptions\InvalidActorNameException.cs" />
     <Compile Include="IActorCreator.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
+    <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\IUniqueNameCreator.cs" />
     <Compile Include="Internals\LocalActorRef.cs" />
+    <Compile Include="Internals\LocalActorRefFactory.cs" />
     <Compile Include="Internals\UniqueNameCreator.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
