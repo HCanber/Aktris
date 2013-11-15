@@ -1,4 +1,5 @@
-﻿using Aktris.Exceptions;
+﻿using System;
+using Aktris.Exceptions;
 using Aktris.Internals;
 using FakeItEasy;
 using FluentAssertions;
@@ -10,7 +11,7 @@ namespace Aktris.Test
 	// ReSharper disable InconsistentNaming
 	public abstract class ActorCreator_Tests_Helper
 	{
-		protected abstract IActorCreator GetActorCreator(IBootstrapper bootstrapper=null);
+		protected abstract IActorCreator GetActorCreator(IBootstrapper bootstrapper = null);
 
 
 		[Fact]
@@ -18,8 +19,9 @@ namespace Aktris.Test
 		{
 			var delegateActorFactory = new DelegateActorFactory(() => new FakeActor());
 			var actorCreator = GetActorCreator();
-		var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
+			var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
 			var actorRef2 = actorCreator.CreateActor(delegateActorFactory, name: null);
+
 			actorRef1.Name.Should().NotBe(actorRef2.Name);
 		}
 
