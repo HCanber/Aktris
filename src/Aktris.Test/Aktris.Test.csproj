@@ -59,6 +59,7 @@
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
     <Compile Include="ActorCreationProperties_Tests.cs" />
     <Compile Include="FakeActor.cs" />
+    <Compile Include="Internals\InterlockedSpin_Tests.cs" />
     <Compile Include="Internals\UniqueNameCreator_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
