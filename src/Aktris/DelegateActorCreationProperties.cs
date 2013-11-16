@@ -12,7 +12,7 @@ namespace Aktris
 		{
 			if(factory == null) throw new ArgumentNullException("factory");
 			_factory = factory;
-			MailboxCreator = () => new UnboundedMailbox();
+			MailboxCreator = () => new UnboundedMailbox(new ThreadPoolScheduler());
 		}
 
 		public Func<Mailbox> MailboxCreator { get; set; }

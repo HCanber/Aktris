@@ -58,6 +58,7 @@
     <Compile Include="ActorSystem_as_ActorCreator_Tests.cs" />
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
     <Compile Include="ActorCreationProperties_Tests.cs" />
+    <Compile Include="Dispatching\SchedulerBasedMailbox_Tests.cs" />
     <Compile Include="FakeActor.cs" />
     <Compile Include="Internals\LocalActorRef_Tests.cs" />
     <Compile Include="Internals\InterlockedSpin_Tests.cs" />
