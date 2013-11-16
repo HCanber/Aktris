@@ -52,6 +52,7 @@
     <Compile Include="IActorCreator.cs" />
     <Compile Include="IBootstrapper.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
+    <Compile Include="Internals\StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
     <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
     <Compile Include="Internals\ILocalActorRef.cs" />
