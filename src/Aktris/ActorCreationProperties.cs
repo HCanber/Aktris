@@ -1,6 +1,8 @@
-﻿namespace Aktris
+﻿using Aktris.Dispatching;
+
+namespace Aktris
 {
-	public abstract class ActorCreationProperties
+	public abstract class ActorCreationProperties : ActorInstantiator
 	{
 		public abstract Actor CreateNewActor();
 
@@ -10,5 +12,7 @@
 			//TODO: Create this thru the ioc container instead of Activator so that dependencies can be injected. Then remove:  T: new()
 			return new DelegateActorCreationProperties(() => new T());
 		}
+
+		public abstract Mailbox CreateMailbox();
 	}
 }

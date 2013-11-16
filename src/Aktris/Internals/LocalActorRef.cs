@@ -1,25 +1,30 @@
 ﻿using System;
+using Aktris.Dispatching;
 using Aktris.JetBrainsAnnotations;
 
 namespace Aktris.Internals
 {
 	public class LocalActorRef : ILocalActorRef
 	{
-		private readonly ActorCreationProperties _actorCreationProperties;
+		private readonly ActorInstantiator _actorInstantiator;
 		private readonly string _name;
+		private readonly Mailbox _mailbox;
 
-		public LocalActorRef([NotNull] ActorCreationProperties actorCreationProperties, [NotNull] string name)
+		public LocalActorRef([NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox)
 		{
-			if(actorCreationProperties == null) throw new ArgumentNullException("actorCreationProperties");
+			if(actorInstantiator == null) throw new ArgumentNullException("actorInstantiator");
 			if(name == null) throw new ArgumentNullException("name");
-			_actorCreationProperties = actorCreationProperties;
+			if(mailbox == null) throw new ArgumentNullException("mailbox");
+			_actorInstantiator = actorInstantiator;
 			_name = name;
+			_mailbox = mailbox;
 		}
 
 		public string Name { get { return _name; } }
 
 		public void Start()
 		{
+			_mailbox.Attach(this);
 		}
 	}
 }

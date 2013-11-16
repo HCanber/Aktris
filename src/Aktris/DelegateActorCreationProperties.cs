@@ -1,4 +1,5 @@
 ﻿using System;
+using Aktris.Dispatching;
 using Aktris.JetBrainsAnnotations;
 
 namespace Aktris
@@ -11,6 +12,13 @@ namespace Aktris
 		{
 			if(factory == null) throw new ArgumentNullException("factory");
 			_factory = factory;
+			MailboxCreator = () => new UnboundedMailbox();
+		}
+
+		public Func<Mailbox> MailboxCreator { get; set; }
+		public override Mailbox CreateMailbox()
+		{
+			return MailboxCreator();
 		}
 
 		public override Actor CreateNewActor()

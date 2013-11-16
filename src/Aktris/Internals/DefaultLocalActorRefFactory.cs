@@ -4,7 +4,8 @@
 	{
 		public override ILocalActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name)
 		{
-			return new LocalActorRef(actorCreationProperties, name);
+			var mailbox = actorCreationProperties.CreateMailbox();
+			return new LocalActorRef(actorCreationProperties, name,mailbox);
 		}
 	}
 }
