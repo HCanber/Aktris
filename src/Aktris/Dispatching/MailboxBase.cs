@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using Aktris.Internals;
+using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Dispatching
 {
@@ -9,6 +11,7 @@ namespace Aktris.Dispatching
 	{
 		private volatile int _mailboxStatus = MailboxStatus.Open;
 		private ILocalActorRef _actor;
+		private readonly ConcurrentQueue<SystemMessageEnvelope> _systemMessagesQueue = new ConcurrentQueue<SystemMessageEnvelope>();
 
 
 		public void SetActor(ILocalActorRef actor)
@@ -29,16 +32,19 @@ namespace Aktris.Dispatching
 			ScheduleIfNeeded();
 		}
 
+		public void EnqueueSystemMessage(SystemMessageEnvelope envelope)
+		{
+			_systemMessagesQueue.Enqueue(envelope);
+			ScheduleIfNeeded();
+
+		}
 
 		private void ProcessMessages()
 		{
 			try
 			{
-				var messagesToProcess = GetMessagesToProcess();
-				foreach(var message in messagesToProcess)
-				{
-					HandleMessage(message);
-				}
+				ProcessSystemMessages();
+				ProcessNormalMessages();
 			}
 			finally
 			{
@@ -47,6 +53,24 @@ namespace Aktris.Dispatching
 				{
 					ScheduleIfNeeded();
 				}
+			}
+		}
+
+		private void ProcessSystemMessages()
+		{
+			SystemMessageEnvelope envelope;
+			while(_systemMessagesQueue.TryDequeue(out envelope))
+			{
+				
+			}
+		}
+
+		private void ProcessNormalMessages()
+		{
+			var messagesToProcess = GetMessagesToProcess();
+			foreach(var message in messagesToProcess)
+			{
+				HandleMessage(message);
 			}
 		}
 

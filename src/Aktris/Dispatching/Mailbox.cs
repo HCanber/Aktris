@@ -1,4 +1,5 @@
 ﻿using Aktris.Internals;
+using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Dispatching
 {
@@ -6,5 +7,6 @@ namespace Aktris.Dispatching
 	{
 		void SetActor(ILocalActorRef actor);
 		void Enqueue(Envelope envelope);
+		void EnqueueSystemMessage(SystemMessageEnvelope envelope);
 	}
 }

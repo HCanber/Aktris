@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Aktris.Dispatching;
 using Aktris.Internals;
+using Aktris.Internals.SystemMessages;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
@@ -12,6 +13,17 @@ namespace Aktris.Test.Internals
 // ReSharper disable InconsistentNaming
 	public class LocalActorRef_Tests
 	{
+
+		[Fact]
+		public void When_creating_Then_CreateActor_message_is_enqueued_in_mailbox()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			var actorRef = new LocalActorRef(A.Fake<ActorCreationProperties>(), "test", mailbox);
+
+			A.CallTo(() => mailbox.EnqueueSystemMessage(A<SystemMessageEnvelope>.That.Matches(e => e.Message is CreateActor))).MustHaveHappened();
+		}
+
+
 		[Fact]
 		public void When_calling_Start_Then_the_actor_is_attached_to_the_mailbox()
 		{

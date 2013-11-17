@@ -73,6 +73,8 @@
     <Compile Include="Internals\IUniqueNameCreator.cs" />
     <Compile Include="Internals\LocalActorRef.cs" />
     <Compile Include="Internals\LocalActorRefFactory.cs" />
+    <Compile Include="Internals\SystemMessages\SystemMessage.cs" />
+    <Compile Include="Internals\SystemMessages\SystemMessageEnvelope.cs" />
     <Compile Include="Internals\UniqueNameCreator.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

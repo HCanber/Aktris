@@ -1,5 +1,6 @@
 ﻿using System;
 using Aktris.Dispatching;
+using Aktris.Internals.SystemMessages;
 using Aktris.JetBrainsAnnotations;
 
 namespace Aktris.Internals
@@ -18,6 +19,7 @@ namespace Aktris.Internals
 			_actorInstantiator = actorInstantiator;
 			_name = name;
 			_mailbox = mailbox;
+			mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this,new CreateActor(), this));
 		}
 
 		public string Name { get { return _name; } }
