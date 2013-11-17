@@ -56,11 +56,14 @@ namespace Aktris.Dispatching
 
 		protected virtual void HandleMessage(Envelope envelope)
 		{
-			var actor = GetRecipient(envelope);
-			actor.HandleMessage(envelope);
+			var actors = GetRecipients(envelope);
+			foreach(var actor in actors)
+			{
+				actor.HandleMessage(envelope);				
+			}
 		}
 
-		protected abstract ILocalActorRef GetRecipient(Envelope envelope);
+		protected abstract IEnumerable<ILocalActorRef> GetRecipients(Envelope envelope);
 
 		protected abstract void Schedule(Action action);
 

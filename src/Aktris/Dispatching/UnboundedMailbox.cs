@@ -44,7 +44,7 @@ namespace Aktris.Dispatching
 			return _queue.Count > 0;
 		}
 
-		protected override ILocalActorRef GetRecipient(Envelope envelope)
+		protected override IEnumerable<ILocalActorRef> GetRecipients(Envelope envelope)
 		{
 			return _mailboxDeliveryStrategy.GetRecipient(envelope);
 		}
@@ -73,9 +73,9 @@ namespace Aktris.Dispatching
 			_actor = null;
 		}
 
-		public ILocalActorRef GetRecipient(Envelope envelope)
+		public IEnumerable<ILocalActorRef> GetRecipient(Envelope envelope)
 		{
-			return _actor;
+			return new[] { _actor };
 		}
 	}
 
@@ -83,6 +83,6 @@ namespace Aktris.Dispatching
 	{
 		void Register(ILocalActorRef actor);
 		void Unregister(ILocalActorRef actor);
-		ILocalActorRef GetRecipient(Envelope envelope);
+		IEnumerable<ILocalActorRef> GetRecipient(Envelope envelope);
 	}
 }

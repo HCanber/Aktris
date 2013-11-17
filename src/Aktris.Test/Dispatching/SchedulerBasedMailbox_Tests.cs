@@ -135,9 +135,9 @@ namespace Aktris.Test.Dispatching
 				Actor = actor;
 			}
 
-			protected override ILocalActorRef GetRecipient(Envelope envelope)
+			protected override IEnumerable<ILocalActorRef> GetRecipients(Envelope envelope)
 			{
-				return Actor;
+				yield return Actor;
 			}
 		}
 
