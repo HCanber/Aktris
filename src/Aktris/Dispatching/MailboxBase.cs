@@ -14,12 +14,12 @@ namespace Aktris.Dispatching
 
 		public void Attach(ILocalActorRef actor)
 		{
+			Interlocked.Increment(ref _numberOfAttachedActors);
 			Register(actor);
 		}
 
 		protected virtual void Register(ILocalActorRef actor)
 		{
-			Interlocked.Increment(ref _numberOfAttachedActors);
 		}
 
 		public void Enqueue(Envelope envelope)
@@ -30,7 +30,7 @@ namespace Aktris.Dispatching
 		}
 
 
-		private void Run()
+		private void ProcessMessages()
 		{
 			try
 			{
@@ -56,8 +56,11 @@ namespace Aktris.Dispatching
 
 		protected virtual void HandleMessage(Envelope envelope)
 		{
-			throw new NotImplementedException();
+			var actor = GetRecipient(envelope);
+			actor.HandleMessage(envelope);
 		}
+
+		protected abstract ILocalActorRef GetRecipient(Envelope envelope);
 
 		protected abstract void Schedule(Action action);
 
@@ -67,9 +70,9 @@ namespace Aktris.Dispatching
 
 		private void ScheduleIfNeeded()
 		{
-			if(UpdateStatusIf(MailboxStatus.IsNotClosedOrScheduled, MailboxStatus.SetScheduled))
+			if(_numberOfAttachedActors>0 && UpdateStatusIf(MailboxStatus.IsNotClosedOrScheduled, MailboxStatus.SetScheduled))
 			{
-				Schedule(Run);
+				Schedule(ProcessMessages);
 			}
 		}
 

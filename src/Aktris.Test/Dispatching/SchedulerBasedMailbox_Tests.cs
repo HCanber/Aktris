@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Aktris.Dispatching;
+using Aktris.Internals;
 using Aktris.JetBrainsAnnotations;
 using FakeItEasy;
 using FluentAssertions;
@@ -14,12 +15,24 @@ namespace Aktris.Test.Dispatching
 	public class SchedulerBasedMailbox_Tests
 	{
 		[Fact]
+		public void Given_a_mailbox_with_no_actor_attached_When_enqueing_Then_no_action_is_scheduled()
+		{
+			var sender = A.Fake<ActorRef>();
+			var scheduler = A.Fake<IScheduler>();
+
+			var mailbox = new TestableMailbox(scheduler);
+			mailbox.Enqueue(new Envelope("message", sender));
+
+			A.CallTo(() => scheduler.Schedule(A<Action>.Ignored)).MustNotHaveHappened();
+		}
+		[Fact]
 		public void When_enqueing_first_time_Then_an_action_is_scheduled()
 		{
 			var sender = A.Fake<ActorRef>();
 			var scheduler = A.Fake<IScheduler>();
 
 			var mailbox = new TestableMailbox(scheduler);
+			mailbox.Attach(A.Fake<ILocalActorRef>());
 			mailbox.Enqueue(new Envelope("message",sender));
 
 			A.CallTo(() => scheduler.Schedule(A<Action>.Ignored)).MustHaveHappened(Repeated.Exactly.Once);
@@ -31,6 +44,7 @@ namespace Aktris.Test.Dispatching
 			var scheduler = A.Fake<IScheduler>();
 
 			var mailbox = new TestableMailbox(scheduler);
+			mailbox.Attach(A.Fake<ILocalActorRef>());
 			mailbox.Enqueue(new Envelope("first message", sender));
 			mailbox.Enqueue(new Envelope("second message", sender));
 			A.CallTo(() => scheduler.Schedule(A<Action>.Ignored)).MustHaveHappened(Repeated.Exactly.Once);
@@ -43,6 +57,7 @@ namespace Aktris.Test.Dispatching
 			var scheduler = new ManuallySyncronousScheduler();
 
 			var mailbox = new TestableMailbox(scheduler);
+			mailbox.Attach(A.Fake<ILocalActorRef>());
 			mailbox.Enqueue(new Envelope("first message", sender));
 			mailbox.Enqueue(new Envelope("second message", sender));
 			
@@ -53,10 +68,31 @@ namespace Aktris.Test.Dispatching
 			handledMessages[1].Should().Be("second message");
 		}
 
+		[Fact]
+		public void Given_mailbox_with_messages_When_scheduler_processes_Then_mailbox_calls_actor_with_messages()
+		{
+			var sender = A.Fake<ActorRef>();
+			var scheduler = new ManuallySyncronousScheduler();
+
+			var mailbox = new TestableMailbox(scheduler);
+			var fakeActor = A.Fake<ILocalActorRef>();
+			var actorMessages = new List<Envelope>();
+			A.CallTo(() => fakeActor.HandleMessage(A<Envelope>.Ignored)).Invokes(x => actorMessages.Add(x.GetArgument<Envelope>(0)));
+			mailbox.Attach(fakeActor);
+			mailbox.Enqueue(new Envelope("first message", sender));
+			mailbox.Enqueue(new Envelope("second message", sender));
+
+			scheduler.ExecuteAll();
+			actorMessages.Count.Should().Be(2);
+			actorMessages[0].Message.Should().Be("first message");
+			actorMessages[1].Message.Should().Be("second message");
+		}
 		private class TestableMailbox : SchedulerBasedMailbox
 		{
+			public ILocalActorRef Actor { get; set; }
 			public ConcurrentQueue<Envelope> EnqueuedMessages = new ConcurrentQueue<Envelope>();
 			public ConcurrentQueue<Envelope> HandledMessages = new ConcurrentQueue<Envelope>();
+
 			public TestableMailbox([NotNull] IScheduler scheduler) : base(scheduler)
 			{
 			}
@@ -86,6 +122,17 @@ namespace Aktris.Test.Dispatching
 			protected override void HandleMessage(Envelope envelope)
 			{
 				HandledMessages.Enqueue(envelope);
+				base.HandleMessage(envelope);
+			}
+
+			protected override void Register(ILocalActorRef actor)
+			{
+				Actor = actor;
+			}
+
+			protected override ILocalActorRef GetRecipient(Envelope envelope)
+			{
+				return Actor;
 			}
 		}
 

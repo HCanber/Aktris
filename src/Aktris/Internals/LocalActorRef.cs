@@ -32,5 +32,10 @@ namespace Aktris.Internals
 			var envelope=new Envelope(message,sender);
 			_mailbox.Enqueue(envelope);
 		}
+
+		public void HandleMessage(Envelope envelope)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
