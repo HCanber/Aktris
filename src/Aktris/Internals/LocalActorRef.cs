@@ -26,5 +26,11 @@ namespace Aktris.Internals
 		{
 			_mailbox.Attach(this);
 		}
+
+		public void Send(object message, ActorRef sender)
+		{
+			var envelope=new Envelope(message,sender);
+			_mailbox.Enqueue(envelope);
+		}
 	}
 }

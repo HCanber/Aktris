@@ -6,5 +6,6 @@ namespace Aktris
 	public interface ActorRef	//TODO : IComparable<ActorRef>, IEquatable<ActorRef>
 	{
 		string Name { get; }
+		void Send(object message, ActorRef sender);
 	}
 }

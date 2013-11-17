@@ -10,7 +10,7 @@ namespace Aktris.Dispatching
 		public Envelope([NotNull] object message, [NotNull] ActorRef sender)
 		{
 			if(message == null) throw new ArgumentNullException("message");
-			if(sender == null) throw new ArgumentNullException("sender");
+			//if(sender == null) throw new ArgumentNullException("sender");		//TODO: Remove this when we have DeadLetterMailbox
 			Message = message;
 			Sender = sender;
 		}
