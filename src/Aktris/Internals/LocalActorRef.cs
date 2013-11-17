@@ -24,7 +24,7 @@ namespace Aktris.Internals
 
 		public void Start()
 		{
-			_mailbox.Attach(this);
+			_mailbox.SetActor(this);
 		}
 
 		public void Send(object message, ActorRef sender)

@@ -20,7 +20,7 @@ namespace Aktris.Test.Internals
 
 			actorRef.Start();
 
-			A.CallTo(() => mailbox.Attach(actorRef)).MustHaveHappened();
+			A.CallTo(() => mailbox.SetActor(actorRef)).MustHaveHappened();
 		}
 
 

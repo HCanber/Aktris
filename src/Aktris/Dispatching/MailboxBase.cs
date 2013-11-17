@@ -7,14 +7,14 @@ namespace Aktris.Dispatching
 {
 	public abstract class MailboxBase : Mailbox
 	{
-		private long _numberOfAttachedActors = 0;
 		private volatile int _mailboxStatus = MailboxStatus.Open;
+		private ILocalActorRef _actor;
 
-		public long NumberOfAttachedActors { get { return _numberOfAttachedActors; } }
 
-		public void Attach(ILocalActorRef actor)
+		public void SetActor(ILocalActorRef actor)
 		{
-			Interlocked.Increment(ref _numberOfAttachedActors);
+			if(_actor != null) throw new InvalidOperationException(StringFormat.SafeFormat("Trying to reuse a Mailbox. It's already in use for {0} and cannot be used for {1}", _actor, actor));
+			_actor = actor;
 			Register(actor);
 		}
 
@@ -56,14 +56,8 @@ namespace Aktris.Dispatching
 
 		protected virtual void HandleMessage(Envelope envelope)
 		{
-			var actors = GetRecipients(envelope);
-			foreach(var actor in actors)
-			{
-				actor.HandleMessage(envelope);				
-			}
+			_actor.HandleMessage(envelope);
 		}
-
-		protected abstract IEnumerable<ILocalActorRef> GetRecipients(Envelope envelope);
 
 		protected abstract void Schedule(Action action);
 
@@ -73,7 +67,7 @@ namespace Aktris.Dispatching
 
 		private void ScheduleIfNeeded()
 		{
-			if(_numberOfAttachedActors>0 && UpdateStatusIf(MailboxStatus.IsNotClosedOrScheduled, MailboxStatus.SetScheduled))
+			if(_actor != null && UpdateStatusIf(MailboxStatus.IsNotClosedOrScheduled, MailboxStatus.SetScheduled))
 			{
 				Schedule(ProcessMessages);
 			}
