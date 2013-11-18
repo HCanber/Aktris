@@ -13,7 +13,7 @@ namespace Aktris.Internals
 		private readonly string _name;
 		private readonly Mailbox _mailbox;
 		private Actor _actor;
-
+	
 		public LocalActorRef([NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox)
 		{
 			if(actorInstantiator == null) throw new ArgumentNullException("actorInstantiator");
@@ -40,7 +40,16 @@ namespace Aktris.Internals
 
 		public void HandleMessage(Envelope envelope)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				_actor.Sender = new SenderActorRef(envelope.Sender,this);
+				_actor.Receive(envelope.Message);
+			}
+			finally
+			{
+				_actor.Sender = null;	//TODO: change to use one that directs to deadletter
+			}
+
 		}
 
 		public void HandleSystemMessage(SystemMessageEnvelope envelope)

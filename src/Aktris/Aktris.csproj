@@ -80,6 +80,7 @@
     <Compile Include="Internals\UniqueNameCreator.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SenderActorRef.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

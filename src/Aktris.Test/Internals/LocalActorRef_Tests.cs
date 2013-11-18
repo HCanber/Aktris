@@ -85,7 +85,41 @@ namespace Aktris.Test.Internals
 			A.CallTo(()=>actorInstantiator.CreateNewActor()).MustHaveHappened(Repeated.Exactly.Once);
 		}
 
+		[Fact]
+		public void When_handling_message_Then_it_is_forwarded_to_the_actor_and_sender_is_set()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			var actor = new TestableActor();
+			var actorInstantiator = A.Fake<ActorInstantiator>();
+			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
+			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);
+			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			var message=new object();
+			var sender = A.Fake<ActorRef>();
+			A.CallTo(() => sender.Name).Returns("SenderActor");
+
+			//Send Create message so that the instance is created
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
+
+
+			actorRef.HandleMessage(new Envelope(actorRef,message,sender));
+
+			actor.ReceivedMessages.Should().HaveCount(1);
+			actor.ReceivedMessages[0].Item2.Should().BeSameAs(message);
+			actor.ReceivedMessages[0].Item1.Name.Should().Be("SenderActor");
+		}
+
 		private class NonExistingSystemMessage : SystemMessage { }
 	}
 	// ReSharper restore InconsistentNaming
+
+	public class TestableActor : Actor
+	{
+		public List<Tuple<SenderActorRef,object>> ReceivedMessages=new List<Tuple<SenderActorRef, object>>();
+
+		protected override void Receive(object message)
+		{
+			ReceivedMessages.Add(Tuple.Create(Sender,message));
+		}
+	}
 }
