@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Aktris.Dispatching;
+using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.SystemMessages;
 using FakeItEasy;
@@ -50,6 +51,41 @@ namespace Aktris.Test.Internals
 			actorRef.Send("MyTestMessage", null);
 			messages.Should().Contain(e => e.Message is string && ((string)e.Message) == "MyTestMessage");
 		}
+
+		[Fact]
+		public void When_handling_non_existing_SystemMessage_then_Exception_is_thrown()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			var actorInstantiator = A.Fake<ActorInstantiator>();
+			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			Assert.Throws<InvalidOperationException>(() => actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new NonExistingSystemMessage(), A.Fake<ActorRef>())));
+		}
+
+		[Fact]
+		public void When_handling_CreateActor_message_and_the_ActorInstantiator_returns_null_then_Exception_is_thrown()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			var actorInstantiator = A.Fake<ActorInstantiator>();
+			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(null);
+			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			Assert.Throws<ActorInitializationException>(()=>actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>())));
+		}
+
+		[Fact]
+		public void When_handling_CreateActor_message_Then_a_new_instance_of_the_actor_is_created()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			var actor = A.Fake<Actor>();
+			var actorInstantiator = A.Fake<ActorInstantiator>();
+				//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
+			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);
+			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef,new CreateActor(),A.Fake<ActorRef>()));
+
+			A.CallTo(()=>actorInstantiator.CreateNewActor()).MustHaveHappened(Repeated.Exactly.Once);
+		}
+
+		private class NonExistingSystemMessage : SystemMessage { }
 	}
 	// ReSharper restore InconsistentNaming
 }

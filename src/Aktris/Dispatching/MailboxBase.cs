@@ -61,7 +61,7 @@ namespace Aktris.Dispatching
 			SystemMessageEnvelope envelope;
 			while(_systemMessagesQueue.TryDequeue(out envelope))
 			{
-				
+				_actor.HandleSystemMessage(envelope);
 			}
 		}
 

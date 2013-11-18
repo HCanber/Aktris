@@ -60,11 +60,13 @@
     <Compile Include="Dispatching\SynchronousScheduler.cs" />
     <Compile Include="Dispatching\ThreadPoolScheduler.cs" />
     <Compile Include="Dispatching\UnboundedMailbox.cs" />
+    <Compile Include="Exceptions\ActorInitializationException.cs" />
     <Compile Include="Exceptions\InvalidActorNameException.cs" />
     <Compile Include="Exceptions\NullMessageException.cs" />
     <Compile Include="IActorCreator.cs" />
     <Compile Include="IBootstrapper.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
+    <Compile Include="Internals\PatternMatcher.cs" />
     <Compile Include="Internals\StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
     <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
