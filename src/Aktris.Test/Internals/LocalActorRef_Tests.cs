@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.SystemMessages;
+using Aktris.Test.TestHelpers;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
@@ -75,21 +78,42 @@ namespace Aktris.Test.Internals
 		public void When_handling_CreateActor_message_Then_a_new_instance_of_the_actor_is_created()
 		{
 			var mailbox = A.Fake<Mailbox>();
-			var actor = A.Fake<Actor>();
+			var actor = ActorHelper.CreateActorDirectly<TestableActor>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
-				//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
+			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);
 			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
-			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef,new CreateActor(),A.Fake<ActorRef>()));
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
 
-			A.CallTo(()=>actorInstantiator.CreateNewActor()).MustHaveHappened(Repeated.Exactly.Once);
+			A.CallTo(() => actorInstantiator.CreateNewActor()).MustHaveHappened(Repeated.Exactly.Once);
+		}
+
+		[Fact]
+		public void When_handling_CreateActor_message_Then_the_LocalActorRef_is_pushed_to_stack_and_afterwards_removed()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			var actorInstantiator = A.Fake<ActorInstantiator>();
+			ImmutableStack<LocalActorRef> stackDuringActorCreation=null;
+			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
+			A.CallTo(() => actorInstantiator.CreateNewActor()).Invokes(() =>
+			{
+				stackDuringActorCreation = ActorHelper.GetActorRefStack();
+			}).ReturnsLazily(()=>new TestableActor());
+			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
+			var stackAfterActorCreation = ActorHelper.GetActorRefStack();
+
+			stackDuringActorCreation.IsEmpty.Should().BeFalse("The stack should contain one item");
+			stackDuringActorCreation.Peek().Should().BeSameAs(actorRef,"The item on stack should be the LocalActorRef that creates the actor");
+			stackDuringActorCreation.Pop().IsEmpty.Should().BeTrue("The stack should only contain one item.");
+			(stackAfterActorCreation == null || stackAfterActorCreation.IsEmpty).Should().BeTrue("The stack should be empty after creation");
 		}
 
 		[Fact]
 		public void When_handling_message_Then_it_is_forwarded_to_the_actor_and_sender_is_set()
 		{
 			var mailbox = A.Fake<Mailbox>();
-			var actor = new TestableActor();
+			var actor = ActorHelper.CreateActorDirectly<TestableActor>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);

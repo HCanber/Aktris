@@ -39,6 +39,10 @@
       <HintPath>..\packages\FluentAssertions.2.1.0.0\lib\net45\FluentAssertions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.0.30.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Bcl.Immutable.1.0.30\lib\portable-net45+win8+wp8\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -54,16 +58,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActorCreator_Tests_Helper.cs" />
-    <Compile Include="ActorFactory_Tests.cs" />
     <Compile Include="ActorSystem_as_ActorCreator_Tests.cs" />
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
-    <Compile Include="ActorCreationProperties_Tests.cs" />
+    <Compile Include="DelegateActorCreationProperties_Tests.cs" />
+    <Compile Include="Actor_Tests.cs" />
     <Compile Include="Dispatching\SchedulerBasedMailbox_Tests.cs" />
     <Compile Include="FakeActor.cs" />
     <Compile Include="Internals\LocalActorRef_Tests.cs" />
     <Compile Include="Internals\InterlockedSpin_Tests.cs" />
     <Compile Include="Internals\UniqueNameCreator_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestHelpers\ActorHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

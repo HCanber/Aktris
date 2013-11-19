@@ -10,7 +10,7 @@ namespace Aktris.Exceptions
 
 		public Exception Cause { get { return InnerException; } }
 
-		public ActorInitializationException([NotNull] ActorRef actor, string message, Exception cause = null)
+		public ActorInitializationException(ActorRef actor, string message, Exception cause = null)
 			: base(message, cause)
 		{
 			Actor = actor;
