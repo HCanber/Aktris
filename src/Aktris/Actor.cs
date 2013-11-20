@@ -19,7 +19,7 @@ namespace Aktris
 
 		protected internal SenderActorRef Sender { get; internal set; }
 
-		internal protected virtual void Receive(object message)
+		internal protected virtual bool HandleMessage(object message)
 		{
 			throw new System.NotImplementedException();
 		// ReSharper disable once VirtualMemberNeverOverriden.Global   Init is virtual in order to be mockable

@@ -153,9 +153,10 @@ namespace Aktris.Test.Internals
 	{
 		public List<Tuple<SenderActorRef,object>> ReceivedMessages=new List<Tuple<SenderActorRef, object>>();
 
-		protected internal override void Receive(object message)
+		protected internal override bool HandleMessage(object message)
 		{
 			ReceivedMessages.Add(Tuple.Create(Sender,message));
+			return true;
 		}
 	}
 }

@@ -46,7 +46,7 @@ namespace Aktris.Internals
 			try
 			{
 				_actor.Sender = new SenderActorRef(envelope.Sender,this);
-				_actor.Receive(envelope.Message);
+				_actor.HandleMessage(envelope.Message);
 			}
 			finally
 			{
