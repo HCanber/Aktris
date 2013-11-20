@@ -45,6 +45,16 @@ namespace Aktris.Test.TestHelpers
 			actor.Init();
 			return actor;
 		}
+		/// <summary>
+		/// This will create an actor and initialize it.
+		/// <remarks>NOTE! Only use this in tests</remarks>
+		/// </summary>
+		public static T CreateInitializedActorDirectly<T>(Func<T> createActor) where T : Actor
+		{
+			var actor = (T)CreateActorDirectly<T>(createActor)();
+			actor.Init();
+			return actor;
+		}
 
 		public static ImmutableStack<LocalActorRef> GetActorRefStack()
 		{

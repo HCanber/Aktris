@@ -53,6 +53,7 @@
     <Compile Include="ActorRef.cs" />
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
+    <Compile Include="AnonymousActor.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
     <Compile Include="DelegateActorCreationProperties.cs" />
     <Compile Include="Dispatching\Envelope.cs" />
