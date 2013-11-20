@@ -10,11 +10,11 @@ namespace Aktris
 		protected Actor()
 		{
 			LocalActorRef actorRef;
-			if(!LocalActorRef.TryGetActorRefFromStack(out actorRef))
+			if(!LocalActorRefStack.TryGetActorRefFromStack(out actorRef))
 			{
 				throw new InvalidOperationException(StringFormat.SafeFormat("Cannot create a new instance of type {0} directly using new(). An actor can only be created via the CreateActor methods.", GetType().FullName));
 			}
-			LocalActorRef.MarkActorRefConsumedInStack();
+			LocalActorRefStack.MarkActorRefConsumedInStack();
 		}
 
 		protected internal SenderActorRef Sender { get; internal set; }

@@ -22,6 +22,9 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("8e88ff67-262d-4001-8224-324860df4cca")]
 
+
+[assembly: InternalsVisibleTo("Aktris.Test")]
+
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version

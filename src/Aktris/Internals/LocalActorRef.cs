@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -13,8 +12,6 @@ namespace Aktris.Internals
 {
 	public class LocalActorRef : ILocalActorRef
 	{
-		[ThreadStatic]
-		private static ImmutableStack<LocalActorRef> _actorStackDoNotCallMeDirectly;
 		private readonly ActorInstantiator _actorInstantiator;
 		private readonly string _name;
 		private readonly Mailbox _mailbox;
@@ -74,7 +71,7 @@ namespace Aktris.Internals
 		{
 			try
 			{
-				PushActorRefToStack();
+				LocalActorRefStack.PushActorRefToStack(this);
 				var actor = NewActor();
 				_actor = actor;
 			}
@@ -84,7 +81,7 @@ namespace Aktris.Internals
 			}
 			finally
 			{
-				PopActorAndMarkerFromStack();
+				LocalActorRefStack.PopActorAndMarkerFromStack();
 			}
 		}
 
@@ -103,51 +100,5 @@ namespace Aktris.Internals
 		}
 
 
-		// Actor stack ----------------------------------------------------------------------------
-		private void PushActorRefToStack()
-		{
-			var actorRef = this;
-			PushActorRefToStack(actorRef);
-		}
-
-		private static void PushActorRefToStack(LocalActorRef actorRef)		//Note: This method is called via reflection from test code 
-		{
-			InterlockedSpin.Swap(ref _actorStackDoNotCallMeDirectly, st => 
-				st == null 
-				? ImmutableStack.Create(actorRef)
-				: st.Push(actorRef));
-		}
-
-		private void PopActorAndMarkerFromStack()
-		{
-			InterlockedSpin.Swap(ref _actorStackDoNotCallMeDirectly, st => 
-				st == null 
-				? null 
-				: st.Peek()==null		// if first item is null, i.e. a marker
-					? st.Pop().Pop()  // then pop that value, 
-					: st.Pop());      // otherwise pop only the actor
-		}
-
-		internal static void MarkActorRefConsumedInStack()
-		{
-			PushActorRefToStack(null);
-		}
-
-		private static ImmutableStack<LocalActorRef> GetActorRefStack()   //Note: This method is called via reflection from test code 
-		{
-			return _actorStackDoNotCallMeDirectly;
-		}
-
-		internal static bool TryGetActorRefFromStack(out LocalActorRef actorRef)
-		{
-			var stack = _actorStackDoNotCallMeDirectly;
-			if(stack == null || stack.IsEmpty)
-			{
-				actorRef = null;
-				return false;
-			}
-			actorRef = stack.Peek();
-			return true;
-		}
 	}
 }

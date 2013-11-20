@@ -104,7 +104,7 @@ namespace Aktris.Test.Internals
 
 			stackDuringActorCreation.IsEmpty.Should().BeFalse("The stack should contain one item");
 			stackDuringActorCreation.Peek().Should().BeSameAs(actorRef,"The item on stack should be the LocalActorRef that creates the actor");
-			stackDuringActorCreation.Pop().IsEmpty.Should().BeTrue("The stack should only contain one item.");
+			stackDuringActorCreation.Count().Should().Be(1,"The stack should only contain one item.");
 			(stackAfterActorCreation == null || stackAfterActorCreation.IsEmpty).Should().BeTrue("The stack should be empty after creation");
 		}
 
@@ -140,7 +140,7 @@ namespace Aktris.Test.Internals
 	{
 		public List<Tuple<SenderActorRef,object>> ReceivedMessages=new List<Tuple<SenderActorRef, object>>();
 
-		protected override void Receive(object message)
+		protected internal override void Receive(object message)
 		{
 			ReceivedMessages.Add(Tuple.Create(Sender,message));
 		}
