@@ -22,6 +22,10 @@ namespace Aktris
 		internal protected virtual void Receive(object message)
 		{
 			throw new System.NotImplementedException();
+		// ReSharper disable once VirtualMemberNeverOverriden.Global   Init is virtual in order to be mockable
+		internal virtual void Init()
+		{
+		}
 		}
 	}
 }

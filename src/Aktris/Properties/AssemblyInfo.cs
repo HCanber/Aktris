@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 
 
 [assembly: InternalsVisibleTo("Aktris.Test")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 // Version information for an assembly consists of the following four values:
 //

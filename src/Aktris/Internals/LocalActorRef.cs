@@ -73,6 +73,7 @@ namespace Aktris.Internals
 			{
 				LocalActorRefStack.PushActorRefToStack(this);
 				var actor = NewActor();
+				actor.Init();
 				_actor = actor;
 			}
 			catch(Exception ex)

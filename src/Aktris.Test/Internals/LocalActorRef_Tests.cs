@@ -89,6 +89,19 @@ namespace Aktris.Test.Internals
 		}
 
 		[Fact]
+		public void When_handling_CreateActor_message_Then_Init_is_called_on_the_new_actor()
+		{
+			var mailbox = A.Fake<Mailbox>();
+			Actor actor = null;
+			var actorInstantiator = A.Fake<ActorInstantiator>();
+			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
+			A.CallTo(() => actorInstantiator.CreateNewActor()).ReturnsLazily(()=> { actor = A.Fake<Actor>();return actor;});
+			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
+			A.CallTo(()=>actor.Init()).MustHaveHappened(Repeated.Exactly.Once);
+		}
+
+		[Fact]
 		public void When_handling_CreateActor_message_Then_the_LocalActorRef_is_pushed_to_stack_and_afterwards_removed()
 		{
 			var mailbox = A.Fake<Mailbox>();
