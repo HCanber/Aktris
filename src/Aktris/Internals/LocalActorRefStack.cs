@@ -3,6 +3,16 @@ using System.Collections.Immutable;
 
 namespace Aktris.Internals
 {
+	/// <summary>
+	/// This class is used during creation of actors. Before the actor's 
+	/// constructor is called, the LocalActorRef instance is pushed onto the 
+	/// stack. Then the actor's constructor is called, and in which it pops the 
+	/// LocalActorRef off the stack and saves it. 
+	/// If no LocalActorRef exists on the stack it means were calling the actor's
+	/// constructor directly, which is not allowed, and an exception is thrown.
+	/// 
+	/// The stack is per thread so no concurrency or interference should occur.
+	/// </summary>
 	internal static class LocalActorRefStack
 	{
 		[ThreadStatic]
