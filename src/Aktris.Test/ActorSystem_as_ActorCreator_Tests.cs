@@ -1,13 +1,15 @@
-﻿using Aktris.Internals;
+﻿using System;
+using Aktris.Internals;
 
 namespace Aktris.Test
 {
 // ReSharper disable InconsistentNaming
 	public class ActorSystem_as_ActorCreator_Tests : ActorCreator_Tests_Helper
 	{
-		protected override IActorCreator GetActorCreator(IBootstrapper bootstrapper=null)
+		protected override Tuple<IActorCreator, ActorSystem> GetActorCreator(IBootstrapper bootstrapper=null)
 		{
-			return new InternalActorSystem("default", bootstrapper ?? DefaultActorSystemFactory.Instance);
+			var system = new InternalActorSystem("default", bootstrapper ?? DefaultActorSystemFactory.Instance);
+			return new Tuple<IActorCreator, ActorSystem>(system,system);
 		}
 	}
 	// ReSharper restore InconsistentNaming

@@ -1,4 +1,5 @@
-﻿using Aktris.Internals;
+﻿using System;
+using Aktris.Internals;
 
 namespace Aktris
 {
@@ -11,6 +12,7 @@ namespace Aktris
 		{
 			UniqueNameCreator=new UniqueNameCreator();
 			LocalActorRefFactory = new DefaultLocalActorRefFactory();
+			DeadLetterActorCreator = () => new DeadLetterActorRef();
 		}
 
 		public static DefaultActorSystemFactory Instance { get { return _Instance; } }
@@ -23,5 +25,6 @@ namespace Aktris
 
 		public IUniqueNameCreator UniqueNameCreator { get; set; }
 		public LocalActorRefFactory LocalActorRefFactory { get; set; }
+		public Func<ActorRef> DeadLetterActorCreator { get; set; }
 	}
 }

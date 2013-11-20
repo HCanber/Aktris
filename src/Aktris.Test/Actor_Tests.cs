@@ -38,7 +38,7 @@ namespace Aktris.Test
 				return actor;
 			});
 
-			var actorRef = new LocalActorRef(actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
 
 			//Send Create message so that the instance is created
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));

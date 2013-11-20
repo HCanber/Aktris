@@ -1,4 +1,6 @@
-﻿using Aktris.Internals;
+﻿using System;
+using Aktris.Internals;
+using Fibrous.Experimental.Actors;
 
 namespace Aktris
 {
@@ -6,5 +8,6 @@ namespace Aktris
 	{
 		IUniqueNameCreator UniqueNameCreator { get; }
 		LocalActorRefFactory LocalActorRefFactory { get; }
+		Func<ActorRef> DeadLetterActorCreator { get; }
 	}
 }

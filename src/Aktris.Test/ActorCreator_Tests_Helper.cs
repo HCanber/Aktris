@@ -1,6 +1,7 @@
 ﻿using System;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.JetBrainsAnnotations;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
@@ -11,14 +12,15 @@ namespace Aktris.Test
 	// ReSharper disable InconsistentNaming
 	public abstract class ActorCreator_Tests_Helper
 	{
-		protected abstract IActorCreator GetActorCreator(IBootstrapper bootstrapper = null);
+		protected abstract Tuple<IActorCreator,ActorSystem> GetActorCreator(IBootstrapper bootstrapper = null);
 
 
 		[Fact]
 		public void Given_an_ActorCreator_When_creating_actors_with_no_names_Then_they_are_assigned_random_different_names()
 		{
 			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
-			var actorCreator = GetActorCreator();
+			var tuple = GetActorCreator();
+			var actorCreator=tuple.Item1;
 			var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
 			var actorRef2 = actorCreator.CreateActor(delegateActorFactory, name: null);
 
@@ -35,7 +37,8 @@ namespace Aktris.Test
 		public void Given_an_ActorCreator_When_creating_actors_with_invalid_name_Then_it_fails(string name)
 		{
 			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
-			var actorCreator = GetActorCreator();
+			var tuple = GetActorCreator();
+			var actorCreator = tuple.Item1;
 			Assert.Throws<InvalidActorNameException>(() => actorCreator.CreateActor(delegateActorFactory, name: name));
 		}
 
@@ -48,7 +51,8 @@ namespace Aktris.Test
 		public void Given_an_ActorCreator_When_creating_actors_with_valid_name_Then_it_succeeds(string name)
 		{
 			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
-			var actorCreator = GetActorCreator();
+			var tuple = GetActorCreator();
+			var actorCreator = tuple.Item1;
 			Assert.Throws<InvalidActorNameException>(() => actorCreator.CreateActor(delegateActorFactory, name: name));
 		}
 
@@ -57,16 +61,28 @@ namespace Aktris.Test
 		{
 			var bootstrapper = DefaultActorSystemFactory.Instance;
 			var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
-			var fakeActorRef = A.Fake<ILocalActorRef>();
-			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(A<ActorCreationProperties>.Ignored, A<string>.Ignored)).Returns(fakeActorRef);
 			bootstrapper.LocalActorRefFactory = fakeLocalActorRefFactory;
+			var fakeActorRef = A.Fake<ILocalActorRef>();
+			var tuple = GetActorCreator();
+			var actorSystem = tuple.Item2;
+			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.Ignored, A<string>.Ignored)).ReturnsLazily(()=> { return fakeActorRef; });
 
-			var actorCreator = GetActorCreator(bootstrapper);
-
+			var actorCreator = tuple.Item1;
 			var actorRef = actorCreator.CreateActor(new DelegateActorCreationProperties(() => new FakeActor()));
 
 			A.CallTo(() => fakeActorRef.Start()).MustHaveHappened();
 		}
 	}
 	// ReSharper restore InconsistentNaming
+
+	public class TestActorSystem : ActorSystem
+	{
+		public TestActorSystem() : this(null)
+		{
+		}
+
+		public TestActorSystem(IBootstrapper bootstrapper) : base("test", bootstrapper ?? A.Fake<IBootstrapper>())
+		{
+		}
+	}
 }

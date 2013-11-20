@@ -2,6 +2,6 @@
 {
 	public abstract class LocalActorRefFactory
 	{
-		public abstract ILocalActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name);
+		public abstract ILocalActorRef CreateActor(ActorSystem system, ActorCreationProperties actorCreationProperties, string name);
 	}
 }

@@ -2,10 +2,10 @@
 {
 	public class DefaultLocalActorRefFactory : LocalActorRefFactory
 	{
-		public override ILocalActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name)
+		public override ILocalActorRef CreateActor(ActorSystem system, ActorCreationProperties actorCreationProperties, string name)
 		{
 			var mailbox = actorCreationProperties.CreateMailbox();
-			return new LocalActorRef(actorCreationProperties, name,mailbox);
+			return new LocalActorRef(system, actorCreationProperties, name,mailbox);
 		}
 	}
 }

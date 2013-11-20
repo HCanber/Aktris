@@ -13,6 +13,7 @@ namespace Aktris
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private const string _NameExtraCharacter = @"-_=+,.!~";
 		private static readonly Regex _ValidNameRegex = new Regex(@"^[[:alnum:]]([[:alnum:]" + _NameExtraCharacter + @"])*", RegexOptions.Compiled);
+		private readonly ActorRef _deadLetters;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -34,10 +35,11 @@ namespace Aktris
 			_name = name;
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
+			_deadLetters = bootstrapper.DeadLetterActorCreator();
 		}
 
 		public string Name { get { return _name; } }
-
+		public ActorRef DeadLetters { get { return _deadLetters; } }
 
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
 		{
@@ -46,7 +48,7 @@ namespace Aktris
 				EnsureNameIsValid(name);
 			}
 			else name = _uniqueNameCreator.GetNextRandomName();
-			var actorRef = _localActorRefFactory.CreateActor(actorCreationProperties, name);
+			var actorRef = _localActorRefFactory.CreateActor(this, actorCreationProperties, name);
 			actorRef.Start();
 			return actorRef;
 		}

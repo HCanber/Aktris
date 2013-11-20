@@ -26,7 +26,19 @@ namespace Aktris.Internals
 			return true;
 		}
 
-		/// <summary>Calls the handler and then returns true.</summary>
+		/// <summary>Calls the handler if the item is null and then returns true. If it is not null false is returned.</summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool MatchNull(object item, Action handler)
+		{
+			if(item==null)
+			{
+				handler();
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>Calls the handler for any object and then returns true.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool MatchAll(object item, Action<object> handler)
 		{

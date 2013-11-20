@@ -19,7 +19,7 @@ namespace Aktris.Test.TestHelpers
 		{
 			return () =>
 			{
-				LocalActorRefStack.PushActorRefToStack(A.Fake<LocalActorRef>());
+				LocalActorRefStack.PushActorRefToStack(new LocalActorRef(new TestActorSystem(), A.Dummy<ActorInstantiator>(), "fake", A.Fake<Mailbox>()));
 				var actor = createActor();
 				LocalActorRefStack.PopActorAndMarkerFromStack();
 				return actor;

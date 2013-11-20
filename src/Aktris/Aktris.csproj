@@ -54,6 +54,7 @@
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
     <Compile Include="AnonymousActor.cs" />
+    <Compile Include="DeadLetterMessage.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
     <Compile Include="DelegateActorCreationProperties.cs" />
     <Compile Include="Dispatching\Envelope.cs" />
@@ -70,13 +71,14 @@
     <Compile Include="IActorCreator.cs" />
     <Compile Include="IBootstrapper.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
+    <Compile Include="Internals\DeadLetterActorRef.cs" />
+    <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\LocalActorRefStack.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
     <Compile Include="Internals\StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
     <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
     <Compile Include="Internals\ILocalActorRef.cs" />
-    <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\IUniqueNameCreator.cs" />
     <Compile Include="Internals\LocalActorRef.cs" />
     <Compile Include="Internals\LocalActorRefFactory.cs" />

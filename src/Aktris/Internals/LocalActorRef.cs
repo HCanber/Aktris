@@ -12,20 +12,25 @@ namespace Aktris.Internals
 {
 	public class LocalActorRef : ILocalActorRef
 	{
+		private readonly ActorSystem _system;
 		private readonly ActorInstantiator _actorInstantiator;
 		private readonly string _name;
 		private readonly Mailbox _mailbox;
 		private Actor _actor;
-	
-		public LocalActorRef([NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox)
+		private readonly SenderActorRef _deadLetterSender;
+
+		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox)
 		{
+			if(system == null) throw new ArgumentNullException("system");
 			if(actorInstantiator == null) throw new ArgumentNullException("actorInstantiator");
 			if(name == null) throw new ArgumentNullException("name");
 			if(mailbox == null) throw new ArgumentNullException("mailbox");
+			_system = system;
 			_actorInstantiator = actorInstantiator;
 			_name = name;
 			_mailbox = mailbox;
 			mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this, new CreateActor(), this));
+			_deadLetterSender = new SenderActorRef(system.DeadLetters, this);
 		}
 
 		public string Name { get { return _name; } }
@@ -36,8 +41,8 @@ namespace Aktris.Internals
 		}
 
 		public void Send(object message, ActorRef sender)
-		{
-			var envelope = new Envelope(this, message, sender);
+		{			
+			var envelope = new Envelope(this, message, sender ?? _system.DeadLetters);
 			_mailbox.Enqueue(envelope);
 		}
 
@@ -50,7 +55,7 @@ namespace Aktris.Internals
 			}
 			finally
 			{
-				_actor.Sender = null;	//TODO: change to use one that directs to deadletter
+				_actor.Sender = _deadLetterSender;	//TODO: change to use one that directs to deadletter
 			}
 
 		}
