@@ -39,7 +39,7 @@ namespace Aktris.Test.TestHelpers
 		{
 			var methodInfo = typeof(LocalActorRef).GetMethod("GetActorRefStack", BindingFlags.Static | BindingFlags.NonPublic);
 			var itemOnStack = methodInfo.Invoke(null, new object[0]);
-			return (ImmutableStack<LocalActorRef>)itemOnStack;
+			return ((ImmutableStack<LocalActorRef>)itemOnStack) ?? ImmutableStack<LocalActorRef>.Empty;
 		}
 	}
 }

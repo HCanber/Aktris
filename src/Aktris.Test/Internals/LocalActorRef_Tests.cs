@@ -94,7 +94,6 @@ namespace Aktris.Test.Internals
 			var mailbox = A.Fake<Mailbox>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			ImmutableStack<LocalActorRef> stackDuringActorCreation=null;
-			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Invokes(() =>
 			{
 				stackDuringActorCreation = ActorHelper.GetActorRefStack();

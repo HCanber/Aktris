@@ -128,7 +128,7 @@ namespace Aktris.Internals
 					: st.Pop());      // otherwise pop only the actor
 		}
 
-		internal static void MarkActorRefConsumedInStack(LocalActorRef actorRef)
+		internal static void MarkActorRefConsumedInStack()
 		{
 			PushActorRefToStack(null);
 		}
