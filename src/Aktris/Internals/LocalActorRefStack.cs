@@ -16,12 +16,12 @@ namespace Aktris.Internals
 	internal static class LocalActorRefStack
 	{
 		[ThreadStatic]
-		private static ImmutableStack<LocalActorRef> _actorStackDoNotCallMeDirectly;
+		private static ImmutableStack<LocalActorRef> _stack;
 
 
 		internal static void PushActorRefToStack(LocalActorRef actorRef)
 		{
-			InterlockedSpin.Swap(ref _actorStackDoNotCallMeDirectly, st =>
+			InterlockedSpin.Swap(ref _stack, st =>
 				st == null
 					? ImmutableStack.Create(actorRef)
 					: st.Push(actorRef));
@@ -29,7 +29,7 @@ namespace Aktris.Internals
 
 		internal static void PopActorAndMarkerFromStack()
 		{
-			InterlockedSpin.Swap(ref _actorStackDoNotCallMeDirectly, st =>
+			InterlockedSpin.Swap(ref _stack, st =>
 				st == null
 					? null
 					: st.Peek() == null		// if first item is null, i.e. a marker
@@ -42,14 +42,14 @@ namespace Aktris.Internals
 			PushActorRefToStack(null);
 		}
 
-		internal static ImmutableStack<LocalActorRef> GetActorRefStackForTestingOnly()
+		internal static ImmutableStack<LocalActorRef> GetActorRefStack_ForTestingONLY()
 		{
-			return _actorStackDoNotCallMeDirectly;
+			return _stack;
 		}
 
 		internal static bool TryGetActorRefFromStack(out LocalActorRef actorRef)
 		{
-			var stack = _actorStackDoNotCallMeDirectly;
+			var stack = _stack;
 			if(stack == null || stack.IsEmpty)
 			{
 				actorRef = null;
@@ -57,6 +57,12 @@ namespace Aktris.Internals
 			}
 			actorRef = stack.Peek();
 			return true;
+		}
+
+		public static void Clear_ForTestingONLY()
+		{
+			InterlockedSpin.Swap(ref _stack, st => st.Clear());
+			InterlockedSpin.Swap(ref _stack, st => st.Clear());
 		}
 	}
 }

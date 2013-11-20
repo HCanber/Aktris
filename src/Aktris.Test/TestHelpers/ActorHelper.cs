@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
 using Aktris.Dispatching;
@@ -19,7 +20,9 @@ namespace Aktris.Test.TestHelpers
 			return () =>
 			{
 				LocalActorRefStack.PushActorRefToStack(A.Fake<LocalActorRef>());
-				return createActor();
+				var actor = createActor();
+				LocalActorRefStack.PopActorAndMarkerFromStack();
+				return actor;
 			};
 		}
 
@@ -29,13 +32,12 @@ namespace Aktris.Test.TestHelpers
 		/// </summary>
 		public static T CreateActorDirectly<T>() where T : Actor, new()
 		{
-			LocalActorRefStack.PushActorRefToStack(A.Fake<LocalActorRef>());
-			return new T();
+			return (T) CreateActorDirectly<T>(() => new T())();
 		}
 
 		public static ImmutableStack<LocalActorRef> GetActorRefStack()
 		{
-			return LocalActorRefStack.GetActorRefStackForTestingOnly() ?? ImmutableStack<LocalActorRef>.Empty;
+			return LocalActorRefStack.GetActorRefStack_ForTestingONLY() ?? ImmutableStack<LocalActorRef>.Empty;
 		}
 	}
 }
