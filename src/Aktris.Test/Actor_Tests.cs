@@ -60,7 +60,7 @@ namespace Aktris.Test
 		}
 
 		[Fact]
-		public void When_actor_handles_a_message_Then_it_calls_the_correct_handler_registered_in_constructor()
+		public void When_actor_handles_messages_Then_it_calls_the_correct_handler_registered_in_constructor()
 		{
 			var actor = ActorHelper.CreateInitializedActorDirectly<ReceiveTestActor>();
 			actor.HandleMessage(1.0f);
