@@ -51,7 +51,12 @@ namespace Aktris
 
 		public void AddReceiver(Type type, Action<object> handler)
 		{
-			AddReceiver(type, m => { handler(m); return true; });
+			AddReceiver(type, (m,sender) => { handler(m); return true; });
+		}
+
+		public void AddReceiver(Type type, Func<object, bool> handler)
+		{
+			_handlers.Add(Tuple.Create<Type, MessageHandler>(type,(m,sender)=>handler(m)));
 		}
 
 		public void AddReceiver(Type type, MessageHandler handler)
@@ -74,20 +79,14 @@ namespace Aktris
 
 		protected static MessageHandler CreateMessageHandler(IEnumerable<Tuple<Type, MessageHandler>> handlers)
 		{
-			var handler = CreateMessageHandler(handlers.Select(t => new Tuple<Type, Func<object, bool>>(t.Item1, m => t.Item2(m))));
-			return handler;
-		}
-
-		protected static MessageHandler CreateMessageHandler(IEnumerable<Tuple<Type, Func<object, bool>>> handlers)
-		{
-			var internalHandlers = new List<Tuple<Type, Func<object, bool>>>(handlers);
-			return (msg) =>
+			var internalHandlers = new List<Tuple<Type, MessageHandler>>(handlers);
+			return (msg,sender) =>
 			{
 				foreach(var tuple in internalHandlers)
 				{
 					if(tuple.Item1.IsInstanceOfType(msg))
 					{
-						var wasHandled = tuple.Item2(msg);
+						var wasHandled = tuple.Item2(msg,sender);
 						if(wasHandled)
 						{
 							return true;

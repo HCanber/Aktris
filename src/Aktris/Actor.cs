@@ -39,7 +39,7 @@ namespace Aktris
 		/// <returns><c>true</c> if the actor has handled the message; <c>false</c> otherwise.</returns>
 		internal protected virtual bool HandleMessage(object message)
 		{
-			return _defaultMessageHandler(message);
+			return _defaultMessageHandler(message,Sender);
 		}
 
 
@@ -75,6 +75,11 @@ namespace Aktris
 		}
 
 		protected void AddReceiver(Type type, Action<object> handler)
+		{
+			EnsureMayConfigureMessageHandlers();
+			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
+		}
+		protected void AddReceiver(Type type, Func<object,bool> handler)
 		{
 			EnsureMayConfigureMessageHandlers();
 			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
