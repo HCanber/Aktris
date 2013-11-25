@@ -1,4 +1,5 @@
 ﻿using System;
+using Aktris.Dispatching;
 using Aktris.Internals;
 
 namespace Aktris
@@ -13,6 +14,7 @@ namespace Aktris
 			UniqueNameCreator=new UniqueNameCreator();
 			LocalActorRefFactory = new DefaultLocalActorRefFactory();
 			DeadLetterActorCreator = () => new DeadLetterActorRef();
+			DefaultMailboxCreator = () => new UnboundedMailbox(new ThreadPoolScheduler());
 		}
 
 		public static DefaultActorSystemFactory Instance { get { return _Instance; } }
@@ -26,5 +28,6 @@ namespace Aktris
 		public IUniqueNameCreator UniqueNameCreator { get; set; }
 		public LocalActorRefFactory LocalActorRefFactory { get; set; }
 		public Func<ActorRef> DeadLetterActorCreator { get; set; }
+		public Func<Mailbox> DefaultMailboxCreator { get; set; }
 	}
 }
