@@ -13,6 +13,7 @@ namespace Aktris
 		private bool _hasBeenInitialized;
 		private MessageHandlerConfigurator _constructorMessageHandlerConfigurator;
 		private MessageHandler _defaultMessageHandler;
+		private LocalActorRef _self;
 
 
 		protected Actor()
@@ -23,6 +24,7 @@ namespace Aktris
 				throw new InvalidOperationException(StringFormat.SafeFormat("Cannot create a new instance of type {0} directly using new(). An actor can only be created via the CreateActor methods.", GetType().FullName));
 			}
 			LocalActorRefStack.MarkActorRefConsumedInStack();
+			_self = actorRef;
 			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
 		}
 
@@ -30,6 +32,9 @@ namespace Aktris
 		[NotNull]
 		protected internal SenderActorRef Sender { get; internal set; }
 
+		/// <summary>The reference to this actor</summary>
+		[NotNull]
+		protected internal ActorRef Self { get { return _self; } }
 
 		/// <summary>
 		/// Handles a message. By default it calls the handlers registered in the constructor using any of the Receive methods.
