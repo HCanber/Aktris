@@ -148,15 +148,4 @@ namespace Aktris.Test.Internals
 		private class NonExistingSystemMessage : SystemMessage { }
 	}
 	// ReSharper restore InconsistentNaming
-
-	public class TestableActor : Actor
-	{
-		public List<Tuple<SenderActorRef,object>> ReceivedMessages=new List<Tuple<SenderActorRef, object>>();
-
-		protected internal override bool HandleMessage(object message)
-		{
-			ReceivedMessages.Add(Tuple.Create(Sender,message));
-			return true;
-		}
-	}
 }

@@ -67,6 +67,7 @@
     <Compile Include="FakeActor.cs" />
     <Compile Include="Internals\LocalActorRef_Tests.cs" />
     <Compile Include="Internals\InterlockedSpin_Tests.cs" />
+    <Compile Include="TestableActor.cs" />
     <Compile Include="Internals\UniqueNameCreator_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestActorSystem.cs" />
