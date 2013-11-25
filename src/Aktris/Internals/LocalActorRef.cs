@@ -42,9 +42,17 @@ namespace Aktris.Internals
 
 		public void Send(object message, ActorRef sender)
 		{			
+			sender = UnwrapSenderActorRef(sender);
 			var envelope = new Envelope(this, message, sender ?? _system.DeadLetters);
 			_mailbox.Enqueue(envelope);
 		}
+
+		private ActorRef UnwrapSenderActorRef(ActorRef sender)
+		{
+			var senderActorRef = sender as SenderActorRef;
+			return senderActorRef != null ? senderActorRef.Unwrap() : sender;
+		}
+
 
 		public void HandleMessage(Envelope envelope)
 		{
