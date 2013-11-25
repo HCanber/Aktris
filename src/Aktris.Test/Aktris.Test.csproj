@@ -69,6 +69,7 @@
     <Compile Include="Internals\InterlockedSpin_Tests.cs" />
     <Compile Include="Internals\UniqueNameCreator_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestActorSystem.cs" />
     <Compile Include="TestHelpers\ActorHelper.cs" />
   </ItemGroup>
   <ItemGroup>

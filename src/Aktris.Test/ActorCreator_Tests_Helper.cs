@@ -74,15 +74,4 @@ namespace Aktris.Test
 		}
 	}
 	// ReSharper restore InconsistentNaming
-
-	public class TestActorSystem : ActorSystem
-	{
-		public TestActorSystem() : this(null)
-		{
-		}
-
-		public TestActorSystem(IBootstrapper bootstrapper) : base("test", bootstrapper ?? A.Fake<IBootstrapper>())
-		{
-		}
-	}
 }
