@@ -21,6 +21,7 @@ namespace Aktris
 			get { return _sender.Name; }
 		}
 
+
 		void ActorRef.Send(object message, ActorRef sender)
 		{
 			_sender.Send(message, sender);
@@ -29,6 +30,18 @@ namespace Aktris
 		public void Reply(object message)
 		{
 			_sender.Send(message, _instance);
+		}
+
+		protected internal ActorRef Unwrap()
+		{
+			ActorRef unwrapped;
+			var current = this;
+			do
+			{
+				unwrapped = current._sender;
+				current = unwrapped as SenderActorRef;
+			} while(current != null);
+			return unwrapped;
 		}
 	}
 }
