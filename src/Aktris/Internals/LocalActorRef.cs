@@ -36,6 +36,8 @@ namespace Aktris.Internals
 
 		public string Name { get { return _name; } }
 
+		public ActorSystem System { get { return _system; } }
+
 		public void Start()
 		{
 			_mailbox.SetActor(this);
