@@ -12,7 +12,7 @@ namespace Aktris.Test
 	// ReSharper disable InconsistentNaming
 	public abstract class ActorCreator_Tests_Helper
 	{
-		protected abstract Tuple<IActorCreator,ActorSystem> GetActorCreator(IBootstrapper bootstrapper = null);
+		protected abstract Tuple<IActorCreator, ActorSystem> GetActorCreator(IBootstrapper bootstrapper = null);
 
 
 		[Fact]
@@ -20,7 +20,7 @@ namespace Aktris.Test
 		{
 			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
 			var tuple = GetActorCreator();
-			var actorCreator=tuple.Item1;
+			var actorCreator = tuple.Item1;
 			var actorRef1 = actorCreator.CreateActor(delegateActorFactory, name: null);
 			var actorRef2 = actorCreator.CreateActor(delegateActorFactory, name: null);
 
@@ -65,7 +65,7 @@ namespace Aktris.Test
 			var fakeActorRef = A.Fake<ILocalActorRef>();
 			var tuple = GetActorCreator();
 			var actorSystem = tuple.Item2;
-			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.Ignored, A<string>.Ignored)).ReturnsLazily(()=> { return fakeActorRef; });
+			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.Ignored, A<string>.Ignored)).ReturnsLazily(() => { return fakeActorRef; });
 
 			var actorCreator = tuple.Item1;
 			var actorRef = actorCreator.CreateActor(new DelegateActorCreationProperties(() => new FakeActor()));

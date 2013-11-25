@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Aktris.Test
 {
-// ReSharper disable once InconsistentNaming
+	// ReSharper disable once InconsistentNaming
 	public class AnonymousActor_Tests
 	{
 		[Fact]
@@ -17,10 +17,10 @@ namespace Aktris.Test
 			var receivedFloats = new List<float>();
 			var receivedObjects = new List<object>();
 			var allRecievedMessages = new List<object>();
-			Func<Actor> actorFactory=()=>AnonymousActor.Create(c =>
+			Func<Actor> actorFactory = () => AnonymousActor.Create(c =>
 			{
 				// ReSharper disable ConvertClosureToMethodGroup
-				c.AddReceiver(typeof(object),msg=>{allRecievedMessages.Add(msg);return false;});
+				c.AddReceiver(typeof(object), msg => { allRecievedMessages.Add(msg); return false; });
 				c.Receive<float>(f => receivedFloats.Add(f));
 				c.Receive<int>(i => receivedInts.Add(i));
 				c.ReceiveAny(o => receivedObjects.Add(o));
