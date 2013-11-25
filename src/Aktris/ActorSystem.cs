@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.JetBrainsAnnotations;
@@ -14,6 +15,7 @@ namespace Aktris
 		private const string _NameExtraCharacter = @"-_=+,.!~";
 		private static readonly Regex _ValidNameRegex = new Regex(@"^[[:alnum:]]([[:alnum:]" + _NameExtraCharacter + @"])*", RegexOptions.Compiled);
 		private readonly ActorRef _deadLetters;
+		private readonly Func<Mailbox> _defaultMailboxCreator;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -36,6 +38,7 @@ namespace Aktris
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 			_deadLetters = bootstrapper.DeadLetterActorCreator();
+			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
 		}
 
 		public string Name { get { return _name; } }
@@ -70,6 +73,11 @@ namespace Aktris
 			var systemFactory = DefaultActorSystemFactory.Instance;
 			var system = systemFactory.Create(name ?? "default");
 			return system;
+		}
+
+		public Mailbox CreateDefaultMailbox()
+		{
+			return _defaultMailboxCreator();
 		}
 	}
 }
