@@ -20,6 +20,19 @@ namespace Aktris
 			return new DelegateActorCreationProperties(creator);
 		}
 
+		public static ActorCreationProperties CreateAnonymous(Action<MessageHandlerConfigurator> messageHandlersConfiguration)
+		{
+			return new DelegateActorCreationProperties(() => AnonymousActor.Create(messageHandlersConfiguration));
+		}
+		public static ActorCreationProperties CreateAnonymous<TMessage>(Action<TMessage> handler)
+		{
+			return new DelegateActorCreationProperties(() => AnonymousActor.Create(handler));
+		}
+		public static ActorCreationProperties CreateAnonymous<TMessage>(MessageHandler<TMessage> handler)
+		{
+			return new DelegateActorCreationProperties(() => AnonymousActor.Create(handler));
+		}
+
 		public abstract Mailbox CreateMailbox();
 	}
 }
