@@ -12,13 +12,13 @@ namespace Aktris
 		{
 			if(factory == null) throw new ArgumentNullException("factory");
 			_factory = factory;
-			MailboxCreator = () => new UnboundedMailbox(new ThreadPoolScheduler());
+			MailboxCreator = null;
 		}
 
 		public Func<Mailbox> MailboxCreator { get; set; }
 		public override Mailbox CreateMailbox()
 		{
-			return MailboxCreator();
+			return MailboxCreator == null ? null : MailboxCreator();
 		}
 
 		public override Actor CreateNewActor()
