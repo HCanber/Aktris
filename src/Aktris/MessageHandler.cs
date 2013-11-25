@@ -1,4 +1,4 @@
 ﻿namespace Aktris
 {
-	public delegate bool MessageHandler(object message, ActorRef sender);
+	public delegate bool MessageHandler(object message, SenderActorRef sender);
 }
