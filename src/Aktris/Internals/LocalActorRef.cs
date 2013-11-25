@@ -18,6 +18,7 @@ namespace Aktris.Internals
 		private readonly Mailbox _mailbox;
 		private Actor _actor;
 		private readonly SenderActorRef _deadLetterSender;
+		private Envelope _currentMessage;
 
 		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox)
 		{
@@ -58,11 +59,13 @@ namespace Aktris.Internals
 		{
 			try
 			{
+				_currentMessage = envelope;
 				_actor.Sender = new SenderActorRef(envelope.Sender,this);
 				_actor.HandleMessage(envelope.Message);
 			}
 			finally
 			{
+				_currentMessage = null;
 				_actor.Sender = _deadLetterSender;	//TODO: change to use one that directs to deadletter
 			}
 
@@ -112,7 +115,5 @@ namespace Aktris.Internals
 		{
 			return PatternMatcher.Match<T>(message, handler);
 		}
-
-
 	}
 }
