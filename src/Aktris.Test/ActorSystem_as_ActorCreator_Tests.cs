@@ -8,7 +8,7 @@ namespace Aktris.Test
 	{
 		protected override Tuple<IActorCreator, ActorSystem> GetActorCreator(IBootstrapper bootstrapper=null)
 		{
-			var system = new InternalActorSystem("default", bootstrapper ?? DefaultActorSystemFactory.Instance);
+			var system = new InternalActorSystem("default", bootstrapper ?? new TestBootstrapper());
 			return new Tuple<IActorCreator, ActorSystem>(system,system);
 		}
 	}

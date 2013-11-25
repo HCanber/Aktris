@@ -70,10 +70,11 @@ namespace Aktris.Test
 
 			actor.ReceivedFloats.Should().BeEquivalentTo(1.0f);
 			actor.ReceivedInts.Should().BeEquivalentTo(2);
-			actor.ReceivedObjects.Should().BeEquivalentTo(true,"4");
+			actor.ReceivedObjects.Should().BeEquivalentTo(true, "4");
 			actor.ReceivedStrings.Should().BeEmpty();
 			actor.AllRecievedMessages.Should().BeEquivalentTo(1.0f, 2, true, "4");
 		}
+
 
 		private class TestActor : Actor
 		{
@@ -104,11 +105,11 @@ namespace Aktris.Test
 			public List<int> ReceivedInts = new List<int>();
 			public List<float> ReceivedFloats = new List<float>();
 			public List<object> ReceivedObjects = new List<object>();
-			public List<object> AllRecievedMessages=new List<object>();
+			public List<object> AllRecievedMessages = new List<object>();
 
 			public ReceiveTestActor()
 			{
-				AddReceiver(typeof(object),msg=>{AllRecievedMessages.Add(msg);return false;});
+				AddReceiver(typeof(object), msg => { AllRecievedMessages.Add(msg); return false; });
 				Receive<float>(f => ReceivedFloats.Add(f));
 				Receive<int>(i => ReceivedInts.Add(i));
 				ReceiveAny(o => ReceivedObjects.Add(o));
@@ -116,6 +117,5 @@ namespace Aktris.Test
 			}
 		}
 	}
-
 
 }

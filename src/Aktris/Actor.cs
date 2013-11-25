@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
+using System.Text.RegularExpressions;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.JetBrainsAnnotations;
 
 namespace Aktris
 {
-	public abstract class Actor
+	public abstract class Actor : IActorCreator
 	{
 		private bool _hasBeenInitialized;
 		private MessageHandlerConfigurator _constructorMessageHandlerConfigurator;
 		private MessageHandler _defaultMessageHandler;
 		private LocalActorRef _self;
+		private readonly ActorSystem _system;
 
 
 		protected Actor()
@@ -24,6 +26,7 @@ namespace Aktris
 				throw new InvalidOperationException(StringFormat.SafeFormat("Cannot create a new instance of type {0} directly using new(). An actor can only be created via the CreateActor methods.", GetType().FullName));
 			}
 			LocalActorRefStack.MarkActorRefConsumedInStack();
+			_system = actorRef.System;
 			_self = actorRef;
 			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
 		}
@@ -48,6 +51,17 @@ namespace Aktris
 		}
 
 
+		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		{
+			if(name != null)
+			{
+				ActorNameValidator.EnsureNameIsValid(name);
+			}
+			else name = _system.UniqueNameCreator.GetNextRandomName();
+			var actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, name);
+			actorRef.Start();
+			return actorRef;
+		}
 
 		// API for the user that implements an actor to define message handlers -----------------------------------------
 
