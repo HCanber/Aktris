@@ -78,7 +78,7 @@ namespace Aktris.Test.Internals
 		public void When_handling_CreateActor_message_Then_a_new_instance_of_the_actor_is_created()
 		{
 			var mailbox = A.Fake<Mailbox>();
-			var actor = ActorHelper.CreateActorDirectly<TestableActor>();
+			var actor = ActorHelper.CreateActorDirectly<TestActor>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);
@@ -110,7 +110,7 @@ namespace Aktris.Test.Internals
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Invokes(() =>
 			{
 				stackDuringActorCreation = ActorHelper.GetActorRefStack();
-			}).ReturnsLazily(()=>new TestableActor());
+			}).ReturnsLazily(()=>new TestActor());
 			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
 			var stackAfterActorCreation = ActorHelper.GetActorRefStack();
@@ -125,7 +125,7 @@ namespace Aktris.Test.Internals
 		public void When_handling_message_Then_it_is_forwarded_to_the_actor_and_sender_is_set()
 		{
 			var mailbox = A.Fake<Mailbox>();
-			var actor = ActorHelper.CreateActorDirectly<TestableActor>();
+			var actor = ActorHelper.CreateActorDirectly<TestActor>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Aktris.Test.Internals
+namespace Aktris.Test
 {
-	public class TestableActor : Actor
+	public class TestActor : Actor
 	{
 		public List<Tuple<ActorRef, object>> ReceivedMessages=new List<Tuple<ActorRef, object>>();
 
