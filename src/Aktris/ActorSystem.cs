@@ -12,8 +12,6 @@ namespace Aktris
 		private readonly string _name;
 		private readonly IUniqueNameCreator _uniqueNameCreator;
 		private readonly LocalActorRefFactory _localActorRefFactory;
-		private const string _NameExtraCharacter = @"-_=+,.!~";
-		private static readonly Regex _ValidNameRegex = new Regex(@"^[[:alnum:]]([[:alnum:]" + _NameExtraCharacter + @"])*", RegexOptions.Compiled);
 		private readonly ActorRef _deadLetters;
 		private readonly Func<Mailbox> _defaultMailboxCreator;
 
@@ -43,25 +41,20 @@ namespace Aktris
 
 		public string Name { get { return _name; } }
 		public ActorRef DeadLetters { get { return _deadLetters; } }
+		public IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
+		public LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
 
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
 		{
 			if(name != null)
 			{
-				EnsureNameIsValid(name);
+				ActorNameValidator.EnsureNameIsValid(name);
 			}
 			else name = _uniqueNameCreator.GetNextRandomName();
 			var actorRef = _localActorRefFactory.CreateActor(this, actorCreationProperties, name);
 			actorRef.Start();
 			return actorRef;
 		}
-
-		private void EnsureNameIsValid(string name)
-		{
-			if(string.IsNullOrEmpty(name)) throw new InvalidActorNameException("The name may not be empty string.");
-			if(!_ValidNameRegex.IsMatch(name)) throw new InvalidActorNameException(string.Format("Invalid name \"{1}\". The name must start with alpha-numerical (a-zAZ-09) then followed by alphanumerical including the characters {0}", _NameExtraCharacter, name));
-		}
-
 
 		/// <summary>
 		/// Creates a new <see cref="ActorSystem"/> with an optional name.

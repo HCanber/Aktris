@@ -70,6 +70,7 @@
     <Compile Include="Exceptions\NullMessageException.cs" />
     <Compile Include="IActorCreator.cs" />
     <Compile Include="IBootstrapper.cs" />
+    <Compile Include="Internals\ActorNameValidator.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
     <Compile Include="Internals\DeadLetterActorRef.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
