@@ -41,9 +41,9 @@ namespace Aktris
 		}
 
 		public string Name { get { return _name; } }
-		public ActorRef DeadLetters { get { return _deadLetters; } }
-		public IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
-		public LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
+		internal ActorRef DeadLetters { get { return _deadLetters; } }
+		internal IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
+		internal LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
 
 		public void Start()
 		{
