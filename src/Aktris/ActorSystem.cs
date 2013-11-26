@@ -14,6 +14,7 @@ namespace Aktris
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private readonly ActorRef _deadLetters;
 		private readonly Func<Mailbox> _defaultMailboxCreator;
+		private LocalActorRef _rootGuardian;
 		private bool _isStarted;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
@@ -44,24 +45,20 @@ namespace Aktris
 		internal ActorRef DeadLetters { get { return _deadLetters; } }
 		internal IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
 		internal LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
+		internal LocalActorRef RootGuardian { get { return _rootGuardian; } }
 
 		public void Start()
 		{
 			_isStarted = true;
+			var guardianMailbox = CreateDefaultMailbox();
+			_rootGuardian = CreateRootGuardian(guardianMailbox);
+			_rootGuardian.Start();
 		}
 
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
 		{
 			if(!_isStarted) throw new InvalidOperationException(string.Format("You must call {0}.Start() before creating an actor.", typeof(ActorSystem).Name));
-
-			if(name != null)
-			{
-				ActorNameValidator.EnsureNameIsValid(name);
-			}
-			else name = _uniqueNameCreator.GetNextRandomName();
-			var actorRef = _localActorRefFactory.CreateActor(this, actorCreationProperties, name);
-			actorRef.Start();
-			return actorRef;
+			return _rootGuardian.CreateActor(actorCreationProperties, name);
 		}
 
 		/// <summary>
@@ -79,6 +76,12 @@ namespace Aktris
 		public Mailbox CreateDefaultMailbox()
 		{
 			return _defaultMailboxCreator();
+		}
+
+		private LocalActorRef CreateRootGuardian(Mailbox mailbox)
+		{
+			var rootGuardian= new LocalActorRef(this, ActorCreationProperties.Create(()=>new Guardian()), "", mailbox);
+			return rootGuardian;
 		}
 	}
 }

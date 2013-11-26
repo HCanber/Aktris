@@ -130,4 +130,13 @@ namespace Aktris.Internals
 			return PatternMatcher.Match<T>(message, handler);
 		}
 	}
+
+	public class GuardianActorRef : LocalActorRef
+	{
+		public GuardianActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox) : base(system, actorInstantiator, name, mailbox)
+		{
+		}
+
+
+	}
 }

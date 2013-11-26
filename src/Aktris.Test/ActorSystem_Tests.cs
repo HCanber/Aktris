@@ -1,5 +1,7 @@
 ﻿using System;
 using Aktris.Internals;
+using Aktris.JetBrainsAnnotations;
+using FluentAssertions;
 using Xunit;
 
 namespace Aktris.Test
@@ -13,5 +15,14 @@ namespace Aktris.Test
 			var system = new TestActorSystem();
 			Assert.Throws<InvalidOperationException>(() => system.CreateActor(ActorCreationProperties.CreateAnonymous(c => { })));
 		}
+
+		[Fact]
+		public void When_started_Then_a_Guardian_should_have_been_created()
+		{
+			var system = new TestActorSystem();
+			system.Start();
+			system.RootGuardian.Should().NotBeNull();
+		}
+
 	}
 }

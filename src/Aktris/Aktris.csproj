@@ -73,6 +73,7 @@
     <Compile Include="Internals\ActorNameValidator.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
     <Compile Include="Internals\DeadLetterActorRef.cs" />
+    <Compile Include="Internals\Guardian.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\LocalActorRefStack.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
