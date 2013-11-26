@@ -60,6 +60,7 @@
     <Compile Include="ActorCreator_Tests_Helper.cs" />
     <Compile Include="ActorSystem_as_ActorCreator_Tests.cs" />
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
+    <Compile Include="Actor_as_ActorCreator_Tests.cs" />
     <Compile Include="AnonymousActor_Tests.cs" />
     <Compile Include="DelegateActorCreationProperties_Tests.cs" />
     <Compile Include="Actor_Tests.cs" />

@@ -19,6 +19,7 @@ namespace Aktris.Dispatching
 			if(_actor != null) throw new InvalidOperationException(StringFormat.SafeFormat("Trying to reuse a Mailbox. It's already in use for {0} and cannot be used for {1}", _actor, actor));
 			_actor = actor;
 			Register(actor);
+			ScheduleIfNeeded();
 		}
 
 		protected virtual void Register(ILocalActorRef actor)

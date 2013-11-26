@@ -16,6 +16,7 @@ namespace Aktris
 		private MessageHandler _defaultMessageHandler;
 		private LocalActorRef _self;
 		private readonly ActorSystem _system;
+		private LocalActorRefFactory _localActorRefFactory;
 
 
 		protected Actor()
@@ -29,6 +30,26 @@ namespace Aktris
 			_system = actorRef.System;
 			_self = actorRef;
 			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
+			_localActorRefFactory = _system.LocalActorRefFactory;
+		}
+
+		/// <summary>
+		/// This one is used for internal testing only
+		/// </summary>
+		internal Actor(LocalActorRef actorRef, ActorSystem system, LocalActorRefFactory localActorRefFactory)
+		{
+			if(actorRef==null)
+			{
+				if(!LocalActorRefStack.TryGetActorRefFromStack(out actorRef))
+				{
+					throw new InvalidOperationException(StringFormat.SafeFormat("Cannot create a new instance of type {0} directly using new(). An actor can only be created via the CreateActor methods.", GetType().FullName));
+				}
+				LocalActorRefStack.MarkActorRefConsumedInStack();
+			}
+			_system = system;
+			_self = actorRef;
+			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
+			_localActorRefFactory = localActorRefFactory;
 		}
 
 		/// <summary>The actor that sent the last message.</summary>
@@ -58,7 +79,7 @@ namespace Aktris
 				ActorNameValidator.EnsureNameIsValid(name);
 			}
 			else name = _system.UniqueNameCreator.GetNextRandomName();
-			var actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, name);
+			var actorRef = _localActorRefFactory.CreateActor(_system, actorCreationProperties, name);
 			actorRef.Start();
 			return actorRef;
 		}

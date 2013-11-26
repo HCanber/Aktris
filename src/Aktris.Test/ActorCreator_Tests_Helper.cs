@@ -13,8 +13,15 @@ namespace Aktris.Test
 	// ReSharper disable InconsistentNaming
 	public abstract class ActorCreator_Tests_Helper
 	{
-		protected abstract Tuple<IActorCreator, ActorSystem> GetActorCreator(IBootstrapper bootstrapper = null);
+		protected virtual Tuple<IActorCreator, ActorSystem> GetActorCreator(IBootstrapper bootstrapper = null)
+		{
+			return GetActorCreator(null, null);
+		}
 
+		protected virtual Tuple<IActorCreator, ActorSystem> GetActorCreator(LocalActorRefFactory localActorRefFactory, IBootstrapper bootstrapper = null)
+		{
+			throw new NotImplementedException("You need to override this method");
+		}
 
 		[Fact]
 		public void Given_an_ActorCreator_When_creating_actors_with_no_names_Then_they_are_assigned_random_different_names()
@@ -60,17 +67,16 @@ namespace Aktris.Test
 		[Fact]
 		public void When_created_actor_Then_start_is_called_on_LocalActorRef()
 		{
-			var bootstrapper = new TestBootstrapper();
 			var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
-			bootstrapper.LocalActorRefFactory = fakeLocalActorRefFactory;
 			var fakeActorRef = A.Fake<ILocalActorRef>();
-			var tuple = GetActorCreator(bootstrapper);
+			var tuple = GetActorCreator(fakeLocalActorRefFactory);
 			var actorSystem = tuple.Item2;
 			var actorCreator = tuple.Item1;
 
-			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.Ignored, A<string>.Ignored)).ReturnsLazily(() => { return fakeActorRef; });
+			var delegateActorCreationProperties = new DelegateActorCreationProperties(() => new FakeActor());
+			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.That.IsSameAs(delegateActorCreationProperties), A<string>.Ignored)).ReturnsLazily(() => { return fakeActorRef; });
 
-			var actorRef = actorCreator.CreateActor(new DelegateActorCreationProperties(() => new FakeActor()));
+			var actorRef = actorCreator.CreateActor(delegateActorCreationProperties);
 
 			A.CallTo(() => fakeActorRef.Start()).MustHaveHappened();
 		}
@@ -88,15 +94,6 @@ namespace Aktris.Test
 			actor.ChildReceivedMessages.Should().ContainInOrder(new object[] { "123" });
 		}
 
-
-		[Fact]
-		public void Given_an_existing_named_actor_When_creating_another_with_same_name_Then_it_fails()
-		{
-			var tuple = GetActorCreator();
-			var actorCreator = tuple.Item1;
-			var actorref = actorCreator.CreateActor(ActorCreationProperties.Create(() => new CreateChildTestActor()),"NamedActor");
-			
-		}
 
 
 		private class CreateChildTestActor : Actor
