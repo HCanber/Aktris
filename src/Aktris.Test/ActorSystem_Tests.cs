@@ -10,7 +10,7 @@ namespace Aktris.Test
 		[Fact]
 		public void Given_a_system_that_has_not_been_started_When_creating_an_actor_Then_it_should_fail()
 		{
-			var system = new InternalActorSystem("default", new TestBootstrapper());
+			var system = new TestActorSystem();
 			Assert.Throws<InvalidOperationException>(() => system.CreateActor(ActorCreationProperties.CreateAnonymous(c => { })));
 		}
 	}

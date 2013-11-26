@@ -74,14 +74,7 @@ namespace Aktris
 
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
-			if(name != null)
-			{
-				ActorNameValidator.EnsureNameIsValid(name);
-			}
-			else name = _system.UniqueNameCreator.GetNextRandomName();
-			var actorRef = _localActorRefFactory.CreateActor(_system, actorCreationProperties, name);
-			actorRef.Start();
-			return actorRef;
+			return _self.CreateActor(actorCreationProperties, name);
 		}
 
 		// API for the user that implements an actor to define message handlers -----------------------------------------

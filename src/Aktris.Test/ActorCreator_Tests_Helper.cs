@@ -67,7 +67,8 @@ namespace Aktris.Test
 		[Fact]
 		public void When_created_actor_Then_start_is_called_on_LocalActorRef()
 		{
-			var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
+			var fakeLocalActorRefFactory = A.Fake<DefaultLocalActorRefFactory>();
+			A.CallTo(fakeLocalActorRefFactory).CallsBaseMethod();
 			var fakeActorRef = A.Fake<ILocalActorRef>();
 			var tuple = GetActorCreator(fakeLocalActorRefFactory);
 			var actorSystem = tuple.Item2;

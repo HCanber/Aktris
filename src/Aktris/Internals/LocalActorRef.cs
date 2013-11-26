@@ -111,6 +111,18 @@ namespace Aktris.Internals
 			return actor;
 		}
 
+		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		{
+			if(name != null)
+			{
+				ActorNameValidator.EnsureNameIsValid(name);
+			}
+			else name = _system.UniqueNameCreator.GetNextRandomName();
+			var actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, name);
+			actorRef.Start();
+			return actorRef;
+		}
+
 		/// <summary>If the message is of the specified type then the handler is invoked and true is returned. </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool IfMatchSys<T>(SystemMessage message, Action<T> handler) where T : class, SystemMessage

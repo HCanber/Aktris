@@ -8,14 +8,20 @@ namespace Aktris.Test
 	{
 		protected override Tuple<IActorCreator, ActorSystem> GetActorCreator(LocalActorRefFactory localActorRefFactory, IBootstrapper bootstrapper = null)
 		{
-			bootstrapper = bootstrapper ?? new TestBootstrapper();
-			localActorRefFactory = localActorRefFactory ?? bootstrapper.LocalActorRefFactory;
+			if(bootstrapper == null)
+			{
+				var testBootstrapper = new TestBootstrapper();
+				if(localActorRefFactory != null)
+					testBootstrapper.LocalActorRefFactory = localActorRefFactory;
+				bootstrapper = testBootstrapper;
+			}
+
 			var system = new InternalActorSystem("default", bootstrapper);
 			system.Start();
 			Actor actor = null;
 			system.CreateActor(ActorCreationProperties.Create(() =>
 			{
-				actor = new ParentActor(system, localActorRefFactory);
+				actor = new ParentActor();
 				return actor;
 			}),"Parent");
 			return new Tuple<IActorCreator, ActorSystem>(actor, system);
@@ -23,10 +29,6 @@ namespace Aktris.Test
 
 		private class ParentActor : Actor
 		{
-			public ParentActor(ActorSystem system, LocalActorRefFactory localActorRefFactory):base(null, system,localActorRefFactory)
-			{
-				
-			}
 		}
 	}
 }
