@@ -67,6 +67,7 @@
     <Compile Include="Actor_Tests.cs" />
     <Compile Include="Dispatching\SchedulerBasedMailbox_Tests.cs" />
     <Compile Include="FakeActor.cs" />
+    <Compile Include="Internals\Children\ChildrenCollection_Tests.cs" />
     <Compile Include="Internals\LocalActorRef_Tests.cs" />
     <Compile Include="Internals\InterlockedSpin_Tests.cs" />
     <Compile Include="TestActor.cs" />

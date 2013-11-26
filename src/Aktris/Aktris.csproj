@@ -72,6 +72,7 @@
     <Compile Include="IBootstrapper.cs" />
     <Compile Include="Internals\ActorNameValidator.cs" />
     <Compile Include="Internals\Base64Helper.cs" />
+    <Compile Include="Internals\Children\ChildrenCollection.cs" />
     <Compile Include="Internals\DeadLetterActorRef.cs" />
     <Compile Include="Internals\Guardian.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
