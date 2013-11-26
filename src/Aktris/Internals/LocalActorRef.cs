@@ -38,6 +38,8 @@ namespace Aktris.Internals
 
 		public ActorSystem System { get { return _system; } }
 
+		protected Mailbox Mailbox { get { return _mailbox; } }
+
 		public void Start()
 		{
 			_mailbox.SetActor(this);
@@ -111,13 +113,18 @@ namespace Aktris.Internals
 			return actor;
 		}
 
-		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		public virtual ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			if(name != null)
 			{
 				ActorNameValidator.EnsureNameIsValid(name);
 			}
 			else name = _system.UniqueNameCreator.GetNextRandomName();
+			return CreateLocalActor(actorCreationProperties, name);
+		}
+
+		protected ILocalActorRef CreateLocalActor(ActorCreationProperties actorCreationProperties, string name)
+		{
 			var actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, name);
 			actorRef.Start();
 			return actorRef;
@@ -137,6 +144,11 @@ namespace Aktris.Internals
 		{
 		}
 
-
+		public ILocalActorRef CreateGuardian(Func<Actor> actorFactory, string name)
+		{
+			var props = new DelegateActorCreationProperties(actorFactory);
+			var guardian = CreateLocalActor(props,name);
+			return guardian;
+		}
 	}
 }

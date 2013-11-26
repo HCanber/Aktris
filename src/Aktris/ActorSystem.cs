@@ -14,8 +14,10 @@ namespace Aktris
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private readonly ActorRef _deadLetters;
 		private readonly Func<Mailbox> _defaultMailboxCreator;
-		private LocalActorRef _rootGuardian;
 		private bool _isStarted;
+		private GuardianActorRef _rootGuardian;
+		private ILocalActorRef _systemGuardian;
+		private ILocalActorRef _userGuardian;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -45,20 +47,23 @@ namespace Aktris
 		internal ActorRef DeadLetters { get { return _deadLetters; } }
 		internal IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
 		internal LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
-		internal LocalActorRef RootGuardian { get { return _rootGuardian; } }
+		internal ILocalActorRef RootGuardian { get { return _rootGuardian; } }
+		internal ILocalActorRef SystemGuardian { get { return _systemGuardian; } }
+		internal ILocalActorRef UserGuardian { get { return _userGuardian; } }
 
 		public void Start()
 		{
 			_isStarted = true;
-			var guardianMailbox = CreateDefaultMailbox();
-			_rootGuardian = CreateRootGuardian(guardianMailbox);
+			_rootGuardian = CreateRootGuardian();
+			_systemGuardian = CreateSystemGuardian(_rootGuardian);
+			_userGuardian = CreateUserGuardian(_rootGuardian);
 			_rootGuardian.Start();
 		}
 
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
 		{
 			if(!_isStarted) throw new InvalidOperationException(string.Format("You must call {0}.Start() before creating an actor.", typeof(ActorSystem).Name));
-			return _rootGuardian.CreateActor(actorCreationProperties, name);
+			return _userGuardian.CreateActor(actorCreationProperties, name);
 		}
 
 		/// <summary>
@@ -78,10 +83,23 @@ namespace Aktris
 			return _defaultMailboxCreator();
 		}
 
-		private LocalActorRef CreateRootGuardian(Mailbox mailbox)
+		private GuardianActorRef CreateRootGuardian()
 		{
-			var rootGuardian= new LocalActorRef(this, ActorCreationProperties.Create(()=>new Guardian()), "", mailbox);
+			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), "",CreateDefaultMailbox());
 			return rootGuardian;
+		}
+
+		private ILocalActorRef CreateSystemGuardian(GuardianActorRef rootGuardian)
+		{
+			var systemGuardian = rootGuardian.CreateGuardian(() => new Guardian(), "system");
+			return systemGuardian;
+		}
+
+
+		protected virtual ILocalActorRef CreateUserGuardian(GuardianActorRef rootGuardian)
+		{
+			var userGuardian = rootGuardian.CreateGuardian(() => new Guardian(), "user");
+			return userGuardian;
 		}
 	}
 }

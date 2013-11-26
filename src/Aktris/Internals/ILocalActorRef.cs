@@ -8,5 +8,6 @@ namespace Aktris.Internals
 		void Start();
 		void HandleMessage(Envelope envelope);
 		void HandleSystemMessage(SystemMessageEnvelope envelope);
+		ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
 	}
 }
