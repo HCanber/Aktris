@@ -46,6 +46,7 @@ namespace Aktris.Test
 		public void When_actor_forwards_messages_of_specific_types_Then_it_calls_send_on_receiving_actor()
 		{
 			var testActorSystem = new TestActorSystem();
+			testActorSystem.Start();
 			TestActor recipientActor = null;
 			var recipient = testActorSystem.CreateActor(ActorCreationProperties.Create(() => { recipientActor = new TestActor(); return recipientActor; }));
 			var receivedObjects = new List<object>();

@@ -19,6 +19,7 @@ namespace Aktris.Test
 				bootstrapper = testBootstrapper;
 			}
 			var system = new InternalActorSystem("default", bootstrapper);
+			system.Start();
 			return new Tuple<IActorCreator, ActorSystem>(system, system);
 		}
 	}

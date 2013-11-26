@@ -11,6 +11,7 @@ namespace Aktris.Test
 			bootstrapper = bootstrapper ?? new TestBootstrapper();
 			localActorRefFactory = localActorRefFactory ?? bootstrapper.LocalActorRefFactory;
 			var system = new InternalActorSystem("default", bootstrapper);
+			system.Start();
 			Actor actor = null;
 			system.CreateActor(ActorCreationProperties.Create(() =>
 			{

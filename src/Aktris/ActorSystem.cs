@@ -14,6 +14,7 @@ namespace Aktris
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private readonly ActorRef _deadLetters;
 		private readonly Func<Mailbox> _defaultMailboxCreator;
+		private bool _isStarted;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -44,8 +45,15 @@ namespace Aktris
 		public IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
 		public LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
 
+		public void Start()
+		{
+			_isStarted = true;
+		}
+
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
 		{
+			if(!_isStarted) throw new InvalidOperationException(string.Format("You must call {0}.Start() before creating an actor.", typeof(ActorSystem).Name));
+
 			if(name != null)
 			{
 				ActorNameValidator.EnsureNameIsValid(name);
