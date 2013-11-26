@@ -13,9 +13,9 @@ namespace Aktris.Test
 			DeadLetterActorCreator = () => new DeadLetterActorRef();
 			DefaultMailboxCreator = () => new UnboundedMailbox(new SynchronousScheduler());
 		}
-		public IUniqueNameCreator UniqueNameCreator { get; private set; }
-		public LocalActorRefFactory LocalActorRefFactory { get; private set; }
-		public Func<ActorRef> DeadLetterActorCreator { get; private set; }
-		public Func<Mailbox> DefaultMailboxCreator { get; private set; }
+		public IUniqueNameCreator UniqueNameCreator { get; set; }
+		public LocalActorRefFactory LocalActorRefFactory { get; set; }
+		public Func<ActorRef> DeadLetterActorCreator { get; set; }
+		public Func<Mailbox> DefaultMailboxCreator { get; set; }
 	}
 }

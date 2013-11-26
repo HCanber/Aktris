@@ -60,7 +60,7 @@ namespace Aktris.Test
 		[Fact]
 		public void When_created_actor_Then_start_is_called_on_LocalActorRef()
 		{
-			var bootstrapper = DefaultActorSystemFactory.Instance;
+			var bootstrapper = new TestBootstrapper();
 			var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
 			bootstrapper.LocalActorRefFactory = fakeLocalActorRefFactory;
 			var fakeActorRef = A.Fake<ILocalActorRef>();
@@ -101,6 +101,7 @@ namespace Aktris.Test
 				ReceiveAny(m => child.Send(m, Self));
 			}
 		}
+
 	}
 	// ReSharper restore InconsistentNaming
 }
