@@ -95,7 +95,14 @@ namespace Aktris.Test
 			actor.ChildReceivedMessages.Should().ContainInOrder(new object[] { "123" });
 		}
 
-
+		[Fact]
+		public void Given_an_actor_When_creating_another_actor_with_the_same_name_Then_it_fails()
+		{
+			var tuple = GetActorCreator();
+			var actorCreator = tuple.Item1;
+			actorCreator.CreateActor(ActorCreationProperties.Create<TestActor>(), "NamedActor");
+			Assert.Throws<InvalidActorNameException>(()=>actorCreator.CreateActor(ActorCreationProperties.Create<TestActor>(), "NamedActor"));
+		}
 
 		private class CreateChildTestActor : Actor
 		{

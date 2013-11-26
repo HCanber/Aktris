@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Aktris.Dispatching;
 using Aktris.Exceptions;
+using Aktris.Internals.Children;
 using Aktris.Internals.SystemMessages;
 using Aktris.JetBrainsAnnotations;
 
@@ -19,6 +20,8 @@ namespace Aktris.Internals
 		private Actor _actor;
 		private readonly SenderActorRef _deadLetterSender;
 		private Envelope _currentMessage;
+		private volatile ChildrenCollection _children = EmptyChildrenCollection.Instance;
+
 
 		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] string name, [NotNull] Mailbox mailbox)
 		{
@@ -79,7 +82,7 @@ namespace Aktris.Internals
 		{
 			var message = envelope.Message;
 			var wasMatched =
-				IfMatchSys<CreateActor>(message, CreateActor);
+				IfMatchSys<CreateActor>(message, CreateActorInstance);
 			if(!wasMatched)
 			{
 				//This should never happen. If it does a new SystemMessage type has been added
@@ -87,12 +90,12 @@ namespace Aktris.Internals
 			}
 		}
 
-		private void CreateActor(CreateActor obj)
+		private void CreateActorInstance(CreateActor obj)
 		{
 			try
 			{
 				LocalActorRefStack.PushActorRefToStack(this);
-				var actor = NewActor();
+				var actor = NewActorInstance();
 				actor.Init();
 				_actor = actor;
 			}
@@ -106,7 +109,7 @@ namespace Aktris.Internals
 			}
 		}
 
-		private Actor NewActor()
+		private Actor NewActorInstance()
 		{
 			var actor = _actorInstantiator.CreateNewActor();
 			if(actor == null) throw new ActorInitializationException(this, "CreateNewActor returned null");
@@ -120,14 +123,42 @@ namespace Aktris.Internals
 				ActorNameValidator.EnsureNameIsValid(name);
 			}
 			else name = _system.UniqueNameCreator.GetNextRandomName();
-			return CreateLocalActor(actorCreationProperties, name);
+			return CreateLocalActorReference(actorCreationProperties, name);
 		}
 
-		protected ILocalActorRef CreateLocalActor(ActorCreationProperties actorCreationProperties, string name)
+		protected ILocalActorRef CreateLocalActorReference(ActorCreationProperties actorCreationProperties, string name)
 		{
-			var actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, name);
+			ILocalActorRef actorRef;
+			try
+			{
+
+				ReserveChild(name);
+				actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, name);
+			}
+			catch
+			{
+				ReleaseChild(name);
+				throw;
+			}
 			actorRef.Start();
 			return actorRef;
+		}
+
+		private void ReserveChild(string name)
+		{
+			SwapChildrenCollection(c => c.ReserveName(name));
+		}
+
+		private void ReleaseChild(string name)
+		{
+			SwapChildrenCollection(c => c.ReleaseName(name));
+		}
+
+		private ChildrenCollection SwapChildrenCollection(Func<ChildrenCollection, ChildrenCollection> updater)
+		{
+			#pragma warning disable 420		//Ok to disregard from CS0420 "a reference to a volatile field will not be treated as volatile" as we're using interlocked underneath, see http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx
+			return InterlockedSpin.Swap(ref _children, updater);
+			#pragma warning restore 420
 		}
 
 		/// <summary>If the message is of the specified type then the handler is invoked and true is returned. </summary>
@@ -147,7 +178,7 @@ namespace Aktris.Internals
 		public ILocalActorRef CreateGuardian(Func<Actor> actorFactory, string name)
 		{
 			var props = new DelegateActorCreationProperties(actorFactory);
-			var guardian = CreateLocalActor(props,name);
+			var guardian = CreateLocalActorReference(props,name);
 			return guardian;
 		}
 	}
