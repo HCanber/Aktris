@@ -6,7 +6,9 @@ namespace Aktris.Internals
 	public static class ActorNameValidator
 	{
 		private const string _NameExtraCharacter = @"-_=+,.!~";
-		private static readonly Regex _ValidNameRegex = new Regex(@"^[[:alnum:]]([[:alnum:]" + _NameExtraCharacter + @"])*", RegexOptions.Compiled);
+		private const string _AlphaNum = @"a-zA-Z0-9";
+		private const string _Pattern = @"^[" + _AlphaNum + @"]([" + _AlphaNum + _NameExtraCharacter + @"])*$";
+		private static readonly Regex _ValidNameRegex = new Regex(_Pattern, RegexOptions.Compiled);
 
 
 		public static void EnsureNameIsValid(string name)

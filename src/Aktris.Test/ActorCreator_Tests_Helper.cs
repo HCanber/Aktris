@@ -54,7 +54,7 @@ namespace Aktris.Test
 			var delegateActorFactory = new DelegateActorCreationProperties(() => new FakeActor());
 			var tuple = GetActorCreator();
 			var actorCreator = tuple.Item1;
-			Assert.Throws<InvalidActorNameException>(() => actorCreator.CreateActor(delegateActorFactory, name: name));
+			actorCreator.CreateActor(delegateActorFactory, name: name).Should().NotBeNull();
 		}
 
 		[Fact]
@@ -74,14 +74,11 @@ namespace Aktris.Test
 
 			A.CallTo(() => fakeActorRef.Start()).MustHaveHappened();
 		}
+
 		[Fact]
 		public void Given_an_actor_Then_it_should_be_possible_to_create_a_child_actor_and_forward_messages_to_it()
 		{
-			var bootstrapper = new TestBootstrapper();
-			//var fakeLocalActorRefFactory = A.Fake<LocalActorRefFactory>();
-			//bootstrapper.LocalActorRefFactory = fakeLocalActorRefFactory;
-
-			var tuple = GetActorCreator(bootstrapper);
+			var tuple = GetActorCreator();
 			var actorCreator = tuple.Item1;
 
 			CreateChildTestActor actor = null;
@@ -89,6 +86,16 @@ namespace Aktris.Test
 
 			actorref.Send("123", null);
 			actor.ChildReceivedMessages.Should().ContainInOrder(new object[] { "123" });
+		}
+
+
+		[Fact]
+		public void Given_an_existing_named_actor_When_creating_another_with_same_name_Then_it_fails()
+		{
+			var tuple = GetActorCreator();
+			var actorCreator = tuple.Item1;
+			var actorref = actorCreator.CreateActor(ActorCreationProperties.Create(() => new CreateChildTestActor()),"NamedActor");
+			
 		}
 
 
