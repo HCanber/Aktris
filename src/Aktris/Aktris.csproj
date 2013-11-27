@@ -82,6 +82,7 @@
     <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\LocalActorRefStack.cs" />
     <Compile Include="Internals\Path\ChildActorPath.cs" />
+    <Compile Include="Internals\MinimalActorRef.cs" />
     <Compile Include="Internals\Path\RootActorPath.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
     <Compile Include="Internals\StringFormat.cs" />
