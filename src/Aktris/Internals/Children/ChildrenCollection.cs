@@ -54,6 +54,18 @@ namespace Aktris.Internals.Children
 	}
 	public interface ChildInfo { }
 
+	public class ChildRestartInfo : ChildInfo
+	{
+		private readonly ActorRef _child;
+
+		public ChildRestartInfo(ActorRef child)
+		{
+			_child = child;
+		}
+
+		public ActorRef Child { get { return _child; } }
+	}
+
 	class ChildNameReserved : ChildInfo
 	{
 		public readonly static ChildNameReserved Instance = new ChildNameReserved();
