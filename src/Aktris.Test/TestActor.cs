@@ -10,7 +10,7 @@ namespace Aktris.Test
 		protected internal override bool HandleMessage(object message)
 		{
 			ReceivedMessages.Add(Tuple.Create(Sender.Unwrap(),message));
-			return true;
+			return base.HandleMessage(message);
 		}
 	}
 }
