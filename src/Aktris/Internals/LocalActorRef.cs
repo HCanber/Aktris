@@ -97,6 +97,7 @@ namespace Aktris.Internals
 				LocalActorRefStack.PushActorRefToStack(this);
 				var actor = NewActorInstance();
 				actor.Init();
+				actor.Prestart();
 				_actor = actor;
 			}
 			catch(Exception ex)

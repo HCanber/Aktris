@@ -60,6 +60,13 @@ namespace Aktris
 		[NotNull]
 		protected internal ActorRef Self { get { return _self; } }
 
+
+		protected internal virtual void Prestart()
+		{
+			//Intentionally left blank
+		}
+
+
 		/// <summary>
 		/// Handles a message. By default it calls the handlers registered in the constructor using any of the Receive methods.
 		/// If the actor has handled the message it should return <c>true</c>; otherwise <c>false</c>.
