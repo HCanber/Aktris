@@ -16,8 +16,8 @@ namespace Aktris
 		private readonly Func<Mailbox> _defaultMailboxCreator;
 		private bool _isStarted;
 		private GuardianActorRef _rootGuardian;
-		private ILocalActorRef _systemGuardian;
-		private ILocalActorRef _userGuardian;
+		private InternalActorRef _systemGuardian;
+		private InternalActorRef _userGuardian;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -47,9 +47,9 @@ namespace Aktris
 		internal ActorRef DeadLetters { get { return _deadLetters; } }
 		internal IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
 		internal LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
-		internal ILocalActorRef RootGuardian { get { return _rootGuardian; } }
-		internal ILocalActorRef SystemGuardian { get { return _systemGuardian; } }
-		internal ILocalActorRef UserGuardian { get { return _userGuardian; } }
+		internal InternalActorRef RootGuardian { get { return _rootGuardian; } }
+		internal InternalActorRef SystemGuardian { get { return _systemGuardian; } }
+		internal InternalActorRef UserGuardian { get { return _userGuardian; } }
 
 		public void Start()
 		{
@@ -89,14 +89,14 @@ namespace Aktris
 			return rootGuardian;
 		}
 
-		private ILocalActorRef CreateSystemGuardian(GuardianActorRef rootGuardian)
+		private InternalActorRef CreateSystemGuardian(GuardianActorRef rootGuardian)
 		{
 			var systemGuardian = rootGuardian.CreateGuardian(() => new Guardian(), "system");
 			return systemGuardian;
 		}
 
 
-		protected virtual ILocalActorRef CreateUserGuardian(GuardianActorRef rootGuardian)
+		protected virtual InternalActorRef CreateUserGuardian(GuardianActorRef rootGuardian)
 		{
 			var userGuardian = rootGuardian.CreateGuardian(() => new Guardian(), "user");
 			return userGuardian;

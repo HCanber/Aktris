@@ -69,7 +69,7 @@ namespace Aktris.Test
 		{
 			var fakeLocalActorRefFactory = A.Fake<DefaultLocalActorRefFactory>();
 			A.CallTo(fakeLocalActorRefFactory).CallsBaseMethod();
-			var fakeActorRef = A.Fake<ILocalActorRef>();
+			var fakeActorRef = A.Fake<InternalActorRef>();
 			var tuple = GetActorCreator(fakeLocalActorRefFactory);
 			var actorSystem = tuple.Item2;
 			var actorCreator = tuple.Item1;

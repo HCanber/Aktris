@@ -34,7 +34,7 @@ namespace Aktris.Test.Dispatching
 			var scheduler = A.Fake<IScheduler>();
 
 			var mailbox = new TestableMailbox(scheduler);
-			mailbox.SetActor(A.Fake<ILocalActorRef>());
+			mailbox.SetActor(A.Fake<InternalActorRef>());
 			mailbox.Enqueue(new Envelope(receiver, "message", sender));
 
 			A.CallTo(() => scheduler.Schedule(A<Action>.Ignored)).MustHaveHappened(Repeated.Exactly.Once);
@@ -47,7 +47,7 @@ namespace Aktris.Test.Dispatching
 			var scheduler = A.Fake<IScheduler>();
 
 			var mailbox = new TestableMailbox(scheduler);
-			mailbox.SetActor(A.Fake<ILocalActorRef>());
+			mailbox.SetActor(A.Fake<InternalActorRef>());
 			mailbox.Enqueue(new Envelope(receiver, "first message", sender));
 			mailbox.Enqueue(new Envelope(receiver, "second message", sender));
 			A.CallTo(() => scheduler.Schedule(A<Action>.Ignored)).MustHaveHappened(Repeated.Exactly.Once);
@@ -61,7 +61,7 @@ namespace Aktris.Test.Dispatching
 			var scheduler = new ManuallySyncronousScheduler();
 
 			var mailbox = new TestableMailbox(scheduler);
-			mailbox.SetActor(A.Fake<ILocalActorRef>());
+			mailbox.SetActor(A.Fake<InternalActorRef>());
 			mailbox.Enqueue(new Envelope(receiver, "first message", sender));
 			mailbox.Enqueue(new Envelope(receiver, "second message", sender));
 			
@@ -80,7 +80,7 @@ namespace Aktris.Test.Dispatching
 			var scheduler = new ManuallySyncronousScheduler();
 
 			var mailbox = new TestableMailbox(scheduler);
-			var fakeActor = A.Fake<ILocalActorRef>();
+			var fakeActor = A.Fake<InternalActorRef>();
 			var actorMessages = new List<Envelope>();
 			A.CallTo(() => fakeActor.HandleMessage(A<Envelope>.Ignored)).Invokes(x => actorMessages.Add(x.GetArgument<Envelope>(0)));
 			mailbox.SetActor(fakeActor);
@@ -94,7 +94,7 @@ namespace Aktris.Test.Dispatching
 		}
 		private class TestableMailbox : SchedulerBasedMailbox
 		{
-			public ILocalActorRef Actor { get; set; }
+			public InternalActorRef Actor { get; set; }
 			public ConcurrentQueue<Envelope> EnqueuedMessages = new ConcurrentQueue<Envelope>();
 			public ConcurrentQueue<Envelope> HandledMessages = new ConcurrentQueue<Envelope>();
 
@@ -130,7 +130,7 @@ namespace Aktris.Test.Dispatching
 				base.HandleMessage(envelope);
 			}
 
-			protected override void Register(ILocalActorRef actor)
+			protected override void Register(InternalActorRef actor)
 			{
 				Actor = actor;
 			}

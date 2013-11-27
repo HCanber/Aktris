@@ -10,11 +10,11 @@ namespace Aktris.Dispatching
 	public abstract class MailboxBase : Mailbox
 	{
 		private volatile int _mailboxStatus = MailboxStatus.Open;
-		private ILocalActorRef _actor;
+		private InternalActorRef _actor;
 		private readonly ConcurrentQueue<SystemMessageEnvelope> _systemMessagesQueue = new ConcurrentQueue<SystemMessageEnvelope>();
 
 
-		public void SetActor(ILocalActorRef actor)
+		public void SetActor(InternalActorRef actor)
 		{
 			if(_actor != null) throw new InvalidOperationException(StringFormat.SafeFormat("Trying to reuse a Mailbox. It's already in use for {0} and cannot be used for {1}", _actor, actor));
 			_actor = actor;
@@ -22,7 +22,7 @@ namespace Aktris.Dispatching
 			ScheduleIfNeeded();
 		}
 
-		protected virtual void Register(ILocalActorRef actor)
+		protected virtual void Register(InternalActorRef actor)
 		{
 		}
 

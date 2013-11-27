@@ -42,7 +42,7 @@ namespace Aktris.Test
 		private class ActorSys : TestActorSystem
 		{
 			public List<string> Children=new List<string>();
-			protected override ILocalActorRef CreateUserGuardian(GuardianActorRef rootGuardian)
+			protected override InternalActorRef CreateUserGuardian(GuardianActorRef rootGuardian)
 			{
 				var localActorRef = A.Fake<LocalActorRef>(builder => builder.WithArgumentsForConstructor(() => new LocalActorRef(this,A.Fake<ActorInstantiator>(),"",CreateDefaultMailbox())));
 				A.CallTo(() => localActorRef.CreateActor(A<ActorCreationProperties>.Ignored, A<string>.Ignored)).Invokes(a => Children.Add((string) a.Arguments[1]));

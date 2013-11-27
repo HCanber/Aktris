@@ -3,7 +3,8 @@ using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Internals
 {
-	public interface ILocalActorRef : ActorRef
+// ReSharper disable once InconsistentNaming
+	public interface InternalActorRef : ActorRef
 	{
 		void Start();
 		void HandleMessage(Envelope envelope);

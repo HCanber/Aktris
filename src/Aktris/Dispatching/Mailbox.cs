@@ -5,7 +5,7 @@ namespace Aktris.Dispatching
 {
 	public interface Mailbox
 	{
-		void SetActor(ILocalActorRef actor);
+		void SetActor(InternalActorRef actor);
 		void Enqueue(Envelope envelope);
 		void EnqueueSystemMessage(SystemMessageEnvelope envelope);
 	}

@@ -11,7 +11,7 @@ using Aktris.JetBrainsAnnotations;
 
 namespace Aktris.Internals
 {
-	public class LocalActorRef : ILocalActorRef
+	public class LocalActorRef : InternalActorRef
 	{
 		private readonly ActorSystem _system;
 		private readonly ActorInstantiator _actorInstantiator;
@@ -127,9 +127,9 @@ namespace Aktris.Internals
 			return CreateLocalActorReference(actorCreationProperties, name);
 		}
 
-		protected ILocalActorRef CreateLocalActorReference(ActorCreationProperties actorCreationProperties, string name)
+		protected InternalActorRef CreateLocalActorReference(ActorCreationProperties actorCreationProperties, string name)
 		{
-			ILocalActorRef actorRef;
+			InternalActorRef actorRef;
 			try
 			{
 
@@ -176,7 +176,7 @@ namespace Aktris.Internals
 		{
 		}
 
-		public ILocalActorRef CreateGuardian(Func<Actor> actorFactory, string name)
+		public InternalActorRef CreateGuardian(Func<Actor> actorFactory, string name)
 		{
 			var props = new DelegateActorCreationProperties(actorFactory);
 			var guardian = CreateLocalActorReference(props,name);
