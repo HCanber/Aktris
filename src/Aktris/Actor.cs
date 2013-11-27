@@ -102,6 +102,17 @@ namespace Aktris
 		}
 
 		/// <summary>
+		/// Swallows all incomming, unhandled messages.
+		/// <remarks>This may only be called from the constructor.</remarks>
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		protected void ReceiveAny()
+		{
+			ReceiveAny(_ => { });
+		}
+
+		/// <summary>
 		/// Registers a handler for incoming messages of any type.
 		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
