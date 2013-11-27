@@ -61,7 +61,7 @@ namespace Aktris
 		protected internal ActorRef Self { get { return _self; } }
 
 
-		protected internal virtual void Prestart()
+		protected internal virtual void PreStart()
 		{
 			//Intentionally left blank
 		}

@@ -26,7 +26,7 @@ namespace Aktris.Test
 			{
 				ReceiveAny(_ => { if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = false; });
 			}
-			protected internal override void Prestart()
+			protected internal override void PreStart()
 			{
 				if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = true;
 			}
