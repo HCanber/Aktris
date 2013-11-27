@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActorCreator_Tests_Helper.cs" />
+    <Compile Include="ActorRefWithActor.cs" />
     <Compile Include="ActorSystem_as_ActorCreator_Tests.cs" />
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
     <Compile Include="ActorSystem_Tests.cs" />

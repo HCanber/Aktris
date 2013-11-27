@@ -22,22 +22,25 @@ namespace Aktris.Internals
 		private readonly ActorInstantiator _actorInstantiator;
 		private readonly ActorPath _path;
 		private readonly Mailbox _mailbox;
+		private readonly InternalActorRef _supervisor;
 		private Actor _actor;
 		private readonly SenderActorRef _deadLetterSender;
 		private Envelope _currentMessage;
 		private volatile ChildrenCollection _children = EmptyChildrenCollection.Instance;
 
 
-		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox)
+		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
 		{
 			if(system == null) throw new ArgumentNullException("system");
 			if(actorInstantiator == null) throw new ArgumentNullException("actorInstantiator");
 			if(path == null) throw new ArgumentNullException("path");
 			if(mailbox == null) throw new ArgumentNullException("mailbox");
+			if(supervisor == null) throw new ArgumentNullException("supervisor");
 			_system = system;
 			_actorInstantiator = actorInstantiator;
 			_path = path;
 			_mailbox = mailbox;
+			_supervisor = supervisor;
 			mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this, new CreateActor(), this));
 			_deadLetterSender = new SenderActorRef(system.DeadLetters, this);
 		}
@@ -77,6 +80,10 @@ namespace Aktris.Internals
 				_actor.Sender = new SenderActorRef(envelope.Sender, this);
 				_actor.HandleMessage(envelope.Message);
 			}
+			catch(Exception ex)
+			{
+				if(!HandleInvokeFailure(ex)) throw;
+			}
 			finally
 			{
 				_currentMessage = null;
@@ -95,6 +102,12 @@ namespace Aktris.Internals
 				//This should never happen. If it does a new SystemMessage type has been added
 				throw new InvalidOperationException(string.Format("Unexpected message type: {0}. Message was: {1}", message.GetType(), message));
 			}
+		}
+
+		private bool HandleInvokeFailure(Exception exception)
+		{
+			_supervisor.HandleSystemMessage(new SystemMessageEnvelope(_supervisor, new ActorFailed(this, exception), this));
+			return true;
 		}
 
 		private void CreateActorInstance(CreateActor obj)
@@ -136,13 +149,18 @@ namespace Aktris.Internals
 
 		protected InternalActorRef CreateLocalActorReference(ActorCreationProperties actorCreationProperties, string name)
 		{
+			return CreateLocalActorReference(actorCreationProperties, name, this);
+		}
+
+		private InternalActorRef CreateLocalActorReference(ActorCreationProperties actorCreationProperties, string name, InternalActorRef supervisor)
+		{
 			InternalActorRef actorRef;
 			try
 			{
 				ReserveChild(name);
 				var instanceId = CreateInstanceId();
 				var path = new ChildActorPath(new RootActorPath("FAKE will be fixed with supervisors"), name, instanceId);	//TODO
-				actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, path);
+				actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, supervisor, path);
 			}
 			catch
 			{
@@ -190,8 +208,8 @@ namespace Aktris.Internals
 
 	public class GuardianActorRef : LocalActorRef
 	{
-		public GuardianActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox)
-			: base(system, actorInstantiator, path, mailbox)
+		public GuardianActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
+			: base(system, actorInstantiator, name, mailbox, supervisor)
 		{
 		}
 
@@ -200,6 +218,15 @@ namespace Aktris.Internals
 			var props = new DelegateActorCreationProperties(actorFactory);
 			var guardian = CreateLocalActorReference(props, name);
 			return guardian;
+		}
+	}
+
+	public class RootGuardianSupervisor : MinimalActorRef
+	{
+		public override string Name { get { return "$root-guardian-supervisor"; } }
+		public override ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		{
+			throw new InvalidOperationException(string.Format("Creating children to {0} is not allowed.", GetType()));
 		}
 	}
 }

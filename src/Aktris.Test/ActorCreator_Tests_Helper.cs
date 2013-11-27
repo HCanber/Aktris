@@ -75,7 +75,7 @@ namespace Aktris.Test
 			var actorCreator = tuple.Item1;
 
 			var delegateActorCreationProperties = new DelegateActorCreationProperties(() => new FakeActor());
-			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.That.IsSameAs(delegateActorCreationProperties), A<ActorPath>.Ignored)).ReturnsLazily(() => { return fakeActorRef; });
+			A.CallTo(() => fakeLocalActorRefFactory.CreateActor(actorSystem, A<ActorCreationProperties>.That.IsSameAs(delegateActorCreationProperties), A<InternalActorRef>.Ignored, A<ActorPath>.Ignored)).ReturnsLazily(() => { return fakeActorRef; });
 
 			var actorRef = actorCreator.CreateActor(delegateActorCreationProperties);
 

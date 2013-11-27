@@ -2,6 +2,6 @@
 {
 	public abstract class LocalActorRefFactory
 	{
-		public abstract InternalActorRef CreateActor(ActorSystem system, ActorCreationProperties actorCreationProperties, ActorPath path);
+		public abstract InternalActorRef CreateActor(ActorSystem system, ActorCreationProperties actorCreationProperties, InternalActorRef supervisor, ActorPath path);
 	}
 }
