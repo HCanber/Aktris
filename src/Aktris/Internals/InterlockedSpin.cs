@@ -6,6 +6,11 @@ namespace Aktris.Internals
 {
 	public static class InterlockedSpin
 	{
+		/// <summary>
+		/// Atomically updates the int <paramref name="reference"/> by calling <paramref name="updater"/> to get the new value.
+		/// Note that <paramref name="updater"/> may be called many times so it should be idempotent.
+		/// </summary>
+		/// <returns>The updated value.</returns>
 		public static int Swap(ref int reference, Func<int, int> updater)
 		{
 			var spinWait = new SpinWait();
@@ -52,26 +57,42 @@ namespace Aktris.Internals
 			}
 		}
 
-		public static TReturn BreakableSwap<T, TReturn>(ref T reference, Func<T, Tuple<bool, T, TReturn>> breakIfTrueUpdateOtherwise) where T : class
+
+		/// <summary>
+		/// Atomically updates the int <paramref name="reference"/> by calling <paramref name="updateIfTrue"/> to get the new value.
+		/// <paramref name="updateIfTrue"/> returns a Tuple&lt;should update, the new int value&gt;
+		/// If the first item in the tuple is true, the value is updated, and true is returned.
+		/// Note that <paramref name="updateIfTrue"/> may be called many times so it should be idempotent.
+		/// </summary>
+		/// <returns>The third value from the tuple return by <paramref name="updateIfTrue"/>.</returns>
+		public static bool ConditionallySwap(ref int reference, Func<int, Tuple<bool, int>> updateIfTrue)
 		{
 			var spinWait = new SpinWait();
 			while(true)
 			{
 				var current = reference;
-				var t = breakIfTrueUpdateOtherwise(current);
-				if(t.Item1) return t.Item3;
-				if(CompareExchange(ref reference, current, t.Item2)) return t.Item3;
+				var t = updateIfTrue(current);
+				if(!t.Item1) return false;
+				if(CompareExchange(ref reference, current, t.Item2)) return true;
 				spinWait.SpinOnce();
 			}
 		}
-		public static TReturn BreakableSwap<TReturn>(ref int reference, Func<int, Tuple<bool, int, TReturn>> breakIfTrueUpdateOtherwise)
+
+		/// <summary>
+		/// Atomically updates the int <paramref name="reference"/> by calling <paramref name="updateIfTrue"/> to get the new value.
+		/// <paramref name="updateIfTrue"/> returns a Tuple&lt;should update, the new int value, the return value&gt;
+		/// If the first item in the tuple is true, the value is updated, and the third value of the tuple is returned.
+		/// Note that <paramref name="updateIfTrue"/> may be called many times so it should be idempotent.
+		/// </summary>
+		/// <returns>The third value from the tuple return by <paramref name="updateIfTrue"/>.</returns>
+		public static TReturn ConditionallySwap<TReturn>(ref int reference, Func<int, Tuple<bool, int, TReturn>> updateIfTrue)
 		{
 			var spinWait = new SpinWait();
 			while(true)
 			{
 				var current = reference;
-				var t = breakIfTrueUpdateOtherwise(current);
-				if(t.Item1) return t.Item3;
+				var t = updateIfTrue(current);
+				if(!t.Item1) return t.Item3;
 				if(CompareExchange(ref reference, current, t.Item2)) return t.Item3;
 				spinWait.SpinOnce();
 			}

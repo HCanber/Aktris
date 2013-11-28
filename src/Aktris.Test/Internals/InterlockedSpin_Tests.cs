@@ -89,11 +89,11 @@ namespace Aktris.Test.Internals
 				numberOfCallsToUpdateWhenSignaled++;
 				hasEnteredUpdateMethod.Set();	//Signal to start-thread that we have entered the update method (it will chang
 				okToContinue.WaitOne(TimeSpan.FromSeconds(2));	//Wait to be signalled
-				var shouldBreak = i!=0;
-				return Tuple.Create(shouldBreak,4711,shouldBreak ? "break":"update");
+				var shouldUpdate = i==0;
+				return Tuple.Create(shouldUpdate,4711,shouldUpdate ? "update":"break");
 			};
 			string result="";
-			var task = Task.Run(() => { result= InterlockedSpin.BreakableSwap(ref sharedVariable, updateWhenSignaled); });
+			var task = Task.Run(() => { result= InterlockedSpin.ConditionallySwap(ref sharedVariable, updateWhenSignaled); });
 			hasEnteredUpdateMethod.WaitOne(TimeSpan.FromSeconds(2));
 			sharedVariable = 42;
 			okToContinue.Set();
