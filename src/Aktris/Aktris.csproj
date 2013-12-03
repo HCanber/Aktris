@@ -78,6 +78,7 @@
     <Compile Include="Internals\Guardian.cs" />
     <Compile Include="Internals\Helpers\RandomProvider.cs" />
     <Compile Include="Internals\Helpers\CollectionExtensions.cs" />
+    <Compile Include="Internals\IImmutableEnumerable.cs" />
     <Compile Include="Internals\InternalActorRef.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\LocalActorRefStack.cs" />

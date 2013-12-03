@@ -1,12 +1,18 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Aktris.Exceptions;
 
 namespace Aktris.Internals.Children
 {
-	public abstract class ChildrenCollection
+	public abstract class ChildrenCollection : IImmutableEnumerable<InternalActorRef>
 	{
 		public abstract ChildrenCollection ReserveName(string name);
 		public abstract ChildrenCollection ReleaseName(string name);
+		public abstract IEnumerator<InternalActorRef> GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+		public abstract bool TryGetByRef(ActorRef actorRef, out ChildInfo info);
 	}
 
 	public class EmptyChildrenCollection : ChildrenCollection
@@ -21,6 +27,17 @@ namespace Aktris.Internals.Children
 		public override ChildrenCollection ReleaseName(string name)
 		{
 			return this;
+		}
+
+		public override IEnumerator<InternalActorRef> GetEnumerator()
+		{
+			yield break;
+		}
+
+		public override bool TryGetByRef(ActorRef actorRef, out ChildInfo child)
+		{
+			child = null;
+			return false;
 		}
 	}
 
@@ -50,6 +67,16 @@ namespace Aktris.Internals.Children
 		{
 			if(children.IsEmpty) return EmptyChildrenCollection.Instance;
 			return new NormalChildrenCollection(children);
+		}
+
+		public override IEnumerator<InternalActorRef> GetEnumerator()
+		{
+			return _children.Values.Where(i => i is ChildRestartInfo).Select(i => ((ChildRestartInfo)i).Child).GetEnumerator();
+		}
+
+		public override bool TryGetByRef(ActorRef actorRef, out ChildInfo child)
+		{
+			return _children.TryGetValue(actorRef.Name, out child);
 		}
 	}
 	public interface ChildInfo { }
