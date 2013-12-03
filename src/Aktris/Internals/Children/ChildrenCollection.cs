@@ -56,14 +56,14 @@ namespace Aktris.Internals.Children
 
 	public class ChildRestartInfo : ChildInfo
 	{
-		private readonly ActorRef _child;
+		private readonly InternalActorRef _child;
 
-		public ChildRestartInfo(ActorRef child)
+		public ChildRestartInfo(InternalActorRef child)
 		{
 			_child = child;
 		}
 
-		public ActorRef Child { get { return _child; } }
+		public InternalActorRef Child { get { return _child; } }
 	}
 
 	class ChildNameReserved : ChildInfo
