@@ -50,6 +50,7 @@
     <Compile Include="Actor.cs" />
     <Compile Include="ActorCreationProperties.cs" />
     <Compile Include="ActorInstantiator.cs" />
+    <Compile Include="ActorPath.cs" />
     <Compile Include="ActorRef.cs" />
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
@@ -80,6 +81,8 @@
     <Compile Include="Internals\InternalActorRef.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
     <Compile Include="Internals\LocalActorRefStack.cs" />
+    <Compile Include="Internals\Path\ChildActorPath.cs" />
+    <Compile Include="Internals\Path\RootActorPath.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
     <Compile Include="Internals\StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
