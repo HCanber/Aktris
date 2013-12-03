@@ -12,7 +12,6 @@ namespace Aktris
 		/// <summary>
 		/// Registers a handler for incoming messages of the specified type 
 		/// <typeparamref name="T"/>.
-		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
 		/// In that case, this handler will not be invoked.</remarks>
 		/// </summary>
@@ -25,14 +24,13 @@ namespace Aktris
 		}
 
 		/// <summary>
-		/// Registers forwarding all incoming messages of the specified type to the specified actor.
+		/// Forwards all incoming messages of the specified type to the specified actor.
 		/// <typeparamref name="T"/>.
-		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
 		/// In that case, this handler will not be invoked.</remarks>
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
-		/// <param name="receiver">The recipient of all incoming messages of typ <typeparamref name="T"/></param>
+		/// <param name="receiver">The recipient of all forwarded messages</param>
 		public void ReceiveAndForward<T>([NotNull] ActorRef receiver)
 		{
 			if(receiver == null) throw new ArgumentNullException("receiver");
@@ -41,7 +39,6 @@ namespace Aktris
 
 		/// <summary>
 		/// Registers a handler for incoming messages of any type.
-		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
 		/// In that case, this handler will not be invoked.</remarks>
 		/// </summary>
@@ -53,6 +50,12 @@ namespace Aktris
 		}
 
 
+		/// <summary>
+		/// Forwards all incoming messages oto the specified actor.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <param name="receiver">The recipient of all incoming messages</param>
 		public void ReceiveAnyAndForward([NotNull] ActorRef receiver)
 		{
 			if(receiver == null) throw new ArgumentNullException("receiver");
