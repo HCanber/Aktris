@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Aktris.Internals.Helpers
 {
@@ -23,5 +24,14 @@ namespace Aktris.Internals.Helpers
 			}
 		}
 
+		public static bool IsNullOrEmpty<T>(this ICollection<T> collection)
+		{
+			return collection == null || collection.Count == 0;
+		}
+
+		public static IEnumerable<T> ExceptThoseInSet<T,T2>(this IEnumerable<T> sequence, ISet<T2> exceptThese) where T:T2
+		{
+			return sequence.Where(i => !exceptThese.Contains(i));
+		}
 	}
 }
