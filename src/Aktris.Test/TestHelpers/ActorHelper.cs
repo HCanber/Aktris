@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Reflection;
 using Aktris.Dispatching;
 using Aktris.Internals;
+using Aktris.Internals.Path;
 using Aktris.JetBrainsAnnotations;
 using FakeItEasy;
 
@@ -20,7 +21,7 @@ namespace Aktris.Test.TestHelpers
 			return () =>
 			{
 				var testActorSystem = new TestActorSystem();
-				LocalActorRefStack.PushActorRefToStack(new LocalActorRef(testActorSystem, A.Dummy<ActorInstantiator>(), "fake", testActorSystem.CreateDefaultMailbox()));
+				LocalActorRefStack.PushActorRefToStack(new LocalActorRef(testActorSystem, A.Dummy<ActorInstantiator>(),new RootActorPath("fake"), testActorSystem.CreateDefaultMailbox()));
 				var actor = createActor();
 				LocalActorRefStack.PopActorAndMarkerFromStack();
 				return actor;

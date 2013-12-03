@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.Internals.Path;
 using Aktris.JetBrainsAnnotations;
 
 namespace Aktris
@@ -18,6 +19,7 @@ namespace Aktris
 		private GuardianActorRef _rootGuardian;
 		private InternalActorRef _systemGuardian;
 		private InternalActorRef _userGuardian;
+		private readonly RootActorPath _rootPath;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -37,9 +39,10 @@ namespace Aktris
 			}
 
 			_name = name;
+			_rootPath = new RootActorPath("/");
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
-			_deadLetters = bootstrapper.DeadLetterActorCreator();
+			_deadLetters = bootstrapper.DeadLetterActorCreator(new ChildActorPath(_rootPath,"_DeadLetter",LocalActorRef.UndefinedInstanceId));
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
 		}
 
@@ -85,7 +88,7 @@ namespace Aktris
 
 		private GuardianActorRef CreateRootGuardian()
 		{
-			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), "",CreateDefaultMailbox());
+			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), _rootPath, CreateDefaultMailbox());
 			return rootGuardian;
 		}
 

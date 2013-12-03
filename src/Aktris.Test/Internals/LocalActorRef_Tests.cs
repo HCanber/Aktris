@@ -6,6 +6,7 @@ using System.Reflection;
 using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.Internals.Path;
 using Aktris.Internals.SystemMessages;
 using Aktris.Test.TestHelpers;
 using FakeItEasy;
@@ -22,7 +23,7 @@ namespace Aktris.Test.Internals
 		public void When_creating_Then_CreateActor_message_is_enqueued_in_mailbox()
 		{
 			var mailbox = A.Fake<Mailbox>();
-			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), new RootActorPath("test"), mailbox);
 
 			A.CallTo(() => mailbox.EnqueueSystemMessage(A<SystemMessageEnvelope>.That.Matches(e => e.Message is CreateActor))).MustHaveHappened();
 		}
@@ -32,7 +33,7 @@ namespace Aktris.Test.Internals
 		public void When_calling_Start_Then_the_actor_is_attached_to_the_mailbox()
 		{
 			var mailbox = A.Fake<Mailbox>();
-			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), new RootActorPath("test"), mailbox);
 
 			actorRef.Start();
 
@@ -48,7 +49,7 @@ namespace Aktris.Test.Internals
 			var messages = new List<Envelope>();
 			A.CallTo(() => mailbox.Enqueue(A<Envelope>.Ignored)).Invokes(x => messages.Add(x.GetArgument<Envelope>(0)));
 
-			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), new RootActorPath("test"), mailbox);
 
 			actorRef.Start();
 			actorRef.Send("MyTestMessage", null);
@@ -60,7 +61,7 @@ namespace Aktris.Test.Internals
 		{
 			var mailbox = A.Fake<Mailbox>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 			Assert.Throws<InvalidOperationException>(() => actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new NonExistingSystemMessage(), A.Fake<ActorRef>())));
 		}
 
@@ -70,7 +71,7 @@ namespace Aktris.Test.Internals
 			var mailbox = A.Fake<Mailbox>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(null);
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 			Assert.Throws<ActorInitializationException>(()=>actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>())));
 		}
 
@@ -82,7 +83,7 @@ namespace Aktris.Test.Internals
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
 
 			A.CallTo(() => actorInstantiator.CreateNewActor()).MustHaveHappened(Repeated.Exactly.Once);
@@ -96,7 +97,7 @@ namespace Aktris.Test.Internals
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).ReturnsLazily(()=> { actor = A.Fake<Actor>();return actor;});
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
 			A.CallTo(()=>actor.Init()).MustHaveHappened(Repeated.Exactly.Once);
 		}
@@ -111,7 +112,7 @@ namespace Aktris.Test.Internals
 			{
 				stackDuringActorCreation = ActorHelper.GetActorRefStack();
 			}).ReturnsLazily(()=>new TestActor());
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
 			var stackAfterActorCreation = ActorHelper.GetActorRefStack();
 
@@ -129,7 +130,7 @@ namespace Aktris.Test.Internals
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			//Note: NEVER do this in actual code (returning a premade instance). Always create new instances.
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(actor);
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 			var message=new object();
 			var sender = A.Fake<ActorRef>();
 			A.CallTo(() => sender.Name).Returns("SenderActor");

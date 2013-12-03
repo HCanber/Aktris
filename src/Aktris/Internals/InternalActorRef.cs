@@ -10,5 +10,6 @@ namespace Aktris.Internals
 		void HandleMessage(Envelope envelope);
 		void HandleSystemMessage(SystemMessageEnvelope envelope);
 		ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
+		uint InstanceId { get; }
 	}
 }

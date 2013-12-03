@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Aktris.Internals;
+using Aktris.Internals.Path;
 using Aktris.JetBrainsAnnotations;
 using FakeItEasy;
 using FluentAssertions;
@@ -44,7 +45,7 @@ namespace Aktris.Test
 			public List<string> Children=new List<string>();
 			protected override InternalActorRef CreateUserGuardian(GuardianActorRef rootGuardian)
 			{
-				var localActorRef = A.Fake<LocalActorRef>(builder => builder.WithArgumentsForConstructor(() => new LocalActorRef(this,A.Fake<ActorInstantiator>(),"",CreateDefaultMailbox())));
+				var localActorRef = A.Fake<LocalActorRef>(builder => builder.WithArgumentsForConstructor(() => new LocalActorRef(this, A.Fake<ActorInstantiator>(), new RootActorPath("test"), CreateDefaultMailbox())));
 				A.CallTo(() => localActorRef.CreateActor(A<ActorCreationProperties>.Ignored, A<string>.Ignored)).Invokes(a => Children.Add((string) a.Arguments[1]));
 				return localActorRef;
 			}

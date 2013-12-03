@@ -16,11 +16,9 @@ namespace Aktris
 			_instance = instance;
 		}
 
-		public string Name
-		{
-			get { return _sender.Name; }
-		}
+		public string Name { get { return _sender.Name; } }
 
+		public ActorPath Path { get { return _sender.Path; } }
 
 		void ActorRef.Send(object message, ActorRef sender)
 		{

@@ -5,6 +5,7 @@ using System.Linq;
 using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.Internals.Path;
 using Aktris.Internals.SystemMessages;
 using Aktris.Test.Internals;
 using Aktris.Test.TestHelpers;
@@ -38,7 +39,7 @@ namespace Aktris.Test
 				return actor;
 			});
 
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, "test", mailbox);
+			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox);
 
 			//Send Create message so that the instance is created
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
