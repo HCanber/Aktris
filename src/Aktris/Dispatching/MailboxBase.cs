@@ -18,7 +18,7 @@ namespace Aktris.Dispatching
 		private readonly ConcurrentQueue<SystemMessageEnvelope> _systemMessagesQueue = new ConcurrentQueue<SystemMessageEnvelope>();
 
 		[DebuggerDisplay("{GetMailboxStatusForDebug(),nq}")]
-		protected int Status { get { return _mailboxStatus; } }
+		protected internal int Status { get { return _mailboxStatus; } }
 
 
 		public void SetActor(InternalActorRef actor)
@@ -77,15 +77,18 @@ namespace Aktris.Dispatching
 		{
 			if(!Status.IsSuspendedOrClosed())
 			{
-				var messagesToProcess = GetMessagesToProcess();
-				foreach(var message in messagesToProcess)
+				Envelope message;
+				while(TryGetMessageToProcess(out message))
 				{
 					HandleMessage(message);
+					ProcessAllSystemMessages();					
 				}
 			}
 		}
 
 		protected abstract bool HasMessagesEnqued();
+
+		protected abstract bool TryGetMessageToProcess(out Envelope message);
 
 		protected abstract IEnumerable<Envelope> GetMessagesToProcess();
 
@@ -111,6 +114,14 @@ namespace Aktris.Dispatching
 			}
 		}
 
+		public void Suspend(InternalActorRef actorRef)
+		{
+			if(actorRef.Mailbox == this)
+			{
+				Suspend();
+			}
+		}
+
 		/// <summary>Suspends this instance and returns<c>True</c> if it was running.</summary>
 		protected internal bool Suspend()
 		{
@@ -122,6 +133,14 @@ namespace Aktris.Dispatching
 			}
 			UpdateStatus(MailboxStatus.IncreaseSuspendCount);
 			return status.GetSuspendCount() == 0;
+		}
+
+		public void Resume(InternalActorRef actorRef)
+		{
+			if(actorRef.Mailbox == this)
+			{
+				Resume();
+			}
 		}
 
 		/// <summary>Resumes this instance and returns <c>True</c> if it became (or already was) running.</summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Aktris.Dispatching;
+using Aktris.Exceptions;
 using Aktris.Internals;
 using FakeItEasy;
 using FluentAssertions;
@@ -130,16 +131,6 @@ namespace Aktris.Test.Dispatching
 			mailbox.GetStatus().IsClosed().Should().BeTrue();
 		}
 
-		[Fact]
-		public void When_enqueing_messages_during_handling_message_Then_it_is_scheduled()
-		{
-			var actor = A.Fake<InternalActorRef>();
-			var mailbox = CreateMailboxWithActor(actor);
-			A.CallTo(() => actor.HandleMessage(A<Envelope>.Ignored)).Invokes(() => mailbox.Enqueue(CreateDummyMessage()));
-			mailbox.Enqueue(CreateDummyMessage());
-			mailbox.ProcessScheduledCalls();
-			mailbox.NumberOfScheduleCalls.Should().Be(1);
-		}
 
 		private static Envelope CreateDummyMessage()
 		{
@@ -163,19 +154,23 @@ namespace Aktris.Test.Dispatching
 		private class TestMailbox : MailboxBase
 		{
 			public int NumberOfScheduleCalls { get { return Scheduled.Count; } }
-			public List<Envelope> EnqueuedMessages = new List<Envelope>();
+			public Queue<Envelope> EnqueuedMessages = new Queue<Envelope>();
 			public List<Action> Scheduled = new List<Action>();
 
 			protected override bool HasMessagesEnqued()
 			{
-				return EnqueuedMessages.Count > 0;
+				return false;
+			}
+
+			protected override bool TryGetMessageToProcess(out Envelope message)
+			{
+				message = null;
+				return false;
 			}
 
 			protected override IEnumerable<Envelope> GetMessagesToProcess()
 			{
-				var messagesToProcess = EnqueuedMessages;
-				EnqueuedMessages = new List<Envelope>();
-				return messagesToProcess;
+				yield break;
 			}
 
 			protected override void Schedule(Action action)
@@ -185,13 +180,13 @@ namespace Aktris.Test.Dispatching
 
 			protected override void InternalEnqueue(Envelope envelope)
 			{
-				EnqueuedMessages.Add(envelope);
+				EnqueuedMessages.Enqueue(envelope);
 			}
 
 			public void Reset()
 			{
 				ResetScheduledCalls();
-				EnqueuedMessages=new List<Envelope>();
+				EnqueuedMessages=new Queue<Envelope>();
 				
 			}
 

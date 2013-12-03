@@ -16,6 +16,11 @@ namespace Aktris.Dispatching
 			if(scheduler == null) throw new ArgumentNullException("scheduler");
 		}
 
+		protected override bool TryGetMessageToProcess(out Envelope message)
+		{
+			return _queue.TryDequeue(out message);
+		}
+
 		protected override IEnumerable<Envelope> GetMessagesToProcess()
 		{
 			Envelope envelope;

@@ -112,6 +112,11 @@ namespace Aktris.Test.Dispatching
 				return EnqueuedMessages.Count > 0;
 			}
 
+			protected override bool TryGetMessageToProcess(out Envelope message)
+			{
+				return EnqueuedMessages.TryDequeue(out message);
+			}
+
 			protected override IEnumerable<Envelope> GetMessagesToProcess()
 			{
 				while(EnqueuedMessages.Count > 0)

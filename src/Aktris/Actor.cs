@@ -60,6 +60,9 @@ namespace Aktris
 		[NotNull]
 		protected internal ActorRef Self { get { return _self; } }
 
+		[NotNull]
+		internal InternalActorRef InternalSelf { get { return _self; } }
+
 
 		protected internal virtual void PreStart()
 		{
@@ -123,6 +126,19 @@ namespace Aktris
 		{
 			EnsureMayConfigureMessageHandlers();
 			_constructorMessageHandlerConfigurator.ReceiveAny(handler);
+		}
+
+		/// <summary>
+		/// Forwards all incoming messages oto the specified actor.
+		/// <remarks>This may only be called from the constructor.</remarks>
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <param name="receiver">The recipient of all incoming messages</param>
+		protected void ReceiveAnyAndForward(ActorRef receiver)
+		{
+			EnsureMayConfigureMessageHandlers();
+			_constructorMessageHandlerConfigurator.ReceiveAnyAndForward(receiver);
 		}
 
 		protected void AddReceiver(Type type, Action<object> handler)

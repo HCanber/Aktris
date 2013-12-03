@@ -11,9 +11,9 @@
 			_actor = actor;
 		}
 
-		public string Name
-		{
-			get { return _actorRef.Name; } }
+		public string Name { get { return _actorRef.Name; } }
+
+		public ActorPath Path { get { return _actorRef.Path; } }
 
 		public T Actor { get { return _actor; } }
 

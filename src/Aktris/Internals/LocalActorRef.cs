@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Threading;
@@ -51,7 +55,8 @@ namespace Aktris.Internals
 
 		public ActorSystem System { get { return _system; } }
 
-		protected Mailbox Mailbox { get { return _mailbox; } }
+		public Mailbox Mailbox { get { return _mailbox; } }
+		protected Envelope CurrentMessage { get { return _currentMessage; } }
 
 		public void Start()
 		{
@@ -96,19 +101,17 @@ namespace Aktris.Internals
 		{
 			var message = envelope.Message;
 			var wasMatched =
-				IfMatchSys<CreateActor>(message, CreateActorInstance);
+				IfMatchSys<CreateActor>(message, CreateActorInstance)
+				|| IfMatchSys<SuspendActor>(message, _ =>{SuspendThisOnly();SuspendChildren();})
+				|| IfMatchSys<ActorFailed>(message, HandleActorFailure);
 			if(!wasMatched)
 			{
 				//This should never happen. If it does a new SystemMessage type has been added
-				throw new InvalidOperationException(string.Format("Unexpected message type: {0}. Message was: {1}", message.GetType(), message));
+				throw new InvalidOperationException(string.Format("Unexpected system message type: {0}. Message was: {1}", message.GetType(), message));
 			}
 		}
 
-		private bool HandleInvokeFailure(Exception exception)
-		{
-			_supervisor.HandleSystemMessage(new SystemMessageEnvelope(_supervisor, new ActorFailed(this, exception), this));
-			return true;
-		}
+
 
 		private void CreateActorInstance(CreateActor obj)
 		{
@@ -159,7 +162,7 @@ namespace Aktris.Internals
 			{
 				ReserveChild(name);
 				var instanceId = CreateInstanceId();
-				var path = new ChildActorPath(new RootActorPath("FAKE will be fixed with supervisors"), name, instanceId);	//TODO
+				var path = new ChildActorPath(_path, name, instanceId);
 				actorRef = _system.LocalActorRefFactory.CreateActor(_system, actorCreationProperties, supervisor, path);
 			}
 			catch
@@ -181,6 +184,78 @@ namespace Aktris.Internals
 			return nextInstanceId;
 		}
 
+
+
+		// Failure -------------------------------------------------------------------------------------
+		private ActorRef _failPerpatrator = null;
+		private bool HandleInvokeFailure(Exception exception, IImmutableEnumerable<ActorRef> childrenNotToSuspend=null)
+		{
+			if(!IsFailed)
+			{
+				SuspendThisOnly();
+				var failedMessage = new SystemMessageEnvelope(_supervisor, new ActorFailed(this, exception), this);
+				_supervisor.HandleSystemMessage(failedMessage);
+				var childrenToSkip = childrenNotToSuspend == null ? new HashSet<ActorRef>() : new HashSet<ActorRef>(childrenNotToSuspend);
+				var ignored=
+					PatternMatcher.Match<ActorFailed>(CurrentMessage.Message,m=> { SetFailedPerpatrator(m.Child);childrenToSkip.Add(m.Child);})
+					|| PatternMatcher.MatchAll(CurrentMessage.Message,m=> SetFailedPerpatrator(this));
+				SuspendChildren(childrenToSkip);
+			}
+			return true;
+		}
+
+		private void SuspendChildren(ISet<ActorRef> childrenToSkip=null)
+		{
+			var childrenToSuspend = childrenToSkip.IsNullOrEmpty() ? _children : _children.ExceptThoseInSet(childrenToSkip);
+			childrenToSuspend.ForEach(a => a.Suspend());
+		}
+
+		void InternalActorRef.Suspend()
+		{
+			try
+			{
+				_mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this,SuspendActor.Instance,this));
+			}
+			catch(Exception e)
+			{
+				//TODO: Log
+			}
+		}
+
+		void InternalActorRef.Resume(Exception causedByFailure)
+		{
+			try
+			{
+				_mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this, new ResumeActor(causedByFailure), this));
+			}
+			catch(Exception e)
+			{
+				//TODO: Log
+			}
+		}
+
+		private void HandleActorFailure(ActorFailed actorFailedMessage)
+		{
+			//_currentMessage=new Envelope(this,actorFailedMessage, actorFailedMessage.Child);
+			ChildInfo childInfo;
+			if(!_children.TryGetByRef(actorFailedMessage.Child, out childInfo))
+			{
+				//TODO: Log "dropping Failed(" + f.cause + ") from unknown child " + f.child
+			}
+			else
+			{
+				
+			}
+		}
+
+
+		private void SuspendThisOnly() { _mailbox.Suspend(this); }
+		private void ResumeThisOnly() { _mailbox.Resume(this); }
+
+		private bool IsFailed { get { return _failPerpatrator != null; } }
+		private void SetFailedPerpatrator(ActorRef perpetrator) { _failPerpatrator = perpetrator; }
+
+		// Children -------------------------------------------------------------------------------------
 		private void ReserveChild(string name)
 		{
 			SwapChildrenCollection(c => c.ReserveName(name));
@@ -209,7 +284,7 @@ namespace Aktris.Internals
 	public class GuardianActorRef : LocalActorRef
 	{
 		public GuardianActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
-			: base(system, actorInstantiator, name, mailbox, supervisor)
+			: base(system, actorInstantiator, path, mailbox, supervisor)
 		{
 		}
 
@@ -221,9 +296,15 @@ namespace Aktris.Internals
 		}
 	}
 
-	public class RootGuardianSupervisor : MinimalActorRef
+	public class RootGuardianSupervisor : EmptyLocalActorRef
 	{
-		public override string Name { get { return "$root-guardian-supervisor"; } }
+		private const string _Name = "_Root-guardian-supervisor";
+		public override string Name { get { return _Name; } }
+
+		public RootGuardianSupervisor(RootActorPath root):base(new ChildActorPath(root,_Name,LocalActorRef.UndefinedInstanceId))
+		{
+		}
+
 		public override ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			throw new InvalidOperationException(string.Format("Creating children to {0} is not allowed.", GetType()));

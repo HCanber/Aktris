@@ -88,7 +88,7 @@ namespace Aktris
 
 		private GuardianActorRef CreateRootGuardian()
 		{
-			var supervisor = new RootGuardianSupervisor();
+			var supervisor = new RootGuardianSupervisor(_rootPath);
 			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), _rootPath,CreateDefaultMailbox(), supervisor);
 			return rootGuardian;
 		}

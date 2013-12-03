@@ -75,6 +75,7 @@
     <Compile Include="Internals\Base64Helper.cs" />
     <Compile Include="Internals\Children\ChildrenCollection.cs" />
     <Compile Include="Internals\DeadLetterActorRef.cs" />
+    <Compile Include="Internals\EmptyLocalActorRef.cs" />
     <Compile Include="Internals\Guardian.cs" />
     <Compile Include="Internals\Helpers\RandomProvider.cs" />
     <Compile Include="Internals\Helpers\CollectionExtensions.cs" />
@@ -93,6 +94,8 @@
     <Compile Include="Internals\LocalActorRef.cs" />
     <Compile Include="Internals\LocalActorRefFactory.cs" />
     <Compile Include="Internals\SystemMessages\ActorFailed.cs" />
+    <Compile Include="Internals\SystemMessages\ResumeActor.cs" />
+    <Compile Include="Internals\SystemMessages\SuspendActor.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessage.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessageEnvelope.cs" />
     <Compile Include="Internals\UniqueNameCreator.cs" />

@@ -21,7 +21,7 @@ namespace Aktris.Test.Internals.Children
 			var sut = EmptyChildrenCollection.Instance;
 			var coll = sut.ReserveName("Name");
 			var result = coll.ReleaseName("Name");
-			result.Should().BeSameAs(EmptyChildrenCollection.Instance);
+			((object)result).Should().BeSameAs(EmptyChildrenCollection.Instance);
 		}
 		[Fact]
 		public void Given_a_collection_where_name_has_been_reserved_Then_another_name_can_be_reserved()

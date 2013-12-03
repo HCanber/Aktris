@@ -1,4 +1,5 @@
-﻿using Aktris.Dispatching;
+﻿using System;
+using Aktris.Dispatching;
 using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Internals
@@ -11,5 +12,8 @@ namespace Aktris.Internals
 		void HandleSystemMessage(SystemMessageEnvelope envelope);
 		ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
 		uint InstanceId { get; }
+		Mailbox Mailbox { get; }
+		void Suspend();
+		void Resume(Exception causedByFailure);
 	}
 }
