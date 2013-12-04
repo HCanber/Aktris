@@ -45,7 +45,8 @@ namespace Aktris.Internals
 			_path = path;
 			_mailbox = mailbox;
 			_supervisor = supervisor;
-			mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this, new CreateActor(), this));
+			SendSystemMessage(new CreateActor(), this);
+			supervisor.SendSystemMessage(new SuperviseActor(this),this);
 			_deadLetterSender = new SenderActorRef(system.DeadLetters, this);
 		}
 
@@ -68,6 +69,13 @@ namespace Aktris.Internals
 			sender = UnwrapSenderActorRef(sender);
 			var envelope = new Envelope(this, message, sender ?? _system.DeadLetters);
 			_mailbox.Enqueue(envelope);
+		}
+
+		public void SendSystemMessage(SystemMessage message, ActorRef sender)
+		{
+			sender = UnwrapSenderActorRef(sender);
+			var envelope = new SystemMessageEnvelope(this, message, sender ?? _system.DeadLetters);
+			_mailbox.EnqueueSystemMessage(envelope);
 		}
 
 		private ActorRef UnwrapSenderActorRef(ActorRef sender)
@@ -103,14 +111,14 @@ namespace Aktris.Internals
 			var wasMatched =
 				IfMatchSys<CreateActor>(message, CreateActorInstance)
 				|| IfMatchSys<SuspendActor>(message, _ =>{SuspendThisOnly();SuspendChildren();})
-				|| IfMatchSys<ActorFailed>(message, HandleActorFailure);
+				|| IfMatchSys<ActorFailed>(message, HandleActorFailure)
+				|| IfMatchSys<SuperviseActor>(message,HandleSupervise);
 			if(!wasMatched)
 			{
 				//This should never happen. If it does a new SystemMessage type has been added
 				throw new InvalidOperationException(string.Format("Unexpected system message type: {0}. Message was: {1}", message.GetType(), message));
 			}
 		}
-
 
 
 		private void CreateActorInstance(CreateActor obj)
@@ -182,6 +190,15 @@ namespace Aktris.Internals
 				nextInstanceId = RandomProvider.GetNextUInt();
 			} while(nextInstanceId == UndefinedInstanceId);
 			return nextInstanceId;
+		}
+
+
+
+		// Supervision -------------------------------------------------------------------------------------
+
+		private void HandleSupervise(SuperviseActor message)
+		{
+			
 		}
 
 
@@ -314,6 +331,15 @@ namespace Aktris.Internals
 		public override ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			throw new InvalidOperationException(string.Format("Creating children to {0} is not allowed.", GetType()));
+		}
+
+		public override void SendSystemMessage(SystemMessage message, ActorRef sender)
+		{
+			var ignored = PatternMatcher.Match<SuperviseActor>(message, _ => { })
+			              || PatternMatcher.MatchAll(message, _ =>
+			              {
+				              //TODO: Log "Recevied unexpected system message of type {0}: {1}", message.GetType(), message
+			              });
 		}
 	}
 }

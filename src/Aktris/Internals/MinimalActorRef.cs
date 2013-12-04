@@ -17,5 +17,6 @@ namespace Aktris.Internals
 		public virtual void Resume(Exception causedByFailure) {/* Intentionally left blank */}
 		public abstract ActorPath Path { get; }
 		public abstract uint InstanceId { get; }
+		public virtual void SendSystemMessage(SystemMessage message, ActorRef sender) {/* Intentionally left blank */}
 	}
 }

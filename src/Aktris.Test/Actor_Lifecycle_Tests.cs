@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using Aktris.Dispatching;
 using Aktris.Internals;
@@ -28,6 +29,25 @@ namespace Aktris.Test
 			}));
 			child.Send("A message", null);
 			prestartActor.PrestartCalledFirst.Should().BeTrue();
+		}
+
+		[Fact]
+		public void When_a_child_actor_is_created_Then_it_sends_SuperviseActor_message_to_parent()
+		{
+			var system = new TestActorSystem();
+			system.Start();
+
+			var mailbox = new TestMailbox(system.CreateDefaultMailbox());
+			ParentWithChildActor parent=null;
+			var parentProps = new DelegateActorCreationProperties(() =>{parent=new ParentWithChildActor();return parent;})
+			{
+				MailboxCreator = () => mailbox
+			};
+
+			var parentRef = system.CreateActor(parentProps,"Parent");
+			var stateChanges = mailbox.GetStateChangesForEnquingSystemMessagesOfType<SuperviseActor>();
+			stateChanges.Count.Should().Be(1);
+			((SuperviseActor) stateChanges.First().LastEnqueuedSystemMessage.Message).ActorToSupervise.Should().BeSameAs(parent.Child);
 		}
 
 		[Fact]
@@ -72,6 +92,18 @@ namespace Aktris.Test
 			{
 				if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = true;
 			}
+		}
+
+		private class ParentWithChildActor : Actor
+		{
+			public ParentWithChildActor()
+			{
+				Child = CreateActor<ChildActor>("Child");
+			}
+
+			public ActorRef Child { get; private set; }
+
+			public class ChildActor : Actor{}
 		}
 
 		private class ParentWithFailingChildActor : Actor

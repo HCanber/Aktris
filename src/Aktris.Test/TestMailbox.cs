@@ -22,7 +22,22 @@ namespace Aktris.Test
 
 		public List<State> GetStateChangesFor(StateChange state)
 		{
-			return States.Where(t => t.Item1 == state).Select(t => t.Item2).ToList();				
+			return GetStateChangesFor(t => t.Item1 == state);
+		}
+
+		public List<State> GetStateChangesForEnquingSystemMessagesOfType<T>()
+		{
+			return GetStateChangesFor(StateChange.EnqueueSystemMessage, state => { var m=state.LastEnqueuedSystemMessage; return m!=null && m.Message is T; });
+		}
+
+		public List<State> GetStateChangesFor(StateChange state,Predicate<State> isCorrectState)
+		{
+			return GetStateChangesFor(t => t.Item1 == state && isCorrectState(t.Item2));
+		}
+
+		public List<State> GetStateChangesFor(Predicate<Tuple<StateChange, State>> predicate)
+		{
+			return States.Where(t=>predicate(t)).Select(t => t.Item2).ToList();
 		}
 
 		void Mailbox.SetActor(InternalActorRef actor)
@@ -95,6 +110,21 @@ namespace Aktris.Test
 			public int NumberOfResumeCalls { get { return _numberOfResumeCalls; } }
 			public ImmutableList<Envelope> EnquedMessages { get { return _enquedMessages; } }
 			public ImmutableList<SystemMessageEnvelope> EnquedSystemMessages { get { return _enquedSystemMessages; } }
+
+			public SystemMessageEnvelope LastEnqueuedSystemMessage
+			{
+				get
+				{
+					var count = _enquedSystemMessages.Count;
+					return count == 0 ? null : _enquedSystemMessages[count - 1];
+				}
+			}
+
+			public Envelope GetLastEnqueuedMessage()
+			{
+				var count = _enquedMessages.Count;
+				return count == 0 ? null : _enquedMessages[count - 1];
+			}
 
 			public State SetActor(InternalActorRef actor)
 			{

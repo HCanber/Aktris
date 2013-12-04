@@ -94,7 +94,9 @@
     <Compile Include="Internals\LocalActorRef.cs" />
     <Compile Include="Internals\LocalActorRefFactory.cs" />
     <Compile Include="Internals\SystemMessages\ActorFailed.cs" />
+    <Compile Include="Internals\SystemMessages\CreateActor.cs" />
     <Compile Include="Internals\SystemMessages\ResumeActor.cs" />
+    <Compile Include="Internals\SystemMessages\SuperviseActor.cs" />
     <Compile Include="Internals\SystemMessages\SuspendActor.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessage.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessageEnvelope.cs" />

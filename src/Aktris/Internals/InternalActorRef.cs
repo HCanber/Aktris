@@ -15,5 +15,6 @@ namespace Aktris.Internals
 		Mailbox Mailbox { get; }
 		void Suspend();
 		void Resume(Exception causedByFailure);
+		void SendSystemMessage(SystemMessage message, ActorRef sender);
 	}
 }

@@ -5,8 +5,4 @@
 	{
 		 
 	}
-
-	public class CreateActor : SystemMessage
-	{
-	}
 }
