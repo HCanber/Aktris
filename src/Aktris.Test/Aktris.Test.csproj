@@ -80,6 +80,7 @@
     <Compile Include="TestActorSystem.cs" />
     <Compile Include="TestBootstrapper.cs" />
     <Compile Include="TestHelpers\ActorHelper.cs" />
+    <Compile Include="TestMailbox.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

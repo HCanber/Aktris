@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using Aktris.Dispatching;
 using Aktris.Internals;
@@ -21,7 +21,11 @@ namespace Aktris.Test
 			var system = new TestActorSystem();
 			system.Start();
 			PrestartActor prestartActor = null;
-			var child = system.CreateActor(ActorCreationProperties.Create(() => { prestartActor = new PrestartActor(); return prestartActor; }));
+			var child = system.CreateActor(ActorCreationProperties.Create(() =>
+			{
+				prestartActor = new PrestartActor();
+				return prestartActor;
+			}));
 			child.Send("A message", null);
 			prestartActor.PrestartCalledFirst.Should().BeTrue();
 		}
@@ -38,20 +42,21 @@ namespace Aktris.Test
 
 
 		[Fact]
-		public void When_an_actor_throws_exception_during_handling_message_Then_the_actors_mailbox_gets_suspended2()
+		public void When_an_actor_throws_exception_during_handling_message_Then_the_actors_mailbox_gets_suspended()
 		{
 			var system = new TestActorSystem();
 			system.Start();
 
 			var mailbox = new TestMailbox(system.CreateDefaultMailbox());
-			var props = new DelegateActorCreationProperties(() => AnonymousActor.Create<object>(_=>{throw new Exception();}))
+			var props = new DelegateActorCreationProperties(() => AnonymousActor.Create<object>(_ => { throw new Exception(); }))
 			{
-				MailboxCreator = ()=>mailbox
+				MailboxCreator = () => mailbox
 			};
 
 			var actor = system.CreateActor(props);
 			actor.Send("A trigger message that will cause actor to fail", null);
-			mailbox.NumberOfSuspendCalls.Should().Be(1);
+			var suspendCalls = mailbox.GetStateChangesFor(TestMailbox.StateChange.Suspend);
+			suspendCalls.Count.Should().Be(1);
 		}
 
 		private class PrestartActor : Actor
@@ -62,6 +67,7 @@ namespace Aktris.Test
 			{
 				ReceiveAny(_ => { if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = false; });
 			}
+
 			protected internal override void PreStart()
 			{
 				if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = true;
@@ -71,6 +77,7 @@ namespace Aktris.Test
 		private class ParentWithFailingChildActor : Actor
 		{
 			public ChildActor Child;
+
 			public ParentWithFailingChildActor(Mailbox childMailbox)
 			{
 				var props = new DelegateActorCreationProperties(() => { Child = new ChildActor(); return Child; })
@@ -88,55 +95,9 @@ namespace Aktris.Test
 				{
 					ReceiveAny(_ => { throw new Exception("Child failed"); });
 				}
-				public bool IsSuspended { get { return ((MailboxBase) InternalSelf.Mailbox).Status.IsSuspended(); } }
-			}
-		}
 
-		public class TestMailbox : Mailbox
-		{
-			private readonly Mailbox _mailbox;
-			public int NumberOfSuspendCalls { get; private set; }
-			public int NumberOfResumeCalls { get; private set; }
-			public List<Envelope> EnquedMessages { get; private set; }
-			public List<SystemMessageEnvelope> EnquedSystemMessages { get; private set; }
-
-			public TestMailbox(Mailbox mailbox)
-			{
-				_mailbox = mailbox;
-				EnquedMessages=new List<Envelope>();
-				EnquedSystemMessages=new List<SystemMessageEnvelope>();
-			}
-
-			void Mailbox.SetActor(InternalActorRef actor)
-			{
-				_mailbox.SetActor(actor);
-			}
-
-			void Mailbox.Enqueue(Envelope envelope)
-			{
-				EnquedMessages.Add(envelope);
-				_mailbox.Enqueue(envelope);
-			}
-
-			void Mailbox.EnqueueSystemMessage(SystemMessageEnvelope envelope)
-			{
-				EnquedSystemMessages.Add(envelope);
-				_mailbox.EnqueueSystemMessage(envelope);
-			}
-
-			void Mailbox.Suspend(InternalActorRef actor)
-			{
-				NumberOfSuspendCalls++;
-				_mailbox.Suspend(actor);
-			}
-
-			void Mailbox.Resume(InternalActorRef actor)
-			{
-				NumberOfResumeCalls++;
-				_mailbox.Resume(actor);
+				public bool IsSuspended { get { return ((MailboxBase)InternalSelf.Mailbox).Status.IsSuspended(); } }
 			}
 		}
 	}
-
-
 }
