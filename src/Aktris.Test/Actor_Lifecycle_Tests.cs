@@ -92,7 +92,7 @@ namespace Aktris.Test
 
 
 			var parent = system.CreateActor(ActorCreationProperties.Create(() => new ParentWhichFailsWithChildrenActor(childrenMailboxes)));
-			parent.Send("A trigger message that will cause a child actor to fail", null);
+			parent.Send("A trigger message that will cause the parent actor to fail", null);
 			var childSuspends = childrenMailboxes.Select(m=>m.GetStateChangesFor(TestMailbox.StateChange.Suspend)).ToList();
 			for(int i = 0; i < childSuspends.Count; i++)
 			{

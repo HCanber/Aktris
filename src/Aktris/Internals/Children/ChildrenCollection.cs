@@ -13,6 +13,8 @@ namespace Aktris.Internals.Children
 		public abstract IEnumerator<InternalActorRef> GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 		public abstract bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo info);
+		public abstract bool TryGetByName(string actorName, out ChildInfo info);
+		public abstract ChildrenCollection AddOrUpdate(string name, ChildRestartInfo childRestartInfo);
 	}
 
 	public class EmptyChildrenCollection : ChildrenCollection
@@ -34,10 +36,21 @@ namespace Aktris.Internals.Children
 			yield break;
 		}
 
+		public override bool TryGetByName(string actorName, out ChildInfo info)
+		{
+			info = null;
+			return false;
+		}
+
 		public override bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo info)
 		{
 			info = null;
 			return false;
+		}
+
+		public override ChildrenCollection AddOrUpdate(string name, ChildRestartInfo childRestartInfo)
+		{
+			return NormalChildrenCollection.Create(ImmutableDictionary<string, ChildInfo>.Empty.Add(name, childRestartInfo));			
 		}
 	}
 
@@ -63,6 +76,12 @@ namespace Aktris.Internals.Children
 			return Create(_children.Remove(name));
 		}
 
+		public override ChildrenCollection AddOrUpdate(string name, ChildRestartInfo childRestartInfo)
+		{
+			var newChildren= _children.ContainsKey(name) ? _children.Remove(name).Add(name, childRestartInfo) : _children.Add(name, childRestartInfo);
+			return Create(newChildren);
+		}
+
 		public static ChildrenCollection Create(ImmutableDictionary<string, ChildInfo> children)
 		{
 			if(children.IsEmpty) return EmptyChildrenCollection.Instance;
@@ -74,10 +93,15 @@ namespace Aktris.Internals.Children
 			return _children.Values.Where(i => i is ChildRestartInfo).Select(i => ((ChildRestartInfo)i).Child).GetEnumerator();
 		}
 
+		public override bool TryGetByName(string actorName, out ChildInfo child)
+		{
+			return _children.TryGetValue(actorName, out child);
+		}
+
 		public override bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo child)
 		{
 			ChildInfo childInfo;
-			if(!_children.TryGetValue(actorRef.Name, out childInfo))
+			if(!TryGetByName(actorRef.Name, out childInfo))
 			{
 				child = null;
 				return false;

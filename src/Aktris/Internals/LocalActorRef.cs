@@ -30,7 +30,7 @@ namespace Aktris.Internals
 		private Actor _actor;
 		private readonly SenderActorRef _deadLetterSender;
 		private Envelope _currentMessage;
-		private volatile ChildrenCollection _children = EmptyChildrenCollection.Instance;
+		private volatile ChildrenCollection _childrenDoNotCallMeDirectly = EmptyChildrenCollection.Instance;
 
 
 		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
@@ -112,7 +112,7 @@ namespace Aktris.Internals
 				IfMatchSys<CreateActor>(message, CreateActorInstance)
 				|| IfMatchSys<SuspendActor>(message, _ =>{SuspendThisOnly();SuspendChildren();})
 				|| IfMatchSys<ActorFailed>(message, HandleActorFailure)
-				|| IfMatchSys<SuperviseActor>(message,HandleSupervise);
+				|| IfMatchSys<SuperviseActor>(message, superviseMessage => Supervise(superviseMessage.ActorToSupervise));
 			if(!wasMatched)
 			{
 				//This should never happen. If it does a new SystemMessage type has been added
@@ -196,11 +196,34 @@ namespace Aktris.Internals
 
 		// Supervision -------------------------------------------------------------------------------------
 
-		private void HandleSupervise(SuperviseActor message)
+		private void Supervise(InternalActorRef actor)
 		{
-			
-		}
+			ChildInfo childInfo;
+			var actorName = actor.Name;
 
+			if(Children.TryGetByName(actorName, out childInfo))
+			{
+				var childRestartInfo = childInfo as ChildRestartInfo;
+				if(childRestartInfo == null)
+				{
+					childRestartInfo=new ChildRestartInfo(actor);
+					UpdateChildrenCollection(c => c.AddOrUpdate(actorName, childRestartInfo));
+				}
+			}
+			else
+			{
+				//TODO: publish(Error(self.path.toString, clazz(actor), "received Supervise from unregistered child " + child + ", this will not end well"))
+			}
+			// if (!isTerminating) {
+			//	// Supervise is the first thing we get from a new child, so store away the UID for later use in handleFailure()
+			//	initChild(child) match {
+			//		case Some(crs) ⇒
+			//			handleSupervise(child, async)
+			//			if (system.settings.DebugLifecycle) publish(Debug(self.path.toString, clazz(actor), "now supervising " + child))
+			//		case None ⇒ publish(Error(self.path.toString, clazz(actor), "received Supervise from unregistered child " + child + ", this will not end well"))
+			//	}
+			//}
+		}
 
 
 		// Failure -------------------------------------------------------------------------------------
@@ -223,7 +246,7 @@ namespace Aktris.Internals
 
 		private void SuspendChildren(ISet<ActorRef> childrenToSkip=null)
 		{
-			var childrenToSuspend = childrenToSkip.IsNullOrEmpty() ? _children : _children.ExceptThoseInSet(childrenToSkip);
+			var childrenToSuspend = childrenToSkip.IsNullOrEmpty() ? Children : Children.ExceptThoseInSet(childrenToSkip);
 			childrenToSuspend.ForEach(a => a.Suspend());
 		}
 
@@ -256,7 +279,7 @@ namespace Aktris.Internals
 			//_currentMessage=new Envelope(this,actorFailedMessage, actorFailedMessage.Child);
 			ChildRestartInfo childInfo;
 			var failedChild =(InternalActorRef) actorFailedMessage.Child;
-			if(!_children.TryGetByRef(failedChild, out childInfo))
+			if(!Children.TryGetByRef(failedChild, out childInfo))
 			{
 				//TODO: Log string.Format("Dropping Failed({0}) from unknown child {1}", cause, failedChild)));
 			}
@@ -276,23 +299,26 @@ namespace Aktris.Internals
 		private void ResumeThisOnly() { _mailbox.Resume(this); }
 
 		private bool IsFailed { get { return _failPerpatrator != null; } }
+
+		protected ChildrenCollection Children { get { return _childrenDoNotCallMeDirectly; } }
+
 		private void SetFailedPerpatrator(ActorRef perpetrator) { _failPerpatrator = perpetrator; }
 
 		// Children -------------------------------------------------------------------------------------
 		private void ReserveChild(string name)
 		{
-			SwapChildrenCollection(c => c.ReserveName(name));
+			UpdateChildrenCollection(c => c.ReserveName(name));
 		}
 
 		private void ReleaseChild(string name)
 		{
-			SwapChildrenCollection(c => c.ReleaseName(name));
+			UpdateChildrenCollection(c => c.ReleaseName(name));
 		}
 
-		private ChildrenCollection SwapChildrenCollection(Func<ChildrenCollection, ChildrenCollection> updater)
+		private ChildrenCollection UpdateChildrenCollection(Func<ChildrenCollection, ChildrenCollection> updater)
 		{
 #pragma warning disable 420		//Ok to disregard from CS0420 "a reference to a volatile field will not be treated as volatile" as we're using interlocked underneath, see http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx
-			return InterlockedSpin.Swap(ref _children, updater);
+			return InterlockedSpin.Swap(ref _childrenDoNotCallMeDirectly, updater);
 #pragma warning restore 420
 		}
 

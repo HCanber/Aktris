@@ -2,13 +2,13 @@
 {
 	public class SuperviseActor : SystemMessage
 	{
-		private readonly ActorRef _actorToSupervise;
+		private readonly InternalActorRef _actorToSupervise;
 
-		public SuperviseActor(ActorRef actorToSupervise)
+		public SuperviseActor(InternalActorRef actorToSupervise)
 		{
 			_actorToSupervise = actorToSupervise;
 		}
 
-		public ActorRef ActorToSupervise { get { return _actorToSupervise; } }
+		public InternalActorRef ActorToSupervise { get { return _actorToSupervise; } }
 	}
 }
