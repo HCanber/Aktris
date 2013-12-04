@@ -15,6 +15,17 @@ namespace Aktris.Internals.Helpers
 			}
 		}
 
+		public static void ForEach<T>(this IEnumerable<T> sequence, Action<T,int> action)
+		{
+			if(sequence == null) return;
+			var i = 0;
+			foreach(var item in sequence)
+			{
+				action(item,i);
+				i++;
+			}
+		}
+
 		public static void ForEach<T, TArg>(this IEnumerable<T> sequence, TArg arg, Action<TArg, T> action)
 		{
 			if(sequence == null) return;
