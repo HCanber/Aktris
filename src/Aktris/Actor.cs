@@ -81,8 +81,12 @@ namespace Aktris
 			return _defaultMessageHandler(message,Sender);
 		}
 
+		ActorRef IActorCreator.CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		{
+			return CreateActor(actorCreationProperties, name);
+		}
 
-		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		protected ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			return _self.CreateActor(actorCreationProperties, name);
 		}
