@@ -237,14 +237,20 @@ namespace Aktris.Internals
 		private void HandleActorFailure(ActorFailed actorFailedMessage)
 		{
 			//_currentMessage=new Envelope(this,actorFailedMessage, actorFailedMessage.Child);
-			ChildInfo childInfo;
-			if(!_children.TryGetByRef(actorFailedMessage.Child, out childInfo))
+			ChildRestartInfo childInfo;
+			var failedChild =(InternalActorRef) actorFailedMessage.Child;
+			if(!_children.TryGetByRef(failedChild, out childInfo))
 			{
-				//TODO: Log "dropping Failed(" + f.cause + ") from unknown child " + f.child
+				//TODO: Log string.Format("Dropping Failed({0}) from unknown child {1}", cause, failedChild)));
+			}
+			else if(childInfo.Child.InstanceId != failedChild.InstanceId)
+			{
+				//TODO: string.Format("Dropping Failed({0}) from old child {1} (Instance id={2} != {3})", cause, failedChild, childInfo.Child.InstanceId, failedChild.InstanceId)));
 			}
 			else
 			{
-				
+				//if(!_actor.SupervisorStrategy.HandleFailure(this, failedChild, cause, childStats, GetAllChildStats()))
+				//	throw cause;
 			}
 		}
 

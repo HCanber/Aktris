@@ -12,7 +12,7 @@ namespace Aktris.Internals.Children
 		public abstract ChildrenCollection ReleaseName(string name);
 		public abstract IEnumerator<InternalActorRef> GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-		public abstract bool TryGetByRef(ActorRef actorRef, out ChildInfo info);
+		public abstract bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo info);
 	}
 
 	public class EmptyChildrenCollection : ChildrenCollection
@@ -34,9 +34,9 @@ namespace Aktris.Internals.Children
 			yield break;
 		}
 
-		public override bool TryGetByRef(ActorRef actorRef, out ChildInfo child)
+		public override bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo info)
 		{
-			child = null;
+			info = null;
 			return false;
 		}
 	}
@@ -74,12 +74,20 @@ namespace Aktris.Internals.Children
 			return _children.Values.Where(i => i is ChildRestartInfo).Select(i => ((ChildRestartInfo)i).Child).GetEnumerator();
 		}
 
-		public override bool TryGetByRef(ActorRef actorRef, out ChildInfo child)
+		public override bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo child)
 		{
-			return _children.TryGetValue(actorRef.Name, out child);
+			ChildInfo childInfo;
+			if(!_children.TryGetValue(actorRef.Name, out childInfo))
+			{
+				child = null;
+				return false;
+			}
+			child = childInfo as ChildRestartInfo;
+			return child != null;
 		}
 	}
-	public interface ChildInfo { }
+	public interface ChildInfo {
+	}
 
 	public class ChildRestartInfo : ChildInfo
 	{
