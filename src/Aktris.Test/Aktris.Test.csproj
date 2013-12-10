@@ -74,6 +74,8 @@
     <Compile Include="Internals\LocalActorRef_Tests.cs" />
     <Compile Include="Internals\InterlockedSpin_Tests.cs" />
     <Compile Include="Internals\Path\ActorPath_Tests.cs" />
+    <Compile Include="Supervision\AllForOneSupervisorStrategy_Tests.cs" />
+    <Compile Include="Supervision\OneForOneSupervisorStrategy_Tests.cs" />
     <Compile Include="TestActor.cs" />
     <Compile Include="Internals\UniqueNameCreator_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

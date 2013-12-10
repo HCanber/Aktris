@@ -110,7 +110,7 @@
     <Compile Include="Supervision\OneForOneSupervisorStrategy.cs" />
     <Compile Include="Supervision\SupervisorAction.cs" />
     <Compile Include="Supervision\SupervisorStrategy.cs" />
-    <Compile Include="Supervision\SupervisorStrategyBase.cs" />
+    <Compile Include="Supervision\DeciderSupervisorStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

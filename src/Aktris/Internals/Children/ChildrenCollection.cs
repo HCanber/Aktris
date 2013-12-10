@@ -116,13 +116,30 @@ namespace Aktris.Internals.Children
 	public class ChildRestartInfo : ChildInfo
 	{
 		private readonly InternalActorRef _child;
+		private readonly uint _numberOfRestarts=0;
 
-		public ChildRestartInfo(InternalActorRef child)
+		public ChildRestartInfo(InternalActorRef child) : this(child, 0)
+		{
+		}
+
+		private ChildRestartInfo(InternalActorRef child, uint numberOfRestarts)
 		{
 			_child = child;
+			_numberOfRestarts = numberOfRestarts;
 		}
 
 		public InternalActorRef Child { get { return _child; } }
+		public uint NumberOfRestarts { get { return _numberOfRestarts; } }
+
+		public ChildRestartInfo IncreaseNumberOfRestarts()
+		{
+			return new ChildRestartInfo(_child,_numberOfRestarts+1);
+		}
+
+		public ChildRestartInfo ResetNumberOfRestarts()
+		{
+			return new ChildRestartInfo(_child,0);
+		}
 	}
 
 	class ChildNameReserved : ChildInfo

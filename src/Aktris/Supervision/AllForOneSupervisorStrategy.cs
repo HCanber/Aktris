@@ -6,7 +6,7 @@ using Aktris.Internals.Helpers;
 
 namespace Aktris.Supervision
 {
-	public class AllForOneSupervisorStrategy : SupervisorStrategyBase
+	public class AllForOneSupervisorStrategy : DeciderSupervisorStrategy
 	{
 
 		public AllForOneSupervisorStrategy(Func<Exception, SupervisorAction> decider = null, uint? maxNrOfRetries = null)
@@ -15,25 +15,25 @@ namespace Aktris.Supervision
 		}
 
 
-		protected override void HandleRestart(ActorRef child, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> children)
+		protected override void HandleRestart(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
 		{
-			if(children.Count > 0)
+			if(actorWithSiblings.Count > 0)
 			{
-				var okToRestartAllChildren = children.All(IsOkToRestart);
+				var okToRestartAllChildren = actorWithSiblings.All(IsOkToRestart);
 				if(okToRestartAllChildren)
 				{
-					children.ForEach(c => RestartChild(c.Child, cause));
+					actorWithSiblings.ForEach(c => RestartActor(c.Child, cause,shouldSuspendFirst: c.Child!=failingActor));
 				}
 				else
 				{
-					children.ForEach(c => StopChild(c.Child, cause));
+					actorWithSiblings.ForEach(c => StopActor(c.Child, cause));
 				}
 			}
 		}
 
-		protected override void HandleStop(ActorRef child, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> children)
+		protected override void HandleStop(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
 		{
-			children.ForEach(c => StopChild(c.Child, cause));
+			actorWithSiblings.ForEach(c => StopActor(c.Child, cause));
 		}
 
 	}

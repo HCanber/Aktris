@@ -3,12 +3,12 @@ using Aktris.Internals.Children;
 
 namespace Aktris.Supervision
 {
-	public abstract class SupervisorStrategyBase : SupervisorStrategy
+	public abstract class DeciderSupervisorStrategy : SupervisorStrategy
 	{
 		private readonly uint? _maxNrOfRetries;
 		private readonly Func<Exception, SupervisorAction> _decider;
 
-		protected SupervisorStrategyBase(Func<Exception, SupervisorAction> decider, uint? maxNrOfRetries)
+		protected DeciderSupervisorStrategy(Func<Exception, SupervisorAction> decider, uint? maxNrOfRetries)
 		{
 			_maxNrOfRetries = maxNrOfRetries;
 			_decider = decider ?? DefaultDecider;
@@ -23,10 +23,10 @@ namespace Aktris.Supervision
 			return _decider(cause);
 		}
 
-		protected bool IsOkToRestart(ChildRestartInfo arg)
+		protected bool IsOkToRestart(ChildRestartInfo restartInfo)
 		{
-			//TODO: 
-			return true;
+			if(!_maxNrOfRetries.HasValue) return true;
+			return restartInfo.NumberOfRestarts < _maxNrOfRetries.Value;
 		}
 	}
 }

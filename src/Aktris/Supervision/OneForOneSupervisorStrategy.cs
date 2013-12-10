@@ -4,7 +4,7 @@ using Aktris.Internals.Children;
 
 namespace Aktris.Supervision
 {
-	public class OneForOneSupervisorStrategy : SupervisorStrategyBase
+	public class OneForOneSupervisorStrategy : DeciderSupervisorStrategy
 	{
 
 		public OneForOneSupervisorStrategy(Func<Exception, SupervisorAction> decider = null, uint? maxNrOfRetries = null)
@@ -13,17 +13,17 @@ namespace Aktris.Supervision
 		}
 
 
-		protected override void HandleRestart(ActorRef child, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> children)
+		protected override void HandleRestart(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
 		{
 			if(IsOkToRestart(restartInfo))
 			{
-				RestartChild(child,cause);
+				RestartActor(failingActor,cause,shouldSuspendFirst:false);
 			}
 		}
 
-		protected override void HandleStop(ActorRef child, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> children)
+		protected override void HandleStop(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
 		{
-			StopChild(child,cause);
+			StopActor(failingActor,cause);
 		}
 	}
 }

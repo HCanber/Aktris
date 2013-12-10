@@ -64,6 +64,14 @@ namespace Aktris.Internals
 			_mailbox.SetActor(this);
 		}
 
+		public void Stop()
+		{			
+		}
+
+		public void Restart(Exception causedByFailure)
+		{			
+		}
+
 		public void Send(object message, ActorRef sender)
 		{
 			sender = UnwrapSenderActorRef(sender);

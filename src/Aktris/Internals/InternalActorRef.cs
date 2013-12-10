@@ -16,5 +16,7 @@ namespace Aktris.Internals
 		void Suspend();
 		void Resume(Exception causedByFailure);
 		void SendSystemMessage(SystemMessage message, ActorRef sender);
+		void Stop();
+		void Restart(Exception causedByFailure);
 	}
 }
