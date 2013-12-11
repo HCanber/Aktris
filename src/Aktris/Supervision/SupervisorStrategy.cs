@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.Children;
 
@@ -63,7 +64,8 @@ namespace Aktris.Supervision
 
 		public static SupervisorAction DefaultDecider(Exception exception)
 		{
-			//TODO:
+			if(exception is CreateActorFailedException || exception is ActorKilledException)				//TODO: || exception is DeathPactException
+				return SupervisorAction.Stop;
 			return SupervisorAction.Restart;
 		}
 	}

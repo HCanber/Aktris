@@ -67,6 +67,7 @@
     <Compile Include="Dispatching\ThreadPoolScheduler.cs" />
     <Compile Include="Dispatching\UnboundedMailbox.cs" />
     <Compile Include="Exceptions\ActorKilledException.cs" />
+    <Compile Include="Exceptions\CreateActorFailedException.cs" />
     <Compile Include="Exceptions\InvalidActorNameException.cs" />
     <Compile Include="Exceptions\NullMessageException.cs" />
     <Compile Include="IActorCreator.cs" />
