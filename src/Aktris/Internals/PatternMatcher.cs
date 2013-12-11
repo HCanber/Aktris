@@ -15,6 +15,55 @@ namespace Aktris.Internals
 			return true;
 		}
 
+		/// <summary>If the item is of any of the specified types then the handler is invoked and true is returned. </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Match<T1, T2>(object item, Action<object> handler) where T1 : class
+		{
+			if(item is T1 || item is T2)
+			{
+				handler(item);
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>If the item is of any of the specified types then the handler is invoked and true is returned. </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Match<T1, T2, T3>(object item, Action<object> handler) where T1 : class
+		{
+			if(item is T1 || item is T2 || item is T3)
+			{
+				handler(item);
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>If the item is of any of the specified types then the handler is invoked and true is returned. </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Match<T1, T2, T3, T4>(object item, Action<object> handler) where T1 : class
+		{
+			if(item is T1 || item is T2 || item is T3 || item is T4)
+			{
+				handler(item);
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>If the item is of any of the specified types then the handler is invoked and true is returned. </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool Match<T1, T2, T3, T4, T5>(object item, Action<object> handler) where T1 : class
+		{
+			if(item is T1 || item is T2 || item is T3 || item is T4 || item is T5)
+			{
+				handler(item);
+				return true;
+			}
+			return false;
+		}
+
+
 		/// <summary>If the item is of the specified type and the predicate returns true then the handler is invoked and true is returned. </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Match<T>(object item, Predicate<T> predicate, Action<T> handler) where T : class
