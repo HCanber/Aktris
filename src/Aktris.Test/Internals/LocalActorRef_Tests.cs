@@ -72,7 +72,7 @@ namespace Aktris.Test.Internals
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(null);
 			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
-			Assert.Throws<ActorInitializationException>(()=>actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>())));
+			Assert.Throws<CreateActorFailedException>(()=>actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>())));
 		}
 
 		[Fact]

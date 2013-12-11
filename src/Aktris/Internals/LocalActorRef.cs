@@ -141,7 +141,7 @@ namespace Aktris.Internals
 			}
 			catch(Exception ex)
 			{
-				throw new ActorInitializationException(this, "An error occured while creating the actor. See inner exception", ex);
+				throw new CreateActorFailedException(this, "An error occured while creating the actor. See inner exception", ex);
 			}
 			finally
 			{
@@ -152,7 +152,7 @@ namespace Aktris.Internals
 		private Actor NewActorInstance()
 		{
 			var actor = _actorInstantiator.CreateNewActor();
-			if(actor == null) throw new ActorInitializationException(this, "CreateNewActor returned null");
+			if(actor == null) throw new CreateActorFailedException(this, "CreateNewActor returned null");
 			return actor;
 		}
 
