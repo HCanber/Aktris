@@ -1,58 +1,20 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Aktris.Dispatching;
 using Aktris.Internals;
 using Aktris.Internals.Helpers;
 using Aktris.Internals.Path;
 using Aktris.Internals.SystemMessages;
-using Aktris.JetBrainsAnnotations;
-using Aktris.Test.TestHelpers;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
 
 namespace Aktris.Test
 {
-	public class Actor_Lifecycle_Tests
+// ReSharper disable once InconsistentNaming
+	public class Actor_Lifecycle_Crashes_Tests
 	{
-		[Fact]
-		public void When_an_actor_is_created_Then_its_prestart_is_called_before_messages_are_processed()
-		{
-			var system = new TestActorSystem();
-			system.Start();
-			PrestartActor prestartActor = null;
-			var child = system.CreateActor(ActorCreationProperties.Create(() =>
-			{
-				prestartActor = new PrestartActor();
-				return prestartActor;
-			}));
-			child.Send("A message", null);
-			prestartActor.PrestartCalledFirst.Should().BeTrue();
-		}
-
-		[Fact]
-		public void When_a_child_actor_is_created_Then_it_sends_SuperviseActor_message_to_parent()
-		{
-			var system = new TestActorSystem();
-			system.Start();
-
-			var mailbox = new TestMailbox(system.CreateDefaultMailbox());
-			ParentWithChildActor parent=null;
-			var parentProps = new DelegateActorCreationProperties(() =>{parent=new ParentWithChildActor();return parent;})
-			{
-				MailboxCreator = () => mailbox
-			};
-
-			var parentRef = system.CreateActor(parentProps,"Parent");
-			var stateChanges = mailbox.GetStateChangesForEnquingSystemMessagesOfType<SuperviseActor>();
-			stateChanges.Count.Should().Be(1);
-			((SuperviseActor) stateChanges.First().LastEnqueuedSystemMessage.Message).ActorToSupervise.Should().BeSameAs(parent.Child);
-		}
-
 		[Fact]
 		public void When_an_actor_throws_exception_during_handling_message_Then_Failed_message_is_sent_to_parent()
 		{
@@ -99,33 +61,6 @@ namespace Aktris.Test
 				var suspendCalls= childSuspends[i];
 				suspendCalls.Count.Should().Be(1,"Mailbox for child "+i+" should have been suspended.");
 			}
-		}
-
-		private class PrestartActor : Actor
-		{
-			public bool? PrestartCalledFirst;
-
-			public PrestartActor()
-			{
-				ReceiveAny(_ => { if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = false; });
-			}
-
-			protected internal override void PreStart()
-			{
-				if(!PrestartCalledFirst.HasValue) PrestartCalledFirst = true;
-			}
-		}
-
-		private class ParentWithChildActor : Actor
-		{
-			public ParentWithChildActor()
-			{
-				Child = CreateActor<ChildActor>("Child");
-			}
-
-			public ActorRef Child { get; private set; }
-
-			public class ChildActor : Actor{}
 		}
 
 		private class ParentWhichFailsWithChildrenActor : Actor
