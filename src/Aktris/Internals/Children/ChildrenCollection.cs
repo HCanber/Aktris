@@ -6,21 +6,26 @@ using Aktris.Exceptions;
 
 namespace Aktris.Internals.Children
 {
-	public abstract class ChildrenCollection : IImmutableEnumerable<InternalActorRef>
+	public abstract class ChildrenCollection
 	{
 		public abstract ChildrenCollection ReserveName(string name);
 		public abstract ChildrenCollection ReleaseName(string name);
-		public abstract IEnumerator<InternalActorRef> GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		public abstract int Count { get; }
+
 		public abstract bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo info);
 		public abstract bool TryGetByName(string actorName, out ChildInfo info);
-		public abstract ChildrenCollection AddOrUpdate(string name, ChildRestartInfo childRestartInfo);
+		public abstract ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo);
+		public abstract IEnumerable<InternalActorRef> GetChildrenRefs();
+		public abstract IEnumerable<ChildRestartInfo> GetChildren();
 	}
 
 	public class EmptyChildrenCollection : ChildrenCollection
 	{
 		public static readonly EmptyChildrenCollection Instance = new EmptyChildrenCollection();
 		private EmptyChildrenCollection() { }
+		public override int Count { get { return 0; } }
+
 		public override ChildrenCollection ReserveName(string name)
 		{
 			return NormalChildrenCollection.Create(ImmutableDictionary<string, ChildInfo>.Empty.Add(name, ChildNameReserved.Instance));
@@ -29,11 +34,6 @@ namespace Aktris.Internals.Children
 		public override ChildrenCollection ReleaseName(string name)
 		{
 			return this;
-		}
-
-		public override IEnumerator<InternalActorRef> GetEnumerator()
-		{
-			yield break;
 		}
 
 		public override bool TryGetByName(string actorName, out ChildInfo info)
@@ -48,9 +48,19 @@ namespace Aktris.Internals.Children
 			return false;
 		}
 
-		public override ChildrenCollection AddOrUpdate(string name, ChildRestartInfo childRestartInfo)
+		public override ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo)
 		{
 			return NormalChildrenCollection.Create(ImmutableDictionary<string, ChildInfo>.Empty.Add(name, childRestartInfo));			
+		}
+
+		public override IEnumerable<InternalActorRef> GetChildrenRefs()
+		{
+			yield break;
+		}
+
+		public override IEnumerable<ChildRestartInfo> GetChildren()
+		{
+			yield break;
 		}
 	}
 
@@ -62,6 +72,8 @@ namespace Aktris.Internals.Children
 		{
 			_children = children;
 		}
+
+		public override int Count { get { return _children.Count; } }
 
 		public override ChildrenCollection ReserveName(string name)
 		{
@@ -76,7 +88,7 @@ namespace Aktris.Internals.Children
 			return Create(_children.Remove(name));
 		}
 
-		public override ChildrenCollection AddOrUpdate(string name, ChildRestartInfo childRestartInfo)
+		public override ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo)
 		{
 			var newChildren= _children.ContainsKey(name) ? _children.Remove(name).Add(name, childRestartInfo) : _children.Add(name, childRestartInfo);
 			return Create(newChildren);
@@ -87,10 +99,15 @@ namespace Aktris.Internals.Children
 			if(children.IsEmpty) return EmptyChildrenCollection.Instance;
 			return new NormalChildrenCollection(children);
 		}
-
-		public override IEnumerator<InternalActorRef> GetEnumerator()
+		
+		public override IEnumerable<InternalActorRef> GetChildrenRefs()
 		{
-			return _children.Values.Where(i => i is ChildRestartInfo).Select(i => ((ChildRestartInfo)i).Child).GetEnumerator();
+			return _children.Values.Where(i => i is ChildRestartInfo).Select(c=>((ChildRestartInfo)c).Child);
+		}
+
+		public override IEnumerable<ChildRestartInfo> GetChildren()
+		{
+			return _children.Values.Where(i => i is ChildRestartInfo).Cast<ChildRestartInfo>();
 		}
 
 		public override bool TryGetByName(string actorName, out ChildInfo child)

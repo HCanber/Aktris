@@ -22,7 +22,7 @@ namespace Aktris.Test.Supervision
 			var sibling = A.Fake<InternalActorRef>();
 			var actorRestartInfo = new ChildRestartInfo(actor);
 			var actorAndSiblings = new List<ChildRestartInfo> { new ChildRestartInfo(sibling), actorRestartInfo };
-			var failureHandled = strategy.HandleFailure(actor, new Exception(), actorRestartInfo, actorAndSiblings);
+			var failureHandled = strategy.HandleFailure(actorRestartInfo, new Exception(), actorAndSiblings);
 			failureHandled.Should().BeFalse();
 			A.CallTo(actor).MustNotHaveHappened();
 			A.CallTo(sibling).MustNotHaveHappened();
@@ -36,7 +36,7 @@ namespace Aktris.Test.Supervision
 			var sibling = A.Fake<InternalActorRef>();
 			var actorRestartInfo = new ChildRestartInfo(actor);
 			var actorAndSiblings = new List<ChildRestartInfo> { new ChildRestartInfo(sibling), actorRestartInfo };
-			var failureHandled = strategy.HandleFailure(actor, new Exception(), actorRestartInfo, actorAndSiblings);
+			var failureHandled = strategy.HandleFailure(actorRestartInfo, new Exception(), actorAndSiblings);
 			failureHandled.Should().BeTrue();
 			A.CallTo(() => actor.Stop()).MustHaveHappened(Repeated.Exactly.Once);
 			A.CallTo(() => sibling.Stop()).MustNotHaveHappened();
@@ -51,7 +51,7 @@ namespace Aktris.Test.Supervision
 			var actorRestartInfo = new ChildRestartInfo(actor);
 			var actorAndSiblings = new List<ChildRestartInfo> { new ChildRestartInfo(sibling), actorRestartInfo };
 			var cause = new Exception();
-			var failureHandled = strategy.HandleFailure(actor, cause, actorRestartInfo, actorAndSiblings);
+			var failureHandled = strategy.HandleFailure(actorRestartInfo, cause, actorAndSiblings);
 			failureHandled.Should().BeTrue();
 			A.CallTo(() => actor.Restart(cause)).MustHaveHappened(Repeated.Exactly.Once);
 			A.CallTo(() => actor.Suspend()).MustNotHaveHappened();
@@ -68,7 +68,7 @@ namespace Aktris.Test.Supervision
 			var actorRestartInfo = new ChildRestartInfo(actor);
 			var actorAndSiblings = new List<ChildRestartInfo> { new ChildRestartInfo(sibling), actorRestartInfo };
 			var cause = new Exception();
-			var failureHandled = strategy.HandleFailure(actor, cause, actorRestartInfo, actorAndSiblings);
+			var failureHandled = strategy.HandleFailure(actorRestartInfo, cause, actorAndSiblings);
 			failureHandled.Should().BeTrue();
 			A.CallTo(() => actor.Resume(cause)).MustHaveHappened(Repeated.Exactly.Once);
 			A.CallTo(() => sibling.Resume(cause)).MustNotHaveHappened();

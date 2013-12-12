@@ -68,10 +68,6 @@ namespace Aktris.Internals
 		{			
 		}
 
-		public void Restart(Exception causedByFailure)
-		{			
-		}
-
 		public void Send(object message, ActorRef sender)
 		{
 			sender = UnwrapSenderActorRef(sender);
@@ -103,7 +99,7 @@ namespace Aktris.Internals
 			}
 			catch(Exception ex)
 			{
-				if(!HandleInvokeFailure(ex)) throw;
+				if(!EscalateError(ex)) throw;
 			}
 			finally
 			{
@@ -115,16 +111,24 @@ namespace Aktris.Internals
 
 		public void HandleSystemMessage(SystemMessageEnvelope envelope)
 		{
-			var message = envelope.Message;
-			var wasMatched =
-				IfMatchSys<CreateActor>(message, CreateActorInstance)
-				|| IfMatchSys<SuspendActor>(message, _ =>{SuspendThisOnly();SuspendChildren();})
-				|| IfMatchSys<ActorFailed>(message, HandleActorFailure)
-				|| IfMatchSys<SuperviseActor>(message, superviseMessage => Supervise(superviseMessage.ActorToSupervise));
-			if(!wasMatched)
+			try
 			{
-				//This should never happen. If it does a new SystemMessage type has been added
-				throw new InvalidOperationException(string.Format("Unexpected system message type: {0}. Message was: {1}", message.GetType(), message));
+				var message = envelope.Message;
+
+				var wasMatched =
+					IfMatchSys<CreateActor>(message, CreateActorInstance)
+					|| IfMatchSys<SuspendActor>(message, _ => { SuspendThisOnly(); SuspendChildren(); })
+					|| IfMatchSys<ActorFailed>(message, HandleActorFailure)
+					|| IfMatchSys<SuperviseActor>(message, superviseMessage => Supervise(superviseMessage.ActorToSupervise));
+				if(!wasMatched)
+				{
+					//This should never happen. If it does a new SystemMessage type has been added without updating the code
+					throw new InvalidOperationException(string.Format("Unexpected system message type: {0}. Message was: {1}", message.GetType(), message));
+				}
+			}
+			catch(Exception e)
+			{
+				EscalateError(e);
 			}
 		}
 
@@ -201,7 +205,6 @@ namespace Aktris.Internals
 		}
 
 
-
 		// Supervision -------------------------------------------------------------------------------------
 
 		private void Supervise(InternalActorRef actor)
@@ -215,7 +218,7 @@ namespace Aktris.Internals
 				if(childRestartInfo == null)
 				{
 					childRestartInfo=new ChildRestartInfo(actor);
-					UpdateChildrenCollection(c => c.AddOrUpdate(actorName, childRestartInfo));
+					UpdateChildrenCollection(c => c.AddChild(actorName, childRestartInfo));
 				}
 			}
 			else
@@ -235,26 +238,42 @@ namespace Aktris.Internals
 
 
 		// Failure -------------------------------------------------------------------------------------
+
 		private ActorRef _failPerpatrator = null;
-		private bool HandleInvokeFailure(Exception exception, IImmutableEnumerable<ActorRef> childrenNotToSuspend=null)
+
+		protected virtual bool EscalateError(Exception exception, IImmutableEnumerable<ActorRef> childrenNotToSuspend=null)		//virtual so we can override it to be able to write tests
 		{
 			if(!IsFailed)
 			{
-				SuspendThisOnly();
-				var failedMessage = new SystemMessageEnvelope(_supervisor, new ActorFailed(this, exception), this);
-				_supervisor.HandleSystemMessage(failedMessage);
-				var childrenToSkip = childrenNotToSuspend == null ? new HashSet<ActorRef>() : new HashSet<ActorRef>(childrenNotToSuspend);
-				var ignored=
-					PatternMatcher.Match<ActorFailed>(CurrentMessage.Message,m=> { SetFailedPerpatrator(m.Child);childrenToSkip.Add(m.Child);})
-					|| PatternMatcher.MatchAll(CurrentMessage.Message,m=> SetFailedPerpatrator(this));
-				SuspendChildren(childrenToSkip);
+				try
+				{
+					SuspendThisOnly();
+					var childrenToSkip = childrenNotToSuspend == null ? new HashSet<ActorRef>() : new HashSet<ActorRef>(childrenNotToSuspend);
+					var ignored=
+						PatternMatcher.Match<ActorFailed>(CurrentMessage.Message,m=> { SetFailedPerpatrator(m.Child);childrenToSkip.Add(m.Child);})
+						|| PatternMatcher.MatchAll(CurrentMessage.Message,m=> SetFailedPerpatrator(this));
+					SuspendChildren(childrenToSkip);
+					_supervisor.SendSystemMessage(new ActorFailed(this, exception, InstanceId), this);
+				}
+				catch(Exception e)
+				{
+					//TODO: Log
+					try
+					{
+						Children.GetChildrenRefs().ForEach(c=>c.Stop());
+					}
+					finally
+					{
+						//TODO: FinishTerminate()
+					}
+				}
 			}
 			return true;
 		}
 
 		private void SuspendChildren(ISet<ActorRef> childrenToSkip=null)
 		{
-			var childrenToSuspend = childrenToSkip.IsNullOrEmpty() ? Children : Children.ExceptThoseInSet(childrenToSkip);
+			var childrenToSuspend = childrenToSkip.IsNullOrEmpty() ? Children.GetChildrenRefs() : Children.GetChildrenRefs().ExceptThoseInSet(childrenToSkip);
 			childrenToSuspend.ForEach(a => a.Suspend());
 		}
 
@@ -282,6 +301,18 @@ namespace Aktris.Internals
 			}
 		}
 
+		void InternalActorRef.Restart(Exception causedByFailure)
+		{
+			try
+			{
+				_mailbox.EnqueueSystemMessage(new SystemMessageEnvelope(this, new RestartActor(causedByFailure), this));
+			}
+			catch(Exception e)
+			{
+				//TODO: Log
+			}
+		}
+
 		private void HandleActorFailure(ActorFailed actorFailedMessage)
 		{
 			//_currentMessage=new Envelope(this,actorFailedMessage, actorFailedMessage.Child);
@@ -297,13 +328,18 @@ namespace Aktris.Internals
 			}
 			else
 			{
-				//if(!_actor.SupervisorStrategy.HandleFailure(this, failedChild, cause, childStats, GetAllChildStats()))
-				//	throw cause;
+				var cause = actorFailedMessage.Cause;
+				if(!_actor.GetSupervisorStrategy().HandleFailure(childInfo, cause, Children.GetChildren().ToReadOnlyCollection()))
+				{
+					//It was not handle. Escalate by rethrowing the exception.
+					EscalateError(cause);
+				}
 			}
 		}
 
 
 		private void SuspendThisOnly() { _mailbox.Suspend(this); }
+
 		private void ResumeThisOnly() { _mailbox.Resume(this); }
 
 		private bool IsFailed { get { return _failPerpatrator != null; } }
@@ -313,6 +349,7 @@ namespace Aktris.Internals
 		private void SetFailedPerpatrator(ActorRef perpetrator) { _failPerpatrator = perpetrator; }
 
 		// Children -------------------------------------------------------------------------------------
+
 		private void ReserveChild(string name)
 		{
 			UpdateChildrenCollection(c => c.ReserveName(name));

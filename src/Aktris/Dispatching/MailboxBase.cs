@@ -54,6 +54,10 @@ namespace Aktris.Dispatching
 				ProcessAllSystemMessages();
 				ProcessNormalMessages();
 			}
+			catch(Exception ex)
+			{
+				//TODO: Log
+			}
 			finally
 			{
 				SetIdle();

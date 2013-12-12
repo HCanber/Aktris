@@ -8,11 +8,14 @@ namespace Aktris.Supervision
 {
 	public class AllForOneSupervisorStrategy : DeciderSupervisorStrategy
 	{
+		private static readonly AllForOneSupervisorStrategy _DefaultInstance=new AllForOneSupervisorStrategy(SupervisorStrategy.DefaultDecider);
 
 		public AllForOneSupervisorStrategy(Func<Exception, SupervisorAction> decider = null, uint? maxNrOfRetries = null)
 			: base(decider, maxNrOfRetries)
 		{
 		}
+
+		public static AllForOneSupervisorStrategy DefaultAllForOne { get { return _DefaultInstance; } }
 
 
 		protected override void HandleRestart(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)

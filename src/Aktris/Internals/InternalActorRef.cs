@@ -5,11 +5,9 @@ using Aktris.Internals.SystemMessages;
 namespace Aktris.Internals
 {
 // ReSharper disable once InconsistentNaming
-	public interface InternalActorRef : ActorRef
+	public interface InternalActorRef : ActorRef, InternalMessageHandler
 	{
 		void Start();
-		void HandleMessage(Envelope envelope);
-		void HandleSystemMessage(SystemMessageEnvelope envelope);
 		ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
 		uint InstanceId { get; }
 		Mailbox Mailbox { get; }

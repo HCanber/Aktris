@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Aktris.Internals.Helpers
@@ -43,6 +44,11 @@ namespace Aktris.Internals.Helpers
 		public static IEnumerable<T> ExceptThoseInSet<T,T2>(this IEnumerable<T> sequence, ISet<T2> exceptThese) where T:T2
 		{
 			return sequence.Where(i => !exceptThese.Contains(i));
+		}
+
+		public static IReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> sequence)
+		{
+			return new ReadOnlyCollection<T>(new List<T>(sequence));
 		}
 	}
 }

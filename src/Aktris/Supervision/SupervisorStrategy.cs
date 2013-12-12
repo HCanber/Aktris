@@ -10,19 +10,20 @@ namespace Aktris.Supervision
 	{
 		private static readonly SupervisorStrategy _DefaultStrategy = new OneForOneSupervisorStrategy(DefaultDecider);
 
-		public bool HandleFailure(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
+		public bool HandleFailure(ChildRestartInfo failedActorRestartInfo, Exception cause, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
 		{
 			var action = DecideHowToHandle(cause) ?? SupervisorAction.Escalate;
+			var failingActor = failedActorRestartInfo.Child;
 			switch(action)
 			{
 				case SupervisorAction.Resume:
 					ResumeActor(failingActor, cause);
 					break;
 				case SupervisorAction.Restart:
-					HandleRestart(failingActor, cause, restartInfo, actorWithSiblings);
+					HandleRestart(failingActor, cause, failedActorRestartInfo, actorWithSiblings);
 					break;
 				case SupervisorAction.Stop:
-					HandleStop(failingActor, cause, restartInfo, actorWithSiblings);
+					HandleStop(failingActor, cause, failedActorRestartInfo, actorWithSiblings);
 					break;
 				case SupervisorAction.Escalate:
 					return false;

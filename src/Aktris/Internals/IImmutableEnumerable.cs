@@ -6,7 +6,7 @@ namespace Aktris.Internals
 	/// <summary>A marker interface for enumerations that are immutable.</summary>
 	public interface IImmutableEnumerable<out T> :IEnumerable<T>
 	{
-		//Intentionally left blank 
+		int Count { get; }
 	}
 
 	public static class IImmutableEnumerable
@@ -22,6 +22,8 @@ namespace Aktris.Internals
 
 			private EmptyEnumerable(){}
 
+			public int Count { get { return 0; } }
+
 			public IEnumerator<T> GetEnumerator()
 			{
 				yield break;
@@ -31,6 +33,6 @@ namespace Aktris.Internals
 			{
 				return GetEnumerator();
 			}
-		}
+		}		
 	}
 }

@@ -1,7 +1,12 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq;
 using System.Threading;
+using Aktris.Internals;
+using Aktris.Internals.Helpers;
 using Aktris.Internals.SystemMessages;
 using Aktris.JetBrainsAnnotations;
 using Aktris.Test.TestHelpers;
@@ -79,5 +84,23 @@ namespace Aktris.Test
 			public class ChildActor : Actor { }
 		}
 
+	}
+
+	public class Actor_Lifecycle_Restarting_Tests
+	{
+		//[Fact]
+		//public void Given_supervisor_that_restarts_all_children_When_actor_crashes_and_Then_all_its_siblings_are_restarted()
+		//{
+		//	throw new Exception("Incomplete test");
+		//}
+
+		//public class SupervisorWithChildren : Actor
+		//{
+		//	public SupervisorWithChildren(IEnumerable<LocalActorRef> children)
+		//	{
+				
+		//		children.ForEach(c=>CreateActor());
+		//	}
+		//}
 	}
 }

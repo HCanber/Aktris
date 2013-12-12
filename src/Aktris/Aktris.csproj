@@ -83,6 +83,7 @@
     <Compile Include="Internals\IImmutableEnumerable.cs" />
     <Compile Include="Internals\InternalActorRef.cs" />
     <Compile Include="Internals\InternalActorSystem.cs" />
+    <Compile Include="Internals\InternalMessageHandler.cs" />
     <Compile Include="Internals\LocalActorRefStack.cs" />
     <Compile Include="Internals\Path\ChildActorPath.cs" />
     <Compile Include="Internals\MinimalActorRef.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Internals\LocalActorRefFactory.cs" />
     <Compile Include="Internals\SystemMessages\ActorFailed.cs" />
     <Compile Include="Internals\SystemMessages\CreateActor.cs" />
+    <Compile Include="Internals\SystemMessages\RestartActor.cs" />
     <Compile Include="Internals\SystemMessages\ResumeActor.cs" />
     <Compile Include="Internals\SystemMessages\SuperviseActor.cs" />
     <Compile Include="Internals\SystemMessages\SuspendActor.cs" />

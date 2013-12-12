@@ -8,9 +8,10 @@ namespace Aktris.Internals.SystemMessages
 		private readonly ActorRef _child;
 		private readonly Exception _cause;
 
-		public ActorFailed([NotNull] ActorRef child, Exception cause)
+		public ActorFailed([NotNull] ActorRef child, [NotNull] Exception cause, uint instanceId)
 		{
 			if(child == null) throw new ArgumentNullException("child");
+			if(cause == null) throw new ArgumentNullException("cause");
 			_child = child;
 			_cause = cause;
 		}
@@ -18,7 +19,7 @@ namespace Aktris.Internals.SystemMessages
 		[NotNull]
 		public ActorRef Child { get { return _child; } }
 
-		[CanBeNull]
+		[NotNull]
 		public Exception Cause { get { return _cause; } }
 	}
 }

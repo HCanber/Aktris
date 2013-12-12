@@ -8,6 +8,7 @@ using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.Path;
 using Aktris.Internals.SystemMessages;
+using Aktris.JetBrainsAnnotations;
 using Aktris.Test.TestHelpers;
 using FakeItEasy;
 using FluentAssertions;
@@ -61,18 +62,22 @@ namespace Aktris.Test.Internals
 		{
 			var mailbox = A.Fake<Mailbox>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
-			Assert.Throws<InvalidOperationException>(() => actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new NonExistingSystemMessage(), A.Fake<ActorRef>())));
+			var actorRef = new TestLocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new NonExistingSystemMessage(), A.Fake<ActorRef>()));
+			actorRef.EscalatedErrors.Count.Should().Be(1);
+			actorRef.EscalatedErrors[0].Should().BeOfType<InvalidOperationException>();
 		}
 
 		[Fact]
-		public void When_handling_CreateActor_message_and_the_ActorInstantiator_returns_null_then_Exception_is_thrown()
+		public void When_handling_CreateActor_message_and_the_ActorInstantiator_returns_null_then_error_is_escalated()
 		{
 			var mailbox = A.Fake<Mailbox>();
 			var actorInstantiator = A.Fake<ActorInstantiator>();
 			A.CallTo(() => actorInstantiator.CreateNewActor()).Returns(null);
-			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
-			Assert.Throws<CreateActorFailedException>(()=>actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>())));
+			var actorRef = new TestLocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
+			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
+			actorRef.EscalatedErrors.Count.Should().Be(1);
+			actorRef.EscalatedErrors[0].Should().BeOfType<CreateActorFailedException>();
 		}
 
 		[Fact]
@@ -147,6 +152,20 @@ namespace Aktris.Test.Internals
 		}
 
 		private class NonExistingSystemMessage : SystemMessage { }
+
+		private class TestLocalActorRef : LocalActorRef
+		{
+			public TestLocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor) : base(system, actorInstantiator, path, mailbox, supervisor)
+			{
+				EscalatedErrors=new List<Exception>();
+			}
+			public List<Exception> EscalatedErrors { get; private set; }
+			protected override bool EscalateError(Exception exception, IImmutableEnumerable<ActorRef> childrenNotToSuspend = null)
+			{
+				EscalatedErrors.Add(exception);
+				return base.EscalateError(exception, childrenNotToSuspend);
+			}
+		}
 	}
 	// ReSharper restore InconsistentNaming
 }

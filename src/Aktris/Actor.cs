@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.JetBrainsAnnotations;
+using Aktris.Supervision;
 
 namespace Aktris
 {
@@ -38,7 +39,7 @@ namespace Aktris
 		/// </summary>
 		internal Actor(LocalActorRef actorRef, ActorSystem system, LocalActorRefFactory localActorRefFactory)
 		{
-			if(actorRef==null)
+			if(actorRef == null)
 			{
 				if(!LocalActorRefStack.TryGetActorRefFromStack(out actorRef))
 				{
@@ -63,6 +64,9 @@ namespace Aktris
 		[NotNull]
 		internal InternalActorRef InternalSelf { get { return _self; } }
 
+		protected virtual SupervisorStrategy SupervisorStrategy { get { return SupervisorStrategy.DefaultStrategy; } }
+
+		internal SupervisorStrategy GetSupervisorStrategy() { return SupervisorStrategy ?? SupervisorStrategy.DefaultStrategy; }
 
 		protected internal virtual void PreStart()
 		{
@@ -78,7 +82,7 @@ namespace Aktris
 		/// <returns><c>true</c> if the actor has handled the message; <c>false</c> otherwise.</returns>
 		internal protected virtual bool HandleMessage(object message)
 		{
-			return _defaultMessageHandler(message,Sender);
+			return _defaultMessageHandler(message, Sender);
 		}
 
 		protected ActorRef CreateActor<T>(string name = null) where T : Actor, new()
@@ -155,7 +159,7 @@ namespace Aktris
 			EnsureMayConfigureMessageHandlers();
 			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
 		}
-		protected void AddReceiver(Type type, Func<object,bool> handler)
+		protected void AddReceiver(Type type, Func<object, bool> handler)
 		{
 			EnsureMayConfigureMessageHandlers();
 			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
