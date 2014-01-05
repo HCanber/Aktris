@@ -27,6 +27,11 @@ namespace Aktris.Test
 			return GetStateChangesFor(t => t.Item1 == state);
 		}
 
+		public List<T> GetEnquedSystemMessagesOfType<T>() where T : class, SystemMessage
+		{
+			return GetStateChangesFor(StateChange.EnqueueSystemMessage, state => { var m = state.GetLastEnqueuedSystemMessage(); return m != null && m.Message is T; }).Select(s=>(T)s.GetLastEnqueuedSystemMessage().Message).ToList();
+		}
+
 		public List<State> GetStateChangesForEnquingSystemMessagesOfType<T>()
 		{
 			return GetStateChangesFor(StateChange.EnqueueSystemMessage, state => { var m = state.GetLastEnqueuedSystemMessage(); return m != null && m.Message is T; });

@@ -123,6 +123,11 @@ namespace Aktris
 			return _self.CreateActor(actorCreationProperties, name);
 		}
 
+		protected void Watch(ActorRef actorToWatch)
+		{
+			_self.Watch((InternalActorRef) actorToWatch);
+		}
+
 		// API for the user that implements an actor to define message handlers -----------------------------------------
 
 		/// <summary>

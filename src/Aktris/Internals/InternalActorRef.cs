@@ -18,5 +18,6 @@ namespace Aktris.Internals
 		void Stop();
 		void Restart(Exception causedByFailure);
 		void UnwatchAndStopChildren();
+		void Watch(InternalActorRef actorToWatch);
 	}
 }

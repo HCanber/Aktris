@@ -106,6 +106,7 @@
     <Compile Include="Internals\SystemMessages\SystemMessage.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessageEnvelope.cs" />
     <Compile Include="Internals\SystemMessages\TerminateActor.cs" />
+    <Compile Include="Internals\SystemMessages\WatchActor.cs" />
     <Compile Include="Internals\UniqueNameCreator.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="MessageHandler.cs" />

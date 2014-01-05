@@ -33,6 +33,8 @@ namespace Aktris.Internals
 		private Envelope _currentMessage;
 		private volatile ChildrenCollection _childrenDoNotCallMeDirectly = EmptyChildrenCollection.Instance;
 		private ActorStatus _actorStatus = ActorStatus.Normal;
+		private static readonly IImmutableSet<InternalActorRef> _EmptyActorRefSet = ImmutableHashSet<InternalActorRef>.Empty;
+		private IImmutableSet<InternalActorRef> _watching = _EmptyActorRefSet;
 
 		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
 		{
@@ -129,7 +131,8 @@ namespace Aktris.Internals
 					|| IfMatchSys<TerminateActor>(message, m => HandleTerminateActor())
 					|| IfMatchSysCause<RecreateActor>(message, m => RecreateActor(m))
 					|| IfMatchSys<SuperviseActor>(message, superviseMessage => Supervise(superviseMessage.ActorToSupervise))
-					|| IfMatchSys<ActorTerminated>(message, m => HandleActorTerminated(m));
+					|| IfMatchSys<ActorTerminated>(message, m => HandleActorTerminated(m))
+					|| IfMatchSys<WatchActor>(message, m => HandleWatch(m));
 				// ReSharper restore ConvertClosureToMethodGroup
 				if(!wasMatched)
 				{
@@ -516,6 +519,15 @@ namespace Aktris.Internals
 			}
 		}
 
+		public void Watch(InternalActorRef actorToWatch)
+		{
+			if(actorToWatch != this && !_watching.Contains(actorToWatch))
+			{
+				actorToWatch.SendSystemMessage(new WatchActor(this),this);
+				_watching = _watching.Add(actorToWatch);
+			}
+		}
+
 		private void Unwatch(InternalActorRef actor)
 		{
 			if(actor != this)
@@ -523,6 +535,10 @@ namespace Aktris.Internals
 			}
 		}
 
+
+		private void HandleWatch(WatchActor message)
+		{
+		}
 		// Failure -------------------------------------------------------------------------------------
 
 
