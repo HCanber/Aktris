@@ -63,8 +63,10 @@
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
     <Compile Include="ActorSystem_Tests.cs" />
     <Compile Include="Actor_as_ActorCreator_Tests.cs" />
+    <Compile Include="Actor_Lifecycle_Crashes_LifecycleEvents_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Crashes_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Creation_Tests.cs" />
+    <Compile Include="Actor_Lifecycle_Termintation_Tests.cs" />
     <Compile Include="AnonymousActor_Tests.cs" />
     <Compile Include="DelegateActorCreationProperties_Tests.cs" />
     <Compile Include="Actor_Tests.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="TestActorSystem.cs" />
     <Compile Include="TestBootstrapper.cs" />
     <Compile Include="TestHelpers\ActorHelper.cs" />
+    <Compile Include="TestHelpers\NoopActor.cs" />
     <Compile Include="TestMailbox.cs" />
   </ItemGroup>
   <ItemGroup>

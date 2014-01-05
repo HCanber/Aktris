@@ -1,5 +1,6 @@
 ﻿using System;
 using Aktris.Dispatching;
+using Aktris.Internals.Children;
 using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Internals
@@ -20,5 +21,6 @@ namespace Aktris.Internals
 		public abstract ActorPath Path { get; }
 		public abstract uint InstanceId { get; }
 		public virtual void SendSystemMessage(SystemMessage message, ActorRef sender) {/* Intentionally left blank */}
+		public void UnwatchAndStopChildren() {/* Intentionally left blank */}
 	}
 }

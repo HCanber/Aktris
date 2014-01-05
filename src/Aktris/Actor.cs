@@ -5,6 +5,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text.RegularExpressions;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.Internals.Helpers;
 using Aktris.JetBrainsAnnotations;
 using Aktris.Supervision;
 
@@ -15,7 +16,7 @@ namespace Aktris
 		private bool _hasBeenInitialized;
 		private MessageHandlerConfigurator _constructorMessageHandlerConfigurator;
 		private MessageHandler _defaultMessageHandler;
-		private LocalActorRef _self;
+		private InternalActorRef _self;
 		private readonly ActorSystem _system;
 		private LocalActorRefFactory _localActorRefFactory;
 
@@ -33,6 +34,21 @@ namespace Aktris
 			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
 			_localActorRefFactory = _system.LocalActorRefFactory;
 		}
+
+		// ReSharper disable once VirtualMemberNeverOverriden.Global   Init is virtual in order to be mockable
+		internal virtual void Init(LocalActorRef self)
+		{
+			//This might be called directly after the constructor, or when the same actor instance has been returned
+			//during recreate. In the second case, _self has been set to DeadLetter so we need to set it again.
+			_self = self;
+			if(!_hasBeenInitialized)	//Do not perform this when "recreating" the same instance
+			{
+				_defaultMessageHandler = _constructorMessageHandlerConfigurator.CreateMessageHandler();
+				_constructorMessageHandlerConfigurator = null;
+				_hasBeenInitialized = true;
+			}
+		}
+
 
 		/// <summary>
 		/// This one is used for internal testing only
@@ -60,19 +76,26 @@ namespace Aktris
 		/// <summary>The reference to this actor</summary>
 		[NotNull]
 		protected internal ActorRef Self { get { return _self; } }
-
 		[NotNull]
 		internal InternalActorRef InternalSelf { get { return _self; } }
+
+		internal bool IsCleared { get { return _self == _system.DeadLetters; } }
 
 		protected virtual SupervisorStrategy SupervisorStrategy { get { return SupervisorStrategy.DefaultStrategy; } }
 
 		internal SupervisorStrategy GetSupervisorStrategy() { return SupervisorStrategy ?? SupervisorStrategy.DefaultStrategy; }
 
-		protected internal virtual void PreStart()
-		{
-			//Intentionally left blank
-		}
+		protected void Stop() { _self.Stop(); }
 
+
+		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
+		protected internal virtual void PreStart() {/*Intentionally left blank*/}
+		protected internal virtual void PostStop() {/*Intentionally left blank*/}
+		protected internal virtual void PreRestart(Exception cause, object message)
+		{
+			InternalSelf.UnwatchAndStopChildren();
+		}
+		protected internal virtual void PostRestart(Exception cause) {/*Intentionally left blank*/}
 
 		/// <summary>
 		/// Handles a message. By default it calls the handlers registered in the constructor using any of the Receive methods.
@@ -182,12 +205,11 @@ namespace Aktris
 			if(_hasBeenInitialized) throw new InvalidOperationException("You may only call Receive-methods from the constructor.");
 		}
 
-		// ReSharper disable once VirtualMemberNeverOverriden.Global   Init is virtual in order to be mockable
-		internal virtual void Init()
+
+
+		internal void Clear()
 		{
-			_defaultMessageHandler = _constructorMessageHandlerConfigurator.CreateMessageHandler();
-			_constructorMessageHandlerConfigurator = null;
-			_hasBeenInitialized = true;
+			_self = (InternalActorRef)_system.DeadLetters;
 		}
 
 

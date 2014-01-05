@@ -20,6 +20,7 @@ namespace Aktris.Dispatching
 		[DebuggerDisplay("{GetMailboxStatusForDebug(),nq}")]
 		protected internal int Status { get { return _mailboxStatus; } }
 
+		public bool IsSuspended { get { return _mailboxStatus.IsSuspended(); } }
 
 		public void SetActor(InternalActorRef actor)
 		{
@@ -29,9 +30,15 @@ namespace Aktris.Dispatching
 			ScheduleIfNeeded();
 		}
 
+		public void DetachActor(InternalActorRef actor)
+		{
+			if(_actor == actor) _actor = null;
+		}
+
 		protected virtual void Register(InternalActorRef actor)
 		{
 		}
+
 
 		public void Enqueue(Envelope envelope)
 		{
@@ -43,7 +50,7 @@ namespace Aktris.Dispatching
 		public void EnqueueSystemMessage(SystemMessageEnvelope envelope)
 		{
 			_systemMessagesQueue.Enqueue(envelope);
-			ScheduleIfNeeded();
+			ScheduleIfNeeded(hasSystemMessage: true);
 
 		}
 
@@ -85,7 +92,7 @@ namespace Aktris.Dispatching
 				while(TryGetMessageToProcess(out message))
 				{
 					HandleMessage(message);
-					ProcessAllSystemMessages();					
+					ProcessAllSystemMessages();
 				}
 			}
 		}
@@ -107,11 +114,11 @@ namespace Aktris.Dispatching
 
 
 
-		protected void ScheduleIfNeeded()
+		protected void ScheduleIfNeeded(bool hasSystemMessage = false)
 		{
 			if(_actor != null)
 			{
-				if(UpdateStatusIf(MailboxStatus.IsOpenAndIdleAndNotSuspended, MailboxStatus.SetScheduled))
+				if(UpdateStatusIf(status => hasSystemMessage ? status.IsOpenAndIdle() : status.IsOpenAndIdleAndNotSuspended(), MailboxStatus.SetScheduled))
 				{
 					Schedule(ProcessMessages);
 				}
@@ -120,7 +127,7 @@ namespace Aktris.Dispatching
 
 		public void Suspend(InternalActorRef actorRef)
 		{
-			if(actorRef.Mailbox == this)
+			if(Equals(actorRef.Mailbox, this))
 			{
 				Suspend();
 			}
@@ -141,7 +148,7 @@ namespace Aktris.Dispatching
 
 		public void Resume(InternalActorRef actorRef)
 		{
-			if(actorRef.Mailbox == this)
+			if(Equals(actorRef.Mailbox, this))
 			{
 				Resume();
 			}
@@ -205,8 +212,7 @@ namespace Aktris.Dispatching
 			});
 		}
 
-		[UsedImplicitly]
-		private string GetMailboxStatusForDebug()
+		internal string GetMailboxStatusForDebug()
 		{
 			return _mailboxStatus.ToDebugString();
 		}
@@ -300,7 +306,7 @@ namespace Aktris.Dispatching
 
 		public static bool IsSuspendedOrClosed(this int status)
 		{
-			return (status & _SuspendedOrClosedMask) !=0;
+			return (status & _SuspendedOrClosedMask) != 0;
 		}
 
 		public static string ToDebugString(this int status)

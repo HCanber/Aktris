@@ -11,5 +11,7 @@ namespace Aktris.Dispatching
 		void EnqueueSystemMessage(SystemMessageEnvelope envelope);
 		void Suspend(InternalActorRef actor);
 		void Resume(InternalActorRef actor);
+		bool IsSuspended { get; }
+		void DetachActor(InternalActorRef actor);
 	}
 }

@@ -16,6 +16,22 @@ namespace Aktris.Internals.Helpers
 			}
 		}
 
+		public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action, Action<T,Exception> exceptionHandler)
+		{
+			if(sequence == null) return;
+			foreach(var item in sequence)
+			{
+				try
+				{
+					action(item);
+				}
+				catch(Exception e)
+				{
+					exceptionHandler(item, e);
+				}
+			}
+		}
+
 		public static void ForEach<T>(this IEnumerable<T> sequence, Action<T,int> action)
 		{
 			if(sequence == null) return;

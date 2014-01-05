@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Aktris.Internals
 {
@@ -14,6 +15,11 @@ namespace Aktris.Internals
 		public static IImmutableEnumerable<T> Empty<T>()
 		{
 			return EmptyEnumerable<T>.Instance;
+		}
+
+		public static IImmutableEnumerable<T> ToImmutableEnumerable<T>(this IEnumerable<T> sequence)
+		{
+			return new ImmutableEnumerable<T>(sequence);
 		}
 
 		private class EmptyEnumerable<T> : IImmutableEnumerable<T>
@@ -33,6 +39,28 @@ namespace Aktris.Internals
 			{
 				return GetEnumerator();
 			}
-		}		
+		}
+
+		private class ImmutableEnumerable<T> : IImmutableEnumerable<T>
+		{
+			private List<T> _source;
+
+			public ImmutableEnumerable(IEnumerable<T> source)
+			{
+				_source = source.ToList();
+			}
+
+			public int Count { get { return _source.Count; }}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+
+			public IEnumerator<T> GetEnumerator()
+			{
+				return _source.GetEnumerator();
+			}
+		}
 	}
 }

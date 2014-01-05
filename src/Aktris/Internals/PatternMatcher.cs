@@ -89,6 +89,14 @@ namespace Aktris.Internals
 
 		/// <summary>Calls the handler for any object and then returns true.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool MatchAll( Action handler)
+		{
+			handler();
+			return true;
+		}
+
+		/// <summary>Calls the handler for any object and then returns true.</summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool MatchAll(object item, Action<object> handler)
 		{
 			handler(item);

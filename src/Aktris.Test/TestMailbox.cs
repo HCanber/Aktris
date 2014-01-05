@@ -8,17 +8,19 @@ using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Test
 {
-	public class TestMailbox : Mailbox
+	public class TestMailbox : Mailbox, IEquatable<Mailbox>
 	{
 		private readonly Mailbox _mailbox;
 		private readonly object _stateLock = new object();
 		public List<Tuple<StateChange, State>> States { get; private set; }
-			
+
 		public TestMailbox(Mailbox mailbox)
 		{
 			_mailbox = mailbox;
-			States = new List<Tuple<StateChange, State>>(){Tuple.Create(StateChange.Initial,new State())};				
+			States = new List<Tuple<StateChange, State>>() { Tuple.Create(StateChange.Initial, new State()) };
 		}
+
+		public bool IsSuspended { get { return _mailbox.IsSuspended; } }
 
 		public List<State> GetStateChangesFor(StateChange state)
 		{
@@ -27,22 +29,22 @@ namespace Aktris.Test
 
 		public List<State> GetStateChangesForEnquingSystemMessagesOfType<T>()
 		{
-			return GetStateChangesFor(StateChange.EnqueueSystemMessage, state => { var m=state.LastEnqueuedSystemMessage; return m!=null && m.Message is T; });
+			return GetStateChangesFor(StateChange.EnqueueSystemMessage, state => { var m = state.GetLastEnqueuedSystemMessage(); return m != null && m.Message is T; });
 		}
 
-		public List<State> GetStateChangesFor(StateChange state,Predicate<State> isCorrectState)
+		public List<State> GetStateChangesFor(StateChange state, Predicate<State> isCorrectState)
 		{
 			return GetStateChangesFor(t => t.Item1 == state && isCorrectState(t.Item2));
 		}
 
 		public List<State> GetStateChangesFor(Predicate<Tuple<StateChange, State>> predicate)
 		{
-			return States.Where(t=>predicate(t)).Select(t => t.Item2).ToList();
+			return States.Where(t => predicate(t)).Select(t => t.Item2).ToList();
 		}
 
 		void Mailbox.SetActor(InternalActorRef actor)
 		{
-			ChangeState(StateChange.SetActor, s=>s.SetActor(actor));
+			ChangeState(StateChange.SetActor, s => s.SetActor(actor));
 			_mailbox.SetActor(actor);
 		}
 
@@ -70,17 +72,38 @@ namespace Aktris.Test
 			_mailbox.Resume(actor);
 		}
 
+		void Mailbox.DetachActor(InternalActorRef actor)
+		{
+			ChangeState(StateChange.DetachActor, s => s.Actor==actor ? s.SetActor(null) : s);
+			_mailbox.DetachActor(actor);
+		}
+
+		public bool Equals(Mailbox other)
+		{
+			return _mailbox.Equals(other);
+		}
+
+		public override bool Equals(object obj)
+		{
+			var mailbox = obj as Mailbox;
+			if(mailbox == null) return false;
+			return Equals(mailbox);
+		}
+
 		private void ChangeState(StateChange stateChange, Func<State, State> stateChanger)
 		{
 			lock(_stateLock)
 			{
-				States.Add(Tuple.Create(stateChange, stateChanger(States[States.Count - 1].Item2)));
+				var lastIndex = States.Count - 1;
+				var lastState = States[lastIndex].Item2;
+				var newState = stateChanger(lastState);
+				States.Add(Tuple.Create(stateChange, newState));
 			}
 		}
 
 		public enum StateChange
 		{
-			Initial, SetActor, Enqueue, EnqueueSystemMessage, Suspend, Resume
+			Initial, SetActor, Enqueue, EnqueueSystemMessage, Suspend, Resume, DetachActor
 		}
 
 		public class State
@@ -111,13 +134,10 @@ namespace Aktris.Test
 			public ImmutableList<Envelope> EnquedMessages { get { return _enquedMessages; } }
 			public ImmutableList<SystemMessageEnvelope> EnquedSystemMessages { get { return _enquedSystemMessages; } }
 
-			public SystemMessageEnvelope LastEnqueuedSystemMessage
+			public SystemMessageEnvelope GetLastEnqueuedSystemMessage()
 			{
-				get
-				{
-					var count = _enquedSystemMessages.Count;
-					return count == 0 ? null : _enquedSystemMessages[count - 1];
-				}
+				var count = _enquedSystemMessages.Count;
+				return count == 0 ? null : _enquedSystemMessages[count - 1];
 			}
 
 			public Envelope GetLastEnqueuedMessage()
@@ -133,19 +153,19 @@ namespace Aktris.Test
 
 			public State IncreaseNumberOfSuspendCalls()
 			{
-				return new State(_actor,_numberOfSuspendCalls + 1, _numberOfResumeCalls, _enquedMessages, _enquedSystemMessages);
+				return new State(_actor, _numberOfSuspendCalls + 1, _numberOfResumeCalls, _enquedMessages, _enquedSystemMessages);
 			}
 			public State IncreaseNumberOfResumeCalls()
 			{
-				return new State(_actor,_numberOfSuspendCalls, _numberOfResumeCalls + 1, _enquedMessages, _enquedSystemMessages);
+				return new State(_actor, _numberOfSuspendCalls, _numberOfResumeCalls + 1, _enquedMessages, _enquedSystemMessages);
 			}
 			public State EnqueueMessage(Envelope message)
 			{
-				return new State(_actor,_numberOfSuspendCalls, _numberOfResumeCalls, _enquedMessages.Add(message), _enquedSystemMessages);
+				return new State(_actor, _numberOfSuspendCalls, _numberOfResumeCalls, _enquedMessages.Add(message), _enquedSystemMessages);
 			}
 			public State EnqueueSystemMessage(SystemMessageEnvelope message)
 			{
-				return new State(_actor,_numberOfSuspendCalls, _numberOfResumeCalls, _enquedMessages, _enquedSystemMessages.Add(message));
+				return new State(_actor, _numberOfSuspendCalls, _numberOfResumeCalls, _enquedMessages, _enquedSystemMessages.Add(message));
 			}
 		}
 	}

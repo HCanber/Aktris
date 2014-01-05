@@ -2,7 +2,7 @@
 
 namespace Aktris.Internals.SystemMessages
 {
-	public class ResumeActor : SystemMessage
+	public class ResumeActor : ExceptionSystemMessage
 	{
 		private readonly Exception _causedByFailure;
 

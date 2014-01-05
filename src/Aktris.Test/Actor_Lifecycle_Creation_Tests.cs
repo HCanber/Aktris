@@ -53,7 +53,7 @@ namespace Aktris.Test
 			var parentRef = system.CreateActor(parentProps, "Parent");
 			var stateChanges = mailbox.GetStateChangesForEnquingSystemMessagesOfType<SuperviseActor>();
 			stateChanges.Count.Should().Be(1);
-			((SuperviseActor) stateChanges.First().LastEnqueuedSystemMessage.Message).ActorToSupervise.Should().BeSameAs(parent.Child);
+			((SuperviseActor) stateChanges.First().GetLastEnqueuedSystemMessage().Message).ActorToSupervise.Should().BeSameAs(parent.Child);
 		}
 
 

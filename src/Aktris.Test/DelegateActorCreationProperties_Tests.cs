@@ -30,7 +30,7 @@ namespace Aktris.Test
 		[Fact]
 		public void Given_a_factory_created_by_ActorFactory_When_creating_actors_Then_they_are_different()
 		{
-			var factory = new DelegateActorCreationProperties(ActorHelper.CreateActorDirectly(()=>new Test.FakeActor()));
+			var factory = new DelegateActorCreationProperties(ActorHelper.CreateActorDirectly<FakeActor>);
 
 			var actor1 = factory.CreateNewActor();
 			var actor2 = factory.CreateNewActor();

@@ -36,7 +36,7 @@ namespace Aktris.Test.Internals
 			var mailbox = A.Fake<Mailbox>();
 			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
 
-			actorRef.Start();
+			((InternalActorRef)actorRef).Start();
 
 			A.CallTo(() => mailbox.SetActor(actorRef)).MustHaveHappened();
 		}
@@ -52,7 +52,7 @@ namespace Aktris.Test.Internals
 
 			var actorRef = new LocalActorRef(new TestActorSystem(), A.Fake<ActorCreationProperties>(), new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
 
-			actorRef.Start();
+			((InternalActorRef)actorRef).Start();
 			actorRef.Send("MyTestMessage", null);
 			messages.Should().Contain(e => e.Message is string && ((string)e.Message) == "MyTestMessage");
 		}
@@ -104,7 +104,7 @@ namespace Aktris.Test.Internals
 			A.CallTo(() => actorInstantiator.CreateNewActor()).ReturnsLazily(()=> { actor = A.Fake<Actor>();return actor;});
 			var actorRef = new LocalActorRef(new TestActorSystem(), actorInstantiator, new RootActorPath("test"), mailbox, A.Dummy<InternalActorRef>());
 			actorRef.HandleSystemMessage(new SystemMessageEnvelope(actorRef, new CreateActor(), A.Fake<ActorRef>()));
-			A.CallTo(()=>actor.Init()).MustHaveHappened(Repeated.Exactly.Once);
+			A.CallTo(()=>actor.Init(actorRef)).MustHaveHappened(Repeated.Exactly.Once);
 		}
 
 		[Fact]
@@ -160,7 +160,7 @@ namespace Aktris.Test.Internals
 				EscalatedErrors=new List<Exception>();
 			}
 			public List<Exception> EscalatedErrors { get; private set; }
-			protected override bool EscalateError(Exception exception, IImmutableEnumerable<ActorRef> childrenNotToSuspend = null)
+			protected override bool EscalateError(Exception exception, IEnumerable<ActorRef> childrenNotToSuspend = null)
 			{
 				EscalatedErrors.Add(exception);
 				return base.EscalateError(exception, childrenNotToSuspend);

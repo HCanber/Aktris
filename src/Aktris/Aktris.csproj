@@ -96,13 +96,16 @@
     <Compile Include="Internals\LocalActorRef.cs" />
     <Compile Include="Internals\LocalActorRefFactory.cs" />
     <Compile Include="Internals\SystemMessages\ActorFailed.cs" />
+    <Compile Include="Internals\SystemMessages\ActorTerminated.cs" />
     <Compile Include="Internals\SystemMessages\CreateActor.cs" />
-    <Compile Include="Internals\SystemMessages\RestartActor.cs" />
+    <Compile Include="Internals\SystemMessages\ExceptionSystemMessage.cs" />
+    <Compile Include="Internals\SystemMessages\RecreateActor.cs" />
     <Compile Include="Internals\SystemMessages\ResumeActor.cs" />
     <Compile Include="Internals\SystemMessages\SuperviseActor.cs" />
     <Compile Include="Internals\SystemMessages\SuspendActor.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessage.cs" />
     <Compile Include="Internals\SystemMessages\SystemMessageEnvelope.cs" />
+    <Compile Include="Internals\SystemMessages\TerminateActor.cs" />
     <Compile Include="Internals\UniqueNameCreator.cs" />
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="MessageHandler.cs" />

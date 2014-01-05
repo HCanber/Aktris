@@ -16,16 +16,14 @@ namespace Aktris.Test.TestHelpers
 		/// This will decorate a factory method and make it possible to directly create an actor. 
 		/// <remarks>NOTE! Only use this in tests</remarks>
 		/// </summary>
-		public static Func<Actor> CreateActorDirectly<T>(Func<T> createActor) where T : Actor
+		private static Actor CreateActorDirectly<T>(Func<T> createActor, out LocalActorRef localActorRef) where T : Actor
 		{
-			return () =>
-			{
-				var testActorSystem = new TestActorSystem();
-				LocalActorRefStack.PushActorRefToStack(new LocalActorRef(testActorSystem, A.Dummy<ActorInstantiator>(), new RootActorPath("fake"), testActorSystem.CreateDefaultMailbox(), A.Dummy<InternalActorRef>()));
-				var actor = createActor();
-				LocalActorRefStack.PopActorAndMarkerFromStack();
-				return actor;
-			};
+			var testActorSystem = new TestActorSystem();
+			localActorRef = new LocalActorRef(testActorSystem, A.Dummy<ActorInstantiator>(), new RootActorPath("fake"), testActorSystem.CreateDefaultMailbox(), A.Dummy<InternalActorRef>());
+			LocalActorRefStack.PushActorRefToStack(localActorRef);
+			var actor = createActor();
+			LocalActorRefStack.PopActorAndMarkerFromStack();
+			return actor;
 		}
 
 		/// <summary>
@@ -34,7 +32,17 @@ namespace Aktris.Test.TestHelpers
 		/// </summary>
 		public static T CreateActorDirectly<T>() where T : Actor, new()
 		{
-			return (T)CreateActorDirectly<T>(() => new T())();
+			LocalActorRef ignored;
+			return (T)CreateActorDirectly(() => new T(), out ignored);
+		}
+
+		/// <summary>
+		/// This will create an actor. 
+		/// <remarks>NOTE! Only use this in tests</remarks>
+		/// </summary>
+		public static T CreateActorDirectly<T>(out LocalActorRef localActorRef) where T : Actor, new()
+		{
+			return (T)CreateActorDirectly(() => new T(), out localActorRef);
 		}
 
 		/// <summary>
@@ -43,8 +51,9 @@ namespace Aktris.Test.TestHelpers
 		/// </summary>
 		public static T CreateInitializedActorDirectly<T>() where T : Actor, new()
 		{
-			var actor = CreateActorDirectly<T>();
-			actor.Init();
+			LocalActorRef actorRef;
+			var actor= (T)CreateActorDirectly(() => new T(), out actorRef);
+			actor.Init(actorRef);
 			return actor;
 		}
 		/// <summary>
@@ -53,8 +62,9 @@ namespace Aktris.Test.TestHelpers
 		/// </summary>
 		public static T CreateInitializedActorDirectly<T>(Func<T> createActor) where T : Actor
 		{
-			var actor = (T)CreateActorDirectly<T>(createActor)();
-			actor.Init();
+			LocalActorRef actorRef;
+			var actor = (T)CreateActorDirectly<T>(createActor, out actorRef);
+			actor.Init(actorRef);
 			return actor;
 		}
 
