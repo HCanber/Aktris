@@ -35,6 +35,7 @@ namespace Aktris.Internals
 		private ActorStatus _actorStatus = ActorStatus.Normal;
 		private static readonly IImmutableSet<InternalActorRef> _EmptyActorRefSet = ImmutableHashSet<InternalActorRef>.Empty;
 		private IImmutableSet<InternalActorRef> _watching = _EmptyActorRefSet;
+		private IImmutableSet<InternalActorRef> _watchedBy = _EmptyActorRefSet;
 
 		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
 		{
@@ -132,7 +133,8 @@ namespace Aktris.Internals
 					|| IfMatchSysCause<RecreateActor>(message, m => RecreateActor(m))
 					|| IfMatchSys<SuperviseActor>(message, superviseMessage => Supervise(superviseMessage.ActorToSupervise))
 					|| IfMatchSys<ActorTerminated>(message, m => HandleActorTerminated(m))
-					|| IfMatchSys<WatchActor>(message, m => HandleWatch(m));
+					|| IfMatchSys<WatchActor>(message, m => HandleWatch(m))
+					|| IfMatchSys<UnwatchActor>(message, m => HandleUnwatch(m));
 				// ReSharper restore ConvertClosureToMethodGroup
 				if(!wasMatched)
 				{
@@ -258,7 +260,7 @@ namespace Aktris.Internals
 				//Restart children
 				survivors.ForEach(c => c.Restart(cause), (c, e) =>
 				{
-/*TODO: Log */
+					/*TODO: Log */
 				});
 			}
 			catch(Exception e)
@@ -447,7 +449,7 @@ namespace Aktris.Internals
 					{
 						try
 						{
-/*TODO: TellWatchersWeDied();*/
+							TellWatchersWeDied();
 						}
 						finally
 						{
@@ -523,7 +525,7 @@ namespace Aktris.Internals
 		{
 			if(actorToWatch != this && !_watching.Contains(actorToWatch))
 			{
-				actorToWatch.SendSystemMessage(new WatchActor(this),this);
+				actorToWatch.SendSystemMessage(new WatchActor(this), this);
 				_watching = _watching.Add(actorToWatch);
 			}
 		}
@@ -537,10 +539,32 @@ namespace Aktris.Internals
 			}
 		}
 
-
 		private void HandleWatch(WatchActor message)
 		{
+			var watcher = message.Watcher;
+			if(watcher != this && !_watchedBy.Contains(watcher))
+			{
+				_watchedBy = _watchedBy.Add(watcher);
+			}
 		}
+
+		private void HandleUnwatch(UnwatchActor message)
+		{
+			var watcher = message.Watcher;
+			if(watcher != this && !_watchedBy.Contains(watcher))
+			{
+				_watchedBy = _watchedBy.Remove(watcher);
+			}
+		}
+
+		private void TellWatchersWeDied()
+		{
+			foreach(var watcher in _watchedBy)
+			{
+				watcher.SendSystemMessage(new ActorTerminated(this), this);
+			}
+		}
+
 		// Failure -------------------------------------------------------------------------------------
 
 
@@ -629,7 +653,7 @@ namespace Aktris.Internals
 		{
 			//_currentMessage=new Envelope(this,actorFailedMessage, actorFailedMessage.Child);
 			ChildRestartInfo childInfo;
-			var failedChild = (InternalActorRef) actorFailedMessage.Child;
+			var failedChild = (InternalActorRef)actorFailedMessage.Child;
 			if(!Children.TryGetByRef(failedChild, out childInfo))
 			{
 				//TODO: Log string.Format("Dropping Failed({0}) from unknown child {1}", cause, failedChild)));
