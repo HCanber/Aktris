@@ -528,10 +528,12 @@ namespace Aktris.Internals
 			}
 		}
 
-		private void Unwatch(InternalActorRef actor)
+		public void Unwatch(InternalActorRef actor)
 		{
-			if(actor != this)
+			if(actor != this && _watching.Contains(actor))
 			{
+				actor.SendSystemMessage(new UnwatchActor(this), this);
+				_watching = _watching.Remove(actor);
 			}
 		}
 

@@ -23,5 +23,6 @@ namespace Aktris.Internals
 		public virtual void SendSystemMessage(SystemMessage message, ActorRef sender) {/* Intentionally left blank */}
 		public void UnwatchAndStopChildren() {/* Intentionally left blank */}
 		public void Watch(InternalActorRef actorToWatch) {/* Intentionally left blank */}
+		public void Unwatch(InternalActorRef actorToWatch) {/* Intentionally left blank */}
 	}
 }

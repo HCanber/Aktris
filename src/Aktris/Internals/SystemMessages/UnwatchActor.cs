@@ -2,12 +2,12 @@
 
 namespace Aktris.Internals.SystemMessages
 {
-	[DebuggerDisplay("Watch. Watcher={Watcher,nq}")]
-	public class WatchActor : SystemMessage
+	[DebuggerDisplay("Unwatch. Watcher={Watcher,nq}")]
+	public class UnwatchActor : SystemMessage
 	{
 		private readonly InternalActorRef _watcher;
 
-		public WatchActor(InternalActorRef watcher)
+		public UnwatchActor(InternalActorRef watcher)
 		{
 			_watcher = watcher;
 		}

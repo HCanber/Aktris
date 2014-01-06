@@ -12,16 +12,24 @@ namespace Aktris.Test
 	{
 		private readonly Mailbox _mailbox;
 		private readonly object _stateLock = new object();
-		public List<Tuple<StateChange, State>> States { get; private set; }
+		private List<Tuple<StateChange, State>> _states;
+		public IReadOnlyList<Tuple<StateChange, State>> States { get { return _states; } }
 
 		public TestMailbox(Mailbox mailbox)
 		{
 			_mailbox = mailbox;
-			States = new List<Tuple<StateChange, State>>() { Tuple.Create(StateChange.Initial, new State()) };
+			_states = new List<Tuple<StateChange, State>>() { Tuple.Create(StateChange.Initial, new State()) };				
 		}
 
 		public bool IsSuspended { get { return _mailbox.IsSuspended; } }
 
+		public void ClearEnqueuedSystemMessages()
+		{
+			lock(_stateLock)
+			{
+				_states = _states.Where(s=>s.Item1!=StateChange.EnqueueSystemMessage).ToList();
+			}
+		}
 		public List<State> GetStateChangesFor(StateChange state)
 		{
 			return GetStateChangesFor(t => t.Item1 == state);
@@ -44,7 +52,7 @@ namespace Aktris.Test
 
 		public List<State> GetStateChangesFor(Predicate<Tuple<StateChange, State>> predicate)
 		{
-			return States.Where(t => predicate(t)).Select(t => t.Item2).ToList();
+			return _states.Where(t => predicate(t)).Select(t => t.Item2).ToList();
 		}
 
 		void Mailbox.SetActor(InternalActorRef actor)
@@ -99,10 +107,10 @@ namespace Aktris.Test
 		{
 			lock(_stateLock)
 			{
-				var lastIndex = States.Count - 1;
-				var lastState = States[lastIndex].Item2;
+				var lastIndex = _states.Count - 1;
+				var lastState = _states[lastIndex].Item2;
 				var newState = stateChanger(lastState);
-				States.Add(Tuple.Create(stateChange, newState));
+				_states.Add(Tuple.Create(stateChange, newState));
 			}
 		}
 
