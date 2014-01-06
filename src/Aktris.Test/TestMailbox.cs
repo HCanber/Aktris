@@ -30,9 +30,22 @@ namespace Aktris.Test
 				_states = _states.Where(s=>s.Item1!=StateChange.EnqueueSystemMessage).ToList();
 			}
 		}
+
+		public void ClearEnqueuedMessages()
+		{
+			lock(_stateLock)
+			{
+				_states = _states.Where(s => s.Item1 != StateChange.Enqueue).ToList();
+			}
+		}
 		public List<State> GetStateChangesFor(StateChange state)
 		{
 			return GetStateChangesFor(t => t.Item1 == state);
+		}
+
+		public List<T> GetEnquedMessagesOfType<T>() where T : class
+		{
+			return GetStateChangesFor(StateChange.Enqueue, state => { var m = state.GetLastEnqueuedMessage(); return m != null && m.Message is T; }).Select(s => (T)s.GetLastEnqueuedMessage().Message).ToList();
 		}
 
 		public List<T> GetEnquedSystemMessagesOfType<T>() where T : class, SystemMessage

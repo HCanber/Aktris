@@ -495,6 +495,14 @@ namespace Aktris.Internals
 					}
 				}
 			}
+			if(_watching.Contains(terminatedActor))
+			{
+				_watching = _watching.Remove(terminatedActor);
+				if(!_actorStatus.IsTerminating)
+				{
+					Send(new WatchedActorTerminated(terminatedActor),terminatedActor);
+				}
+			}
 		}
 
 		// Supervision -------------------------------------------------------------------------------------

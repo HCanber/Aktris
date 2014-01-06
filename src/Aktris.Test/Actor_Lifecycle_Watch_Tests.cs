@@ -105,8 +105,30 @@ namespace Aktris.Test
 			};
 			var watcher = system.CreateActor(watcherProps, "Watcher");
 			watcher.Send("watch", null);
+			mailbox.ClearEnqueuedSystemMessages();
 			watchedActor.Send("stop", null);
 			var watchMessages = mailbox.GetEnquedSystemMessagesOfType<ActorTerminated>();
+			watchMessages.Should().HaveCount(1);
+			watchMessages[0].TerminatedActor.Should().BeSameAs(watchedActor);
+		}
+
+		[Fact]
+		public void When_a_watched_actor_dies_Then_an_WatchedActorTerminated_message_is_sent_to_watchers()
+		{
+			var system = new TestActorSystem();
+			system.Start();
+
+			var mailbox = new TestMailbox(system.CreateDefaultMailbox());
+			var watchedActor = system.CreateActor(ActorCreationProperties.Create<StoppingActor>(), "WatchedActor");
+			var watcherProps = new DelegateActorCreationProperties(() => new WatchingActor(watchedActor))
+			{
+				MailboxCreator = () => mailbox
+			};
+			var watcher = system.CreateActor(watcherProps, "Watcher");
+			watcher.Send("watch", null);
+			mailbox.ClearEnqueuedMessages();
+			watchedActor.Send("stop", null);
+			var watchMessages = mailbox.GetEnquedMessagesOfType<WatchedActorTerminated>();
 			watchMessages.Should().HaveCount(1);
 			watchMessages[0].TerminatedActor.Should().BeSameAs(watchedActor);
 		}
