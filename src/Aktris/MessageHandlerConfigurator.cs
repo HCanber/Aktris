@@ -10,17 +10,31 @@ namespace Aktris
 		private List<Tuple<Type, MessageHandler>> _handlers = new List<Tuple<Type, MessageHandler>>();
 
 		/// <summary>
-		/// Registers a handler for incoming messages of the specified type 
+		/// Registers a handler for incoming messages of the specified type. 
+		/// If <paramref name="matches"/>!=<c>null</c> then this must return true before a message is passed to <paramref name="handler"/>.
 		/// <typeparamref name="T"/>.
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
 		/// In that case, this handler will not be invoked.</remarks>
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
 		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T"/></param>
-		public void Receive<T>([NotNull] Action<T> handler)
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T>([NotNull] Action<T> handler, Predicate<T> matches=null)
 		{
 			if(handler == null) throw new ArgumentNullException("handler");
-			AddReceiver(typeof(T), o => handler((T)o));
+			if(matches==null)
+				AddReceiver(typeof(T), o => handler((T)o));
+			else
+				AddReceiver(typeof(T), o =>
+				{
+					var m = (T) o;
+					if(matches(m))
+					{
+						handler(m);
+						return true;
+					}
+					return false;
+				});
 		}
 
 		/// <summary>

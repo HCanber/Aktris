@@ -132,6 +132,7 @@ namespace Aktris
 
 		/// <summary>
 		/// Registers a handler for incoming messages of the specified type 
+		/// If <paramref name="matches"/>!=<c>null</c> then this must return true before a message is passed to <paramref name="handler"/>.
 		/// <typeparamref name="T"/>.
 		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
@@ -139,10 +140,11 @@ namespace Aktris
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
 		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T"/></param>
-		protected void Receive<T>([NotNull] Action<T> handler)
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		protected void Receive<T>([NotNull] Action<T> handler, Predicate<T> matches = null)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.Receive<T>(handler);
+			_constructorMessageHandlerConfigurator.Receive<T>(handler,matches);
 		}
 
 		/// <summary>
