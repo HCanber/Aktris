@@ -55,7 +55,7 @@
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
     <Compile Include="AnonymousActor.cs" />
-    <Compile Include="DeadLetterMessage.cs" />
+    <Compile Include="Messages\DeadLetterMessage.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
     <Compile Include="DelegateActorCreationProperties.cs" />
     <Compile Include="Dispatching\DeadLetterMailbox.cs" />
