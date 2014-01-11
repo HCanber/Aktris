@@ -69,7 +69,7 @@ namespace Aktris.Internals
 			_mailbox.SetActor(this);
 		}
 
-		void InternalActorRef.Stop()
+		public void Stop()
 		{
 			SafeEnqueueSystemMessage(TerminateActor.Instance);
 		}
@@ -100,8 +100,14 @@ namespace Aktris.Internals
 			try
 			{
 				_currentMessage = envelope;
+				var message = envelope.Message;
+				var autoHandledMessage = message as AutoHandledMessage;
+				if(autoHandledMessage != null)
+				{
+					AutoHandleMessage(envelope);
+				}
 				_actor.Sender = new SenderActorRef(envelope.Sender, this);
-				_actor.HandleMessage(envelope.Message);
+				_actor.HandleMessage(message);
 			}
 			catch(Exception ex)
 			{
@@ -113,6 +119,19 @@ namespace Aktris.Internals
 				_actor.Sender = _deadLetterSender; //TODO: change to use one that directs to deadletter
 			}
 
+		}
+
+		private void AutoHandleMessage(Envelope envelope)
+		{
+			var message = envelope.Message;
+			if(message is StopActor)
+			{
+				Stop();
+			}
+			else
+			{
+				throw new InvalidOperationException(string.Format("Trying to AutoHandle message {0}. No handler exists for {1}", envelope, message.GetType()));
+			}
 		}
 
 		public void HandleSystemMessage(SystemMessageEnvelope envelope)

@@ -55,6 +55,7 @@
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
     <Compile Include="AnonymousActor.cs" />
+    <Compile Include="Internals\AutoHandledMessage.cs" />
     <Compile Include="Messages\DeadLetterMessage.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
     <Compile Include="DelegateActorCreationProperties.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="JetBrainsAnnotations\JetBrainsAnnotations.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageHandlerConfigurator.cs" />
+    <Compile Include="Messages\StopActor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SenderActorRef.cs" />
     <Compile Include="Supervision\AllForOneSupervisorStrategy.cs" />

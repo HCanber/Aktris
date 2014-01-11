@@ -20,10 +20,17 @@ namespace Aktris.Test
 			return CreateActor<TestActor>(() => new TestActor(), name);
 		}
 
-		public ActorRefWithActor<TActor> CreateActor<TActor>(Func<TActor> createActor, string name=null) where TActor : Actor
+		public ActorRefWithActor<TActor> CreateActor<TActor>(Func<TActor> createActor, string name = null) where TActor : Actor
 		{
 			TActor actor = null;
-			var actorRef = CreateActor(ActorCreationProperties.Create(() => { actor = createActor(); return actor; }),name);
+			var actorRef = CreateActor(ActorCreationProperties.Create(() => { actor = createActor(); return actor; }), name);
+			return new ActorRefWithActor<TActor>(actorRef, actor);
+		}
+
+		public ActorRefWithActor<TActor> CreateActor<TActor>(string name = null) where TActor : Actor, new()
+		{
+			TActor actor = null;
+			var actorRef = CreateActor(ActorCreationProperties.Create(() => { actor = new TActor(); return actor; }), name);
 			return new ActorRefWithActor<TActor>(actorRef, actor);
 		}
 	}

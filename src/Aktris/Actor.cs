@@ -132,6 +132,11 @@ namespace Aktris
 			_self.Unwatch((InternalActorRef)actorToWatch);
 		}
 
+		protected void Stop(ActorRef actorToImmediatelyStop)
+		{
+			((InternalActorRef)actorToImmediatelyStop).Stop();
+		}
+
 		// API for the user that implements an actor to define message handlers -----------------------------------------
 
 		/// <summary>

@@ -66,6 +66,7 @@
     <Compile Include="Actor_Lifecycle_Crashes_LifecycleEvents_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Crashes_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Creation_Tests.cs" />
+    <Compile Include="Actor_Lifecycle_Stop_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Termintation_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Watch_Tests.cs" />
     <Compile Include="AnonymousActor_Tests.cs" />
