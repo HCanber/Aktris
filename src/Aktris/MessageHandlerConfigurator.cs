@@ -23,14 +23,42 @@ namespace Aktris
 		{
 			if(handler == null) throw new ArgumentNullException("handler");
 			if(matches==null)
-				AddReceiver(typeof(T), o => handler((T)o));
+				AddReceiver(typeof(T), (o,s) => handler((T)o));
 			else
-				AddReceiver(typeof(T), o =>
+				AddReceiver(typeof(T), (o,s) =>
 				{
 					var m = (T) o;
 					if(matches(m))
 					{
 						handler(m);
+						return true;
+					}
+					return false;
+				});
+		}
+
+		/// <summary>
+		/// Registers a handler for incoming messages of the specified type. 
+		/// If <paramref name="matches"/>!=<c>null</c> then this must return true before a message is passed to <paramref name="handler"/>.
+		/// <typeparamref name="T"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T">The type of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T"/>.</param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T>([NotNull] Action<T, SenderActorRef> handler, Predicate<T> matches = null)
+		{
+			if(handler == null) throw new ArgumentNullException("handler");
+			if(matches == null)
+				AddReceiver(typeof(T), (o, s) => handler((T)o,s));
+			else
+				AddReceiver(typeof(T), (o, s) =>
+				{
+					var m = (T)o;
+					if(matches(m))
+					{
+						handler(m,s);
 						return true;
 					}
 					return false;
@@ -49,6 +77,18 @@ namespace Aktris
 		{
 			if(receiver == null) throw new ArgumentNullException("receiver");
 			AddReceiver(typeof(T), (m, sender) => receiver.Send(m, sender));
+		}
+
+		/// <summary>
+		/// Registers a handler for incoming messages of any type.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <param name="handler">The message handler that is invoked for all</param>
+		public void ReceiveAny([NotNull] Action<object,SenderActorRef> handler)
+		{
+			if(handler == null) throw new ArgumentNullException("handler");
+			AddReceiver(typeof(object), handler);
 		}
 
 		/// <summary>
@@ -86,7 +126,7 @@ namespace Aktris
 			AddReceiver(type, (m,sender) => { handler(m); return true; });
 		}
 
-		public void AddReceiver(Type type, Action<object,ActorRef> handler)
+		public void AddReceiver(Type type, Action<object,SenderActorRef> handler)
 		{
 			AddReceiver(type, (m, sender) => { handler(m,sender); return true; });
 		}
