@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>Actor – Sequence diagrams</title>
+  <style>
+    .hidden {display:none;}
+    #jsSequenceDiagramCopyright { margin-top:3em; font-size:70%; }
+  </style>
+<head>
+<body>
+  <div class="diagram hidden">
+    Note over LocalActorRef: Child Stops
+    LocalActorRef->Dispatch:stop()
+    Dispatch->ActorCell: Send [Terminate]
+    Note over ActorCell: Handles [Terminate]
+    ActorCell->FaultHandling: terminate()#/handleChildTerminated()
+    FaultHandling->FaultHandling:finishTerminate()
+    FaultHandling->DeathWatch:tellWatchersWeDied
+    DeathWatch->Watchers:Send [DeathWatchNotification/ActorTerminated]
+    Note over ActorCell: Handles [DeathWatchNotification/ActorTerminated]
+    ActorCell->DeathWatch:watchedActorTerminated(actor)
+    DeathWatch->FaultHandling:handleChildTerminated(actor)
+    FaultHandling->Children:removeChildAndGetStateChange(actor)
+
+  </div>
+  <div class="diagram hidden">
+    X->DeathWatch:watch(actor)
+    DeathWatch->DeathWatch:Send [Watch(actor,self)]
+    Note over ActorCell: Handles [Watch(watchee,watcher)]
+    ActorCell->DeathWatch:addWatcher(watchee,watcher)
+    DeathWatch->DeathWatch:watchedBy.Add(watcher)
+  </div>
+
+
+<div id="jsSequenceDiagramCopyright"><a href="https://github.com/bramp/js-sequence-diagrams">JS Sequence Diagrams</a> Copyright (c) 2012-2013, Andrew Brampton. All rights Reserved</div>
+
+<script src="js/jquery-2.0.3.min.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/raphael-min.js"></script>
+<script src="js/sequence-diagram-min.js"></script>
+<script src="js/svginnerhtml.min.js"></script>
+
+<script>
+$(function(){
+  function setupDiagram(container){
+    var diagramText=container.text();
+    function saveAsSvg() {
+      var svg = container.find('svg')[0];
+      var width = parseInt(svg.width.baseVal.value);
+      var height = parseInt(svg.height.baseVal.value);
+      var data = diagramText;
+      var xml = '<?xml version="1.0" encoding="utf-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"><svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" xmlns:xlink="http://www.w3.org/1999/xlink"><source><![CDATA[' + data + ']]></source>' + svg.innerHTML + '</svg>';
+      var a = $(this);
+      a.attr("download", "diagram.svg"); // TODO I could put title here
+      a.attr("href", "data:image/svg+xml," + encodeURIComponent(xml));
+    }
+    var diagramDiv=$('<div class="diagram"></div>');
+
+    function drawDiagram(){
+      var diagram = Diagram.parse(diagramText);
+      var options = {
+        theme: 'simple',
+        scale: 1
+      };
+      diagram.drawSVG(diagramDiv.get(0), options);
+    }
+    var saveLink=$('<a href="#" class="saveSvg">Save as SVG</div>');
+    saveLink.click(saveAsSvg);
+
+    container.html('');
+    container.append(diagramDiv,saveLink);
+    container.removeClass('hidden');
+    drawDiagram();
+  }
+  $(".diagram").each(function(){setupDiagram($(this));});
+ });
+</script>
+</body>

@@ -15,6 +15,7 @@ namespace Aktris
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private readonly ActorRef _deadLetters;
 		private readonly Func<Mailbox> _defaultMailboxCreator;
+		private readonly Mailbox _deadLettersMailbox;
 		private bool _isStarted;
 		private GuardianActorRef _rootGuardian;
 		private InternalActorRef _systemGuardian;
@@ -43,6 +44,7 @@ namespace Aktris
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 			_deadLetters = bootstrapper.DeadLetterActorCreator(new ChildActorPath(_rootPath,"_DeadLetter",LocalActorRef.UndefinedInstanceId));
+			_deadLettersMailbox=new DeadLetterMailbox(_deadLetters);
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
 		}
 
@@ -53,6 +55,7 @@ namespace Aktris
 		internal InternalActorRef RootGuardian { get { return _rootGuardian; } }
 		internal InternalActorRef SystemGuardian { get { return _systemGuardian; } }
 		internal InternalActorRef UserGuardian { get { return _userGuardian; } }
+		internal Mailbox DeadLettersMailbox { get { return _deadLettersMailbox; } }
 
 		public void Start()
 		{

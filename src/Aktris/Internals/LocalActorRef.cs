@@ -26,7 +26,7 @@ namespace Aktris.Internals
 		private readonly ActorSystem _system;
 		private readonly ActorInstantiator _actorInstantiator;
 		private readonly ActorPath _path;
-		private readonly Mailbox _mailbox;
+		private Mailbox _mailbox;
 		private readonly InternalActorRef _supervisor;
 		private Actor _actor;
 		private readonly SenderActorRef _deadLetterSender;
@@ -437,7 +437,9 @@ namespace Aktris.Internals
 			{
 				try
 				{
-					_mailbox.DetachActor(this);
+					var mailbox = _mailbox;
+					_mailbox = System.DeadLettersMailbox;
+					mailbox.DetachActor(this);
 				}
 				finally
 				{
@@ -500,7 +502,7 @@ namespace Aktris.Internals
 				_watching = _watching.Remove(terminatedActor);
 				if(!_actorStatus.IsTerminating)
 				{
-					Send(new WatchedActorTerminated(terminatedActor),terminatedActor);
+					Send(new WatchedActorTerminated(terminatedActor), terminatedActor);
 				}
 			}
 		}
@@ -533,7 +535,7 @@ namespace Aktris.Internals
 		{
 			if(actorToWatch != this && !_watching.Contains(actorToWatch))
 			{
-				actorToWatch.SendSystemMessage(new WatchActor(this), this);
+				actorToWatch.SendSystemMessage(new WatchActor(this, actorToWatch), this);
 				_watching = _watching.Add(actorToWatch);
 			}
 		}

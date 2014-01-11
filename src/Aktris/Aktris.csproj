@@ -58,6 +58,7 @@
     <Compile Include="DeadLetterMessage.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
     <Compile Include="DelegateActorCreationProperties.cs" />
+    <Compile Include="Dispatching\DeadLetterMailbox.cs" />
     <Compile Include="Dispatching\Envelope.cs" />
     <Compile Include="Dispatching\IScheduler.cs" />
     <Compile Include="Dispatching\Mailbox.cs" />

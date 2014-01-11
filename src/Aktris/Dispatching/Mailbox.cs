@@ -3,7 +3,7 @@ using Aktris.Internals.SystemMessages;
 
 namespace Aktris.Dispatching
 {
-// ReSharper disable once InconsistentNaming
+	// ReSharper disable once InconsistentNaming
 	public interface Mailbox
 	{
 		void SetActor(InternalActorRef actor);

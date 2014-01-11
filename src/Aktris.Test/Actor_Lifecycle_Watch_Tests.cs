@@ -133,6 +133,36 @@ namespace Aktris.Test
 			watchMessages[0].TerminatedActor.Should().BeSameAs(watchedActor);
 		}
 
+		[Fact]
+		public void When_a_dead_actor_is_watched_Then_an_WatchedActorTerminated_message_is_sent_to_watcher()
+		{
+			var system = new TestActorSystem();
+			system.Start();
+
+			var mailbox = new TestMailbox(system.CreateDefaultMailbox());
+			var watchedActor = system.CreateActor(ActorCreationProperties.Create<StoppingActor>(), "WatchedActor");
+			var watcherProps = new DelegateActorCreationProperties(() => new WatchingActor(watchedActor))
+			{
+				MailboxCreator = () => mailbox
+			};
+			watchedActor.Send("stop", null);
+
+			var watcher = system.CreateActor(watcherProps, "Watcher");
+
+			mailbox.ClearEnqueuedSystemMessages();
+			mailbox.ClearEnqueuedMessages();
+
+			watcher.Send("watch", null);
+
+			var watchSystemMessages = mailbox.GetEnquedSystemMessagesOfType<ActorTerminated>();
+			watchSystemMessages.Should().HaveCount(1);
+			watchSystemMessages[0].TerminatedActor.Should().BeSameAs(watchedActor);
+			var watchMessages = mailbox.GetEnquedMessagesOfType<WatchedActorTerminated>();
+			watchMessages.Should().HaveCount(1);
+			watchMessages[0].TerminatedActor.Should().BeSameAs(watchedActor);
+
+		}
+
 		private class WatchingActor : Actor
 		{
 			public WatchingActor(ActorRef actorToWatch)
