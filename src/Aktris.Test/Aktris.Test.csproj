@@ -72,6 +72,7 @@
     <Compile Include="AnonymousActor_Tests.cs" />
     <Compile Include="DelegateActorCreationProperties_Tests.cs" />
     <Compile Include="Actor_Tests.cs" />
+    <Compile Include="ManuallyScheduledTestMailbox.cs" />
     <Compile Include="Dispatching\Mailbox_Tests.cs" />
     <Compile Include="Dispatching\SchedulerBasedMailbox_Tests.cs" />
     <Compile Include="FakeActor.cs" />
