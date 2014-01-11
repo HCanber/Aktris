@@ -106,8 +106,11 @@ namespace Aktris.Internals
 				{
 					AutoHandleMessage(envelope);
 				}
-				_actor.Sender = new SenderActorRef(envelope.Sender, this);
-				_actor.HandleMessage(message);
+				else
+				{
+					_actor.Sender = new SenderActorRef(envelope.Sender, this);
+					_actor.HandleMessage(message);
+				}
 			}
 			catch(Exception ex)
 			{
