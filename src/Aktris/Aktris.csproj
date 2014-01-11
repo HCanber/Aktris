@@ -120,7 +120,7 @@
     <Compile Include="Supervision\SupervisorAction.cs" />
     <Compile Include="Supervision\SupervisorStrategy.cs" />
     <Compile Include="Supervision\DeciderSupervisorStrategy.cs" />
-    <Compile Include="WatchedActorTerminated.cs" />
+    <Compile Include="Messages\WatchedActorTerminated.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

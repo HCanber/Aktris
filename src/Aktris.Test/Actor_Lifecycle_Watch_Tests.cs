@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Aktris.Internals.SystemMessages;
+using Aktris.Messages;
 using FluentAssertions;
 using Xunit;
 
