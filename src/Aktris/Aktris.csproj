@@ -58,6 +58,7 @@
     <Compile Include="Internals\AutoHandledMessage.cs" />
     <Compile Include="Internals\Concurrency\TaskHelper.cs" />
     <Compile Include="Internals\Concurrency\Promise.cs" />
+    <Compile Include="Internals\Concurrency\TaskTimeoutExtensions.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Messages\DeadLetterMessage.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
