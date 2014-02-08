@@ -72,6 +72,7 @@
     <Compile Include="AnonymousActor_Tests.cs" />
     <Compile Include="DelegateActorCreationProperties_Tests.cs" />
     <Compile Include="Actor_Tests.cs" />
+    <Compile Include="Internals\Concurrency\Promise_Tests.cs" />
     <Compile Include="Logging\LogLevelTests.cs" />
     <Compile Include="ManuallyScheduledTestMailbox.cs" />
     <Compile Include="Dispatching\Mailbox_Tests.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="TestBootstrapper.cs" />
     <Compile Include="TestHelpers\ActorHelper.cs" />
     <Compile Include="TestHelpers\NoopActor.cs" />
+    <Compile Include="TestHelpers\TaskExtensions.cs" />
     <Compile Include="TestMailbox.cs" />
   </ItemGroup>
   <ItemGroup>
