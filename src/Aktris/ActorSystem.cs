@@ -14,13 +14,14 @@ namespace Aktris
 		private readonly IUniqueNameCreator _uniqueNameCreator;
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private readonly ActorRef _deadLetters;
-		private readonly Func<Mailbox> _defaultMailboxCreator;
+		private readonly Func<IScheduler, Mailbox> _defaultMailboxCreator;
 		private readonly Mailbox _deadLettersMailbox;
 		private bool _isStarted;
 		private GuardianActorRef _rootGuardian;
 		private InternalActorRef _systemGuardian;
 		private InternalActorRef _userGuardian;
 		private readonly RootActorPath _rootPath;
+		private readonly IScheduler _scheduler;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -45,6 +46,7 @@ namespace Aktris
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 			_deadLetters = bootstrapper.DeadLetterActorCreator(new ChildActorPath(_rootPath,"_DeadLetter",LocalActorRef.UndefinedInstanceId));
 			_deadLettersMailbox=new DeadLetterMailbox(_deadLetters);
+			_scheduler = bootstrapper.Scheduler;
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
 		}
 
@@ -56,6 +58,7 @@ namespace Aktris
 		internal InternalActorRef SystemGuardian { get { return _systemGuardian; } }
 		internal InternalActorRef UserGuardian { get { return _userGuardian; } }
 		internal Mailbox DeadLettersMailbox { get { return _deadLettersMailbox; } }
+		internal IScheduler Scheduler { get { return _scheduler; } }
 
 		public void Start()
 		{
@@ -86,7 +89,7 @@ namespace Aktris
 
 		public Mailbox CreateDefaultMailbox()
 		{
-			return _defaultMailboxCreator();
+			return _defaultMailboxCreator(_scheduler);
 		}
 
 		private GuardianActorRef CreateRootGuardian()

@@ -11,11 +11,13 @@ namespace Aktris.Test
 			UniqueNameCreator = new UniqueNameCreator();
 			LocalActorRefFactory = new DefaultLocalActorRefFactory();
 			DeadLetterActorCreator = path => new DeadLetterActorRef(path);
-			DefaultMailboxCreator = () => new UnboundedMailbox(new SynchronousScheduler());
+			Scheduler = new SynchronousScheduler();
+			DefaultMailboxCreator = scheduler => new UnboundedMailbox(scheduler);
 		}
 		public IUniqueNameCreator UniqueNameCreator { get; set; }
 		public LocalActorRefFactory LocalActorRefFactory { get; set; }
 		public Func<ActorPath, ActorRef> DeadLetterActorCreator { get; set; }
-		public Func<Mailbox> DefaultMailboxCreator { get; set; }
+		public Func<IScheduler, Mailbox> DefaultMailboxCreator { get; set; }
+		public IScheduler Scheduler { get; set; }
 	}
 }
