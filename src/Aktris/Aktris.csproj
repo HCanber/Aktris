@@ -126,6 +126,7 @@
     <Compile Include="Supervision\SupervisorStrategy.cs" />
     <Compile Include="Supervision\DeciderSupervisorStrategy.cs" />
     <Compile Include="Messages\WatchedActorTerminated.cs" />
+    <Compile Include="TempNodeHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

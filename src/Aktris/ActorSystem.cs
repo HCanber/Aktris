@@ -22,6 +22,8 @@ namespace Aktris
 		private InternalActorRef _userGuardian;
 		private readonly RootActorPath _rootPath;
 		private readonly IScheduler _scheduler;
+		private TempNodeHandler _tempNodeHandler;
+
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -42,6 +44,8 @@ namespace Aktris
 
 			_name = name;
 			_rootPath = new RootActorPath("/");
+			_tempNodeHandler = new TempNodeHandler(_rootPath / "temp");
+
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 			_deadLetters = bootstrapper.DeadLetterActorCreator(_rootPath / "_DeadLetter");
@@ -60,6 +64,9 @@ namespace Aktris
 		internal InternalActorRef UserGuardian { get { return _userGuardian; } }
 		internal Mailbox DeadLettersMailbox { get { return _deadLettersMailbox; } }
 		internal IScheduler Scheduler { get { return _scheduler; } }
+
+		protected TempNodeHandler TempNodeHandler { get { return _tempNodeHandler; } }
+
 
 		public void Start()
 		{
@@ -112,5 +119,8 @@ namespace Aktris
 			var userGuardian = rootGuardian.CreateGuardian(() => new Guardian(), "user");
 			return userGuardian;
 		}
+
+
+
 	}
 }

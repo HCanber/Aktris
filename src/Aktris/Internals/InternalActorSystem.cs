@@ -1,4 +1,5 @@
-﻿using Aktris.JetBrainsAnnotations;
+﻿using System.Threading;
+using Aktris.JetBrainsAnnotations;
 
 namespace Aktris.Internals
 {
@@ -6,6 +7,11 @@ namespace Aktris.Internals
 	{
 		public InternalActorSystem([NotNull] string name, IBootstrapper bootstrapper) : base(name, bootstrapper)
 		{
+		}
+
+		public ActorPath CreateTempActorPath()
+		{
+			return TempNodeHandler.CreatedNewTempPath();
 		}
 	}
 }
