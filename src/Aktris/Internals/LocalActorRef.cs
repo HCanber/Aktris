@@ -861,7 +861,7 @@ namespace Aktris.Internals
 		public override string Name { get { return _Name; } }
 
 		public RootGuardianSupervisor(RootActorPath root)
-			: base(new ChildActorPath(root, _Name, LocalActorRef.UndefinedInstanceId))
+			: base(root / _Name)
 		{
 		}
 

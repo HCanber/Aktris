@@ -44,8 +44,8 @@ namespace Aktris
 			_rootPath = new RootActorPath("/");
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
-			_deadLetters = bootstrapper.DeadLetterActorCreator(new ChildActorPath(_rootPath,"_DeadLetter",LocalActorRef.UndefinedInstanceId));
-			_deadLettersMailbox=new DeadLetterMailbox(_deadLetters);
+			_deadLetters = bootstrapper.DeadLetterActorCreator(_rootPath / "_DeadLetter");
+			_deadLettersMailbox = new DeadLetterMailbox(_deadLetters);
 			_scheduler = bootstrapper.Scheduler;
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
 		}

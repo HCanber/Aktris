@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text;
+using Aktris.Internals;
 using Aktris.Internals.Path;
 using Aktris.JetBrainsAnnotations;
 
@@ -52,5 +53,10 @@ namespace Aktris
 		}
 
 		protected internal abstract void AppendDebugString(StringBuilder sb);
+
+		public static ActorPath operator /(ActorPath parent, string child)
+		{
+			return new ChildActorPath(parent,child, LocalActorRef.UndefinedInstanceId);
+		}
 	}
 }
