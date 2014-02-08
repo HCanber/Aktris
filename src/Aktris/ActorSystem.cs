@@ -51,6 +51,7 @@ namespace Aktris
 		}
 
 		public string Name { get { return _name; } }
+		//TODO: Maybe push these down to InternalActorSystem and make them public
 		internal ActorRef DeadLetters { get { return _deadLetters; } }
 		internal IUniqueNameCreator UniqueNameCreator { get { return _uniqueNameCreator; } }
 		internal LocalActorRefFactory LocalActorRefFactory { get { return _localActorRefFactory; } }
@@ -69,7 +70,7 @@ namespace Aktris
 			_rootGuardian.Start();
 		}
 
-		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name=null)
+		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			if(!_isStarted) throw new InvalidOperationException(string.Format("You must call {0}.Start() before creating an actor.", typeof(ActorSystem).Name));
 			return _userGuardian.CreateActor(actorCreationProperties, name);
@@ -95,7 +96,7 @@ namespace Aktris
 		private GuardianActorRef CreateRootGuardian()
 		{
 			var supervisor = new RootGuardianSupervisor(_rootPath);
-			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), _rootPath,CreateDefaultMailbox(), supervisor);
+			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), _rootPath, CreateDefaultMailbox(), supervisor);
 			return rootGuardian;
 		}
 
