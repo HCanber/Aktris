@@ -5,18 +5,12 @@ using Aktris.Messages;
 
 namespace Aktris.Internals
 {
-	public class DeadLetterActorRef : MinimalActorRef
+	public class DeadLetterActorRef : EmptyLocalActorRef
 	{
-		private ActorPath _path;
-
-		public DeadLetterActorRef([NotNull] ActorPath path) 
+		public DeadLetterActorRef([NotNull] ActorPath path) : base(path)
 		{
-			if(path == null) throw new ArgumentNullException("path");
-			_path = path;
 		}
 
-		public override string Name { get { return _path.Name; } }
-		public override ActorPath Path { get { return _path; } }
 		public override uint InstanceId { get { return LocalActorRef.UndefinedInstanceId; } }
 
 		public override void Send([NotNull] object message, ActorRef sender)
