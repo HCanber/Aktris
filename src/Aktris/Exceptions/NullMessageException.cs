@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Aktris.JetBrainsAnnotations;
 
 namespace Aktris.Exceptions
@@ -9,5 +10,7 @@ namespace Aktris.Exceptions
 			: base(paramName, "Message is null")
 		{
 		}
+
+		protected NullMessageException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 	}
 }

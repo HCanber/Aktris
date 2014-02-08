@@ -3,8 +3,10 @@ using System.Text.RegularExpressions;
 using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.Internals.Logging;
 using Aktris.Internals.Path;
 using Aktris.JetBrainsAnnotations;
+using Aktris.Settings;
 
 namespace Aktris
 {
@@ -24,6 +26,9 @@ namespace Aktris
 		private readonly IScheduler _scheduler;
 		private TempNodeHandler _tempNodeHandler;
 
+		private readonly EventStream _eventStream;
+		private ISettings _settings;
+		private string _logSource;
 
 		protected ActorSystem([NotNull] string name, [NotNull] IBootstrapper bootstrapper)
 		{
@@ -45,6 +50,7 @@ namespace Aktris
 			_name = name;
 			_rootPath = new RootActorPath("/");
 			_tempNodeHandler = new TempNodeHandler(_rootPath / "temp");
+			_settings = bootstrapper.Settings;
 
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
@@ -52,6 +58,10 @@ namespace Aktris
 			_deadLettersMailbox = new DeadLetterMailbox(_deadLetters);
 			_scheduler = bootstrapper.Scheduler;
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
+			_eventStream = new EventStream(_deadLetters, _settings.DebugEventStream);
+			var standardOutLogger = new StandardOutLogger(new ChildActorPath(_rootPath, "_StandardOutLogger", LocalActorRef.UndefinedInstanceId), this);
+			_eventStream.StartStandardOutLogger(standardOutLogger, _settings.StandardOutLoggerSettings);
+			_logSource = "ActorSystem:" + name;
 		}
 
 		public string Name { get { return _name; } }
@@ -75,24 +85,13 @@ namespace Aktris
 			_systemGuardian = CreateSystemGuardian(_rootGuardian);
 			_userGuardian = CreateUserGuardian(_rootGuardian);
 			_rootGuardian.Start();
+			_eventStream.LogInfo(_logSource, this, "System started");
 		}
 
 		public ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			if(!_isStarted) throw new InvalidOperationException(string.Format("You must call {0}.Start() before creating an actor.", typeof(ActorSystem).Name));
 			return _userGuardian.CreateActor(actorCreationProperties, name);
-		}
-
-		/// <summary>
-		/// Creates a new <see cref="ActorSystem"/> with an optional name.
-		/// </summary>
-		/// <param name="name">[Optional] The name of the system. If left out or if <c>null</c> then the system will get the name "default".</param>
-		/// <returns>The new system.</returns>
-		public static ActorSystem Create(string name = null)
-		{
-			var systemFactory = DefaultActorSystemFactory.Instance;
-			var system = systemFactory.Create(name ?? "default");
-			return system;
 		}
 
 		public Mailbox CreateDefaultMailbox()

@@ -46,10 +46,7 @@ namespace Aktris.Internals
 			return false;
 		}
 
-		public override ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
-		{
-			throw new InvalidOperationException("The DeadLetter Actor may not have children.");
-		}
+
 
 	}
 }

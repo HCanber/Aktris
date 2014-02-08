@@ -71,6 +71,7 @@
     <Compile Include="Actor_Lifecycle_Termintation_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Watch_Tests.cs" />
     <Compile Include="AnonymousActor_Tests.cs" />
+    <Compile Include="Bootstrapper_Tests.cs" />
     <Compile Include="DelegateActorCreationProperties_Tests.cs" />
     <Compile Include="Actor_Tests.cs" />
     <Compile Include="Internals\Concurrency\Promise_Tests.cs" />

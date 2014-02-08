@@ -54,9 +54,13 @@
     <Compile Include="ActorPath.cs" />
     <Compile Include="ActorRef.cs" />
     <Compile Include="ActorSystem.cs" />
-    <Compile Include="ActorSystemFactory.cs" />
     <Compile Include="AnonymousActor.cs" />
     <Compile Include="Exceptions\AskTimeoutException.cs" />
+    <Compile Include="Events\ActorEventBus.cs" />
+    <Compile Include="Events\EventBus.cs" />
+    <Compile Include="Events\EventBusPublisher.cs" />
+    <Compile Include="Events\EventBusSubscription.cs" />
+    <Compile Include="Exceptions\LoggingException.cs" />
     <Compile Include="Internals\AutoHandledMessage.cs" />
     <Compile Include="Internals\Concurrency\IPromise.cs" />
     <Compile Include="Internals\Concurrency\TaskExt.cs" />
@@ -64,9 +68,25 @@
     <Compile Include="Internals\Concurrency\Promise.cs" />
     <Compile Include="Internals\Concurrency\TaskTimeoutExtensions.cs" />
     <Compile Include="Internals\PromiseActorRef.cs" />
+    <Compile Include="Internals\ConcurrentSet.cs" />
+    <Compile Include="Internals\GuardLock.cs" />
+    <Compile Include="Internals\Helpers\EmptyEnumerator.cs" />
+    <Compile Include="Internals\Helpers\EmptyReadonlyCollection.cs" />
+    <Compile Include="Internals\Logging\EventStream.cs" />
+    <Compile Include="Internals\Logging\EventStreamExtensions.cs" />
+    <Compile Include="Internals\Logging\LogEvent.cs" />
+    <Compile Include="Internals\Logging\DebugLogEvent.cs" />
+    <Compile Include="Internals\Logging\ErrorLogEvent.cs" />
+    <Compile Include="Internals\Logging\InfoLogEvent.cs" />
+    <Compile Include="Internals\Logging\LogEventBus.cs" />
+    <Compile Include="Internals\Logging\LoggingEventBus.cs" />
+    <Compile Include="Internals\Logging\LookupClassification.cs" />
+    <Compile Include="Internals\Logging\StandardOutLogger.cs" />
+    <Compile Include="Internals\Logging\WarningLogEvent.cs" />
+    <Compile Include="Logging\Log.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Messages\DeadLetterMessage.cs" />
-    <Compile Include="DefaultActorSystemFactory.cs" />
+    <Compile Include="Bootstrapper.cs" />
     <Compile Include="DelegateActorCreationProperties.cs" />
     <Compile Include="Dispatching\DeadLetterMailbox.cs" />
     <Compile Include="Dispatching\Envelope.cs" />
@@ -127,6 +147,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SenderActorRef.cs" />
     <Compile Include="Status.cs" />
+    <Compile Include="Settings\ISettings.cs" />
+    <Compile Include="Settings\IStandardOutLoggerSettings.cs" />
+    <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Settings\StandardOutLoggerSettings.cs" />
     <Compile Include="Supervision\AllForOneSupervisorStrategy.cs" />
     <Compile Include="Supervision\OneForOneSupervisorStrategy.cs" />
     <Compile Include="Supervision\SupervisorAction.cs" />
@@ -138,6 +162,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

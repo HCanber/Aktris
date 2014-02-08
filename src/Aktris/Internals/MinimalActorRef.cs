@@ -13,8 +13,13 @@ namespace Aktris.Internals
 		public virtual void Stop() {/* Intentionally left blank */}
 		public virtual void HandleMessage(Envelope envelope) {/* Intentionally left blank */}
 		public virtual void HandleSystemMessage(SystemMessageEnvelope envelope) {/* Intentionally left blank */}
-		public abstract ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
+		
 		public virtual bool IsTerminated { get { return false; } }
+		public virtual ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
+		{
+			throw new InvalidOperationException(string.Format("Creating children to {0} is not allowed.", GetType()));
+		}
+
 		public Mailbox Mailbox { get { return null; } }
 		public virtual void Suspend() {/* Intentionally left blank */}
 		public virtual void Resume(Exception causedByFailure) {/* Intentionally left blank */}

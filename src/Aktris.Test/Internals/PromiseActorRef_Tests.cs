@@ -81,7 +81,7 @@ namespace Aktris.Test.Internals
 		[Fact]
 		public void When_timing_out_Then_AskTimeoutException_is_thrown()
 		{
-			var actorSystem = ActorSystem.Create();
+			var actorSystem = new TestBootstrapper().CreateSystem();
 			var promiseActorRef = PromiseActorRef.Create(actorSystem, 10, "target");
 			Assert.Throws<AggregateException>(() => promiseActorRef.Future.Wait()).ContainsException<AskTimeoutException>().Should().BeTrue();
 		}
@@ -90,9 +90,10 @@ namespace Aktris.Test.Internals
 		public void Given_a_timed_out_instance_When_sending_messages_to_it_Then_messages_are_forwarded_to_deadLetter()
 		{
 			var deadLetterActor = A.Fake<ActorRef>();
-			DefaultActorSystemFactory.Instance.DeadLetterActorCreator = (path,system) => deadLetterActor;
+			var testBootstrapper = new TestBootstrapper(){DeadLetterActorCreator = (path, system) => deadLetterActor};
+			var actorSystem = testBootstrapper.CreateSystem();
 
-			var actorSystem = ActorSystem.Create();
+
 			var promiseActorRef = PromiseActorRef.Create(actorSystem, 10, "target");
 			try{promiseActorRef.Future.Wait();}
 			catch(Exception){}

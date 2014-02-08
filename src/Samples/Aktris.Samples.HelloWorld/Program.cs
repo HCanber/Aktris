@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Aktris.Logging;
 
 namespace Aktris.Samples.HelloWorld
 {
@@ -10,7 +11,10 @@ namespace Aktris.Samples.HelloWorld
 	{
 		static void Main(string[] args)
 		{
-			var system = ActorSystem.Create();
+			var system = Bootstrapper.Instance.CreateSystemWithSettings(settings =>
+			{
+				settings.StandardOutLoggerSettings.LogLevel = LogLevel.Debug;
+			});
 			system.Start();
 			var actor = system.CreateActor(ActorCreationProperties.Create<HelloWorldActor>());
 

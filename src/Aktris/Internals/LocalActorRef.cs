@@ -866,10 +866,6 @@ namespace Aktris.Internals
 		{
 		}
 
-		public override ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
-		{
-			throw new InvalidOperationException(string.Format("Creating children to {0} is not allowed.", GetType()));
-		}
 
 		public override void SendSystemMessage(SystemMessage message, ActorRef sender)
 		{
