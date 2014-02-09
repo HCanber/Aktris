@@ -12,6 +12,7 @@ namespace Aktris.Internals
 		ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
 		uint InstanceId { get; }
 		Mailbox Mailbox { get; }
+		bool IsTerminated { get; }
 		void Suspend();
 		void Resume(Exception causedByFailure);
 		void SendSystemMessage(SystemMessage message, ActorRef sender);
