@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Aktris.Internals.Concurrency
 {
-	public class Promise<T> : IDisposable
+	public class Promise<T> : IPromise<T>
 	{
 		private bool _isDisposed; //Automatically initialized to false;
 		private readonly TaskCompletionSource<T> _taskCompletionSource;
