@@ -89,6 +89,11 @@ namespace Aktris.Test
 			get { return _mailbox.IsSuspended; }
 		}
 
+		public bool IsClosed
+		{
+			get { return _mailbox.IsClosed; }
+		}
+		
 		public void DetachActor(InternalActorRef actor)
 		{
 			_mailbox.DetachActor(actor);

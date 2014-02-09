@@ -22,6 +22,7 @@ namespace Aktris.Test
 		}
 
 		public bool IsSuspended { get { return _mailbox.IsSuspended; } }
+		public bool IsClosed { get { return _mailbox.IsClosed; } }
 
 		public void ClearEnqueuedSystemMessages()
 		{

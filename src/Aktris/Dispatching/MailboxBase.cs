@@ -21,6 +21,7 @@ namespace Aktris.Dispatching
 		protected internal int Status { get { return _mailboxStatus; } }
 
 		public bool IsSuspended { get { return _mailboxStatus.IsSuspended(); } }
+		public bool IsClosed { get { return Status.IsClosed(); } }
 
 		public void SetActor(InternalActorRef actor)
 		{

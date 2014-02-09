@@ -33,6 +33,7 @@ namespace Aktris.Dispatching
 		public void Resume(InternalActorRef actor) {/* Intentionally left blank */}
 
 		public bool IsSuspended { get { return false; } }
+		public bool IsClosed { get { return false; } }
 		public void DetachActor(InternalActorRef actor) {/* Intentionally left blank */}
 	}
 }

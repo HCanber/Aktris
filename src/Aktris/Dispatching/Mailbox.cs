@@ -12,6 +12,7 @@ namespace Aktris.Dispatching
 		void Suspend(InternalActorRef actor);
 		void Resume(InternalActorRef actor);
 		bool IsSuspended { get; }
+		bool IsClosed { get; }
 		void DetachActor(InternalActorRef actor);
 	}
 }
