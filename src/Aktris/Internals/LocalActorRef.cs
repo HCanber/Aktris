@@ -567,7 +567,7 @@ namespace Aktris.Internals
 		{
 			if(actor != this && _watching.Contains(actor))
 			{
-				actor.SendSystemMessage(new UnwatchActor(this), this);
+				actor.SendSystemMessage(new UnwatchActor(this, actor), this);
 				_watching = _watching.Remove(actor);
 			}
 		}

@@ -6,12 +6,16 @@ namespace Aktris.Internals.SystemMessages
 	public class UnwatchActor : SystemMessage
 	{
 		private readonly InternalActorRef _watcher;
+		private readonly InternalActorRef _watchee;
 
-		public UnwatchActor(InternalActorRef watcher)
+		public UnwatchActor(InternalActorRef watcher, InternalActorRef watchee)
 		{
 			_watcher = watcher;
+			_watchee = watchee;
 		}
 
 		public InternalActorRef Watcher { get { return _watcher; } }
+
+		public InternalActorRef Watchee { get { return _watchee; } }
 	}
 }
