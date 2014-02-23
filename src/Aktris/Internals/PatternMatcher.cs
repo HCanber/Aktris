@@ -113,6 +113,7 @@ namespace Aktris.Internals
 
 	public class PatternMatcher<TRetVal>
 	{
+		//TODO: Fix comments!
 		private PatternMatcher<TRetVal> _instance = new PatternMatcher<TRetVal>();
 
 		/// <summary>If the item is of the specified type then the handler is invoked and true is returned. </summary>

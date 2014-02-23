@@ -14,7 +14,7 @@ namespace Aktris.Internals
 		public virtual void HandleMessage(Envelope envelope) {/* Intentionally left blank */}
 		public virtual void HandleSystemMessage(SystemMessageEnvelope envelope) {/* Intentionally left blank */}
 		public abstract ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null);
-		public bool IsTerminated { get { return false; } }
+		public virtual bool IsTerminated { get { return false; } }
 		public Mailbox Mailbox { get { return null; } }
 		public virtual void Suspend() {/* Intentionally left blank */}
 		public virtual void Resume(Exception causedByFailure) {/* Intentionally left blank */}

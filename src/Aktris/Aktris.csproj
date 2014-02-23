@@ -55,11 +55,14 @@
     <Compile Include="ActorSystem.cs" />
     <Compile Include="ActorSystemFactory.cs" />
     <Compile Include="AnonymousActor.cs" />
+    <Compile Include="Exceptions\AskTimeoutException.cs" />
     <Compile Include="Internals\AutoHandledMessage.cs" />
     <Compile Include="Internals\Concurrency\IPromise.cs" />
+    <Compile Include="Internals\Concurrency\TaskExt.cs" />
     <Compile Include="Internals\Concurrency\TaskHelper.cs" />
     <Compile Include="Internals\Concurrency\Promise.cs" />
     <Compile Include="Internals\Concurrency\TaskTimeoutExtensions.cs" />
+    <Compile Include="Internals\PromiseActorRef.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Messages\DeadLetterMessage.cs" />
     <Compile Include="DefaultActorSystemFactory.cs" />
@@ -122,6 +125,7 @@
     <Compile Include="Messages\StopActor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SenderActorRef.cs" />
+    <Compile Include="Status.cs" />
     <Compile Include="Supervision\AllForOneSupervisorStrategy.cs" />
     <Compile Include="Supervision\OneForOneSupervisorStrategy.cs" />
     <Compile Include="Supervision\SupervisorAction.cs" />

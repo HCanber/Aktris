@@ -286,11 +286,12 @@ namespace Aktris.Internals.Concurrency
 		{
 			task.ContinueWith(t =>
 			{
+				if(!t.IsCanceled && t.IsFaulted && exceptionHandler != null)
+				{
+					var innerException = t.Exception.Flatten().InnerExceptions.FirstOrDefault();
+					exceptionHandler(innerException ?? t.Exception);
+				}
 				if(finalAction != null) finalAction();
-
-				if(t.IsCanceled || !t.IsFaulted || exceptionHandler == null) return;
-				var innerException = t.Exception.Flatten().InnerExceptions.FirstOrDefault();
-				exceptionHandler(innerException ?? t.Exception);
 			});
 		}
 	}

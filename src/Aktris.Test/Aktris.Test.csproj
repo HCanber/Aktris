@@ -73,6 +73,7 @@
     <Compile Include="DelegateActorCreationProperties_Tests.cs" />
     <Compile Include="Actor_Tests.cs" />
     <Compile Include="Internals\Concurrency\Promise_Tests.cs" />
+    <Compile Include="Internals\PromiseActorRef_Tests.cs" />
     <Compile Include="Logging\LogLevelTests.cs" />
     <Compile Include="ManuallyScheduledTestMailbox.cs" />
     <Compile Include="Dispatching\Mailbox_Tests.cs" />

@@ -121,7 +121,7 @@ namespace Aktris.Internals.Concurrency
 			var timer = new Timer(state =>
 			{
 				// Recover your state information
-				var myTcs = (TaskCompletionSource<VoidTypeStruct>)state;
+				var myTcs = (TaskCompletionSource<T>)state;
 
 				// Fault our proxy with a TimeoutException
 				myTcs.TrySetException(new TimeoutException());
