@@ -14,14 +14,14 @@ namespace Aktris.Test.Internals
 		[Fact]
 		public void Given_a_non_stopped_Then_it_is_not_terminated()
 		{
-			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), A.Fake<IPromise<object>>(), A.Fake<ActorRef>());
+			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), A.Fake<IPromise<object>>(), A.Fake<ActorRef>(), A.Fake<TestActorSystem>());
 			actorRef.IsTerminated.Should().BeFalse();
 		}
 
 		[Fact]
 		public void Given_a_stopped_Then_it_is_terminated()
 		{
-			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), A.Fake<IPromise<object>>(), A.Fake<ActorRef>());
+			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), A.Fake<IPromise<object>>(), A.Fake<ActorRef>(), A.Fake<TestActorSystem>());
 			actorRef.Stop();
 			actorRef.IsTerminated.Should().BeTrue();
 		}
@@ -30,7 +30,7 @@ namespace Aktris.Test.Internals
 		public void Given_a_stopped_When_sending_message_Then_it_is_forwarded_to_DeadLetter()
 		{
 			var deadLetters = A.Fake<ActorRef>();
-			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), A.Fake<IPromise<object>>(), deadLetters);
+			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), A.Fake<IPromise<object>>(), deadLetters, A.Fake<TestActorSystem>());
 			actorRef.Stop();
 
 			var sender = A.Fake<ActorRef>();
@@ -42,7 +42,7 @@ namespace Aktris.Test.Internals
 		public void Given_a_non_stopped_When_sending_Success_Then_promise_success_is_called()
 		{
 			var promise = A.Fake<IPromise<object>>();
-			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), promise, A.Fake<ActorRef>());
+			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), promise, A.Fake<ActorRef>(), A.Fake<TestActorSystem>());
 
 			var sender = A.Fake<ActorRef>();
 			actorRef.Send(new Status.Success("test"), sender);
@@ -55,7 +55,7 @@ namespace Aktris.Test.Internals
 		{
 			var promise = A.Fake<IPromise<object>>();
 			var deadLetters = A.Fake<ActorRef>();
-			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), promise, deadLetters);
+			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), promise, deadLetters, A.Fake<TestActorSystem>());
 			A.CallTo(() => promise.TrySuccess("test")).Returns(false);
 			var sender = A.Fake<ActorRef>();
 			actorRef.Send("test", sender);
@@ -69,7 +69,7 @@ namespace Aktris.Test.Internals
 		public void Given_a_non_stopped_When_sending_Failure_Then_promise_failure_is_called()
 		{
 			var promise = A.Fake<IPromise<object>>();
-			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), promise, A.Fake<ActorRef>());
+			var actorRef = new PromiseActorRef(A.Fake<ActorPath>(), promise, A.Fake<ActorRef>(), A.Fake<TestActorSystem>());
 
 			var sender = A.Fake<ActorRef>();
 			var exception = new Exception("test");
@@ -90,7 +90,7 @@ namespace Aktris.Test.Internals
 		public void Given_a_timed_out_instance_When_sending_messages_to_it_Then_messages_are_forwarded_to_deadLetter()
 		{
 			var deadLetterActor = A.Fake<ActorRef>();
-			DefaultActorSystemFactory.Instance.DeadLetterActorCreator = path => deadLetterActor;
+			DefaultActorSystemFactory.Instance.DeadLetterActorCreator = (path,system) => deadLetterActor;
 
 			var actorSystem = ActorSystem.Create();
 			var promiseActorRef = PromiseActorRef.Create(actorSystem, 10, "target");

@@ -48,7 +48,7 @@ namespace Aktris
 
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
-			_deadLetters = bootstrapper.DeadLetterActorCreator(_rootPath / "_DeadLetter");
+			_deadLetters = bootstrapper.DeadLetterActorCreator(_rootPath / "_DeadLetter", this);
 			_deadLettersMailbox = new DeadLetterMailbox(_deadLetters);
 			_scheduler = bootstrapper.Scheduler;
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
@@ -102,7 +102,7 @@ namespace Aktris
 
 		private GuardianActorRef CreateRootGuardian()
 		{
-			var supervisor = new RootGuardianSupervisor(_rootPath);
+			var supervisor = new RootGuardianSupervisor(_rootPath, this);
 			var rootGuardian = new GuardianActorRef(this, ActorCreationProperties.Create(() => new Guardian()), _rootPath, CreateDefaultMailbox(), supervisor);
 			return rootGuardian;
 		}

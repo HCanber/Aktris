@@ -3,7 +3,7 @@ using Aktris.Internals;
 
 namespace Aktris.Test
 {
-	public class TestActorSystem : ActorSystem
+	public class TestActorSystem : InternalActorSystem
 	{
 		public TestActorSystem()
 			: this(null)

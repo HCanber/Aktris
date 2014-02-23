@@ -3,6 +3,14 @@ using System.Threading.Tasks;
 
 namespace Aktris.Internals.Concurrency
 {
+	public static class Promise
+	{
+		public static Task<T> Failed<T>(Exception exception)
+		{
+			return TaskExt.CreateFailedTask<T>(exception);
+		}
+	}
+
 	public class Promise<T> : IPromise<T>
 	{
 		private bool _isDisposed; //Automatically initialized to false;

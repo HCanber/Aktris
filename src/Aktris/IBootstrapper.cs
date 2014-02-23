@@ -9,7 +9,7 @@ namespace Aktris
 	{
 		IUniqueNameCreator UniqueNameCreator { get; }
 		LocalActorRefFactory LocalActorRefFactory { get; }
-		Func<ActorPath,ActorRef> DeadLetterActorCreator { get; }
+		Func<ActorPath, ActorSystem, ActorRef> DeadLetterActorCreator { get; }
 		Func<IScheduler, Mailbox> DefaultMailboxCreator { get;  }
 		IScheduler Scheduler { get;  }
 	}

@@ -11,6 +11,8 @@
 			_actor = actor;
 		}
 
+		public ActorRef InnerActorRef { get { return _actorRef; } }
+
 		public string Name { get { return _actorRef.Name; } }
 
 		public ActorPath Path { get { return _actorRef.Path; } }

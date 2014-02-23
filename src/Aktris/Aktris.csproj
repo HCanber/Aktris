@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actor.cs" />
+    <Compile Include="ActorAskExtensions.cs" />
     <Compile Include="ActorCreationProperties.cs" />
     <Compile Include="ActorInstantiator.cs" />
     <Compile Include="ActorPath.cs" />

@@ -21,6 +21,7 @@ namespace Aktris.Internals
 		public virtual void Restart(Exception causedByFailure) {/* Intentionally left blank */}
 		public abstract ActorPath Path { get; }
 		public abstract uint InstanceId { get; }
+		public abstract ActorSystem System { get; }
 		public virtual void SendSystemMessage(SystemMessage message, ActorRef sender) {/* Intentionally left blank */}
 		public void UnwatchAndStopChildren() {/* Intentionally left blank */}
 		public void Watch(InternalActorRef actorToWatch) {/* Intentionally left blank */}

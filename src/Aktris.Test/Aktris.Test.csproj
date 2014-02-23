@@ -62,6 +62,7 @@
     <Compile Include="ActorSystem_as_ActorCreator_Tests.cs" />
     <Compile Include="ActorSystem_CreatingNewSystems_Tests.cs" />
     <Compile Include="ActorSystem_Tests.cs" />
+    <Compile Include="Actor_Ask_Tests.cs" />
     <Compile Include="Actor_as_ActorCreator_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Crashes_LifecycleEvents_Tests.cs" />
     <Compile Include="Actor_Lifecycle_Crashes_Tests.cs" />

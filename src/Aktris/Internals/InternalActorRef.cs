@@ -13,6 +13,7 @@ namespace Aktris.Internals
 		uint InstanceId { get; }
 		Mailbox Mailbox { get; }
 		bool IsTerminated { get; }
+		ActorSystem System { get; }
 		void Suspend();
 		void Resume(Exception causedByFailure);
 		void SendSystemMessage(SystemMessage message, ActorRef sender);

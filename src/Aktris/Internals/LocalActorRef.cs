@@ -861,8 +861,8 @@ namespace Aktris.Internals
 		private const string _Name = "_Root-guardian-supervisor";
 		public override string Name { get { return _Name; } }
 
-		public RootGuardianSupervisor(RootActorPath root)
-			: base(root / _Name)
+		public RootGuardianSupervisor(RootActorPath root, ActorSystem system)
+			: base(root / _Name, system)
 		{
 		}
 

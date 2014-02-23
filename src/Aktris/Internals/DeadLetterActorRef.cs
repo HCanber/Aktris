@@ -7,7 +7,8 @@ namespace Aktris.Internals
 {
 	public class DeadLetterActorRef : EmptyLocalActorRef
 	{
-		public DeadLetterActorRef([NotNull] ActorPath path) : base(path)
+		public DeadLetterActorRef([NotNull] ActorPath path, [NotNull] ActorSystem actorSystem)
+			: base(path, actorSystem)
 		{
 		}
 

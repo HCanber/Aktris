@@ -22,8 +22,8 @@ namespace Aktris.Internals
 		private static readonly IImmutableSet<InternalActorRef> _EmptyActorRefSet = ImmutableHashSet<InternalActorRef>.Empty;
 		private IImmutableSet<InternalActorRef> _watchedBy = _EmptyActorRefSet;
 
-		public PromiseActorRef([NotNull] ActorPath path, IPromise<object> promise, ActorRef deadLetters)
-			: base(path)
+		public PromiseActorRef([NotNull] ActorPath path, IPromise<object> promise, ActorRef deadLetters, ActorSystem system)
+			: base(path,system)
 		{
 			_promise = promise;
 			_deadLetters = deadLetters;
@@ -125,7 +125,7 @@ namespace Aktris.Internals
 			var internalSystem = (InternalActorSystem)system;
 			var tempPath = internalSystem.CreateTempActorPath();
 			var promise = new Promise<object>();
-			var promiseActorRef = new PromiseActorRef(tempPath, promise, system.DeadLetters);
+			var promiseActorRef = new PromiseActorRef(tempPath, promise, system.DeadLetters, system);
 
 			var timeoutableTask = promise.Future.TimeoutAfter(timeoutMilliseconds);
 
