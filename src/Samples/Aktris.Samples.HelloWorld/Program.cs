@@ -11,6 +11,7 @@ namespace Aktris.Samples.HelloWorld
 		static void Main(string[] args)
 		{
 			var system = ActorSystem.Create();
+			system.Start();
 			var actor = system.CreateActor(ActorCreationProperties.Create<HelloWorldActor>());
 
 			actor.Send("World", null);
