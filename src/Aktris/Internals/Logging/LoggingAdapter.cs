@@ -91,7 +91,7 @@ namespace Aktris.Internals.Logging
 		public void Log(LogLevel logLevels, string message, params object[] args)
 		{
 			if(logLevels == LogLevel.Off) return;
-			var logLevelSequence = Aktris.Logging.Log.SeparateLogLevelsToSequence(logLevels);
+			var logLevelSequence = Logging.Log.SeparateLogLevelsToSequence(logLevels);
 			foreach(var logLevel in logLevelSequence)
 			{
 				switch(logLevel)

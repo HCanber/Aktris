@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Aktris.Internals.Logging;
 using Aktris.Logging;
 using FluentAssertions;
 using Xunit;
 
-namespace Aktris.Test.Logging
+namespace Aktris.Test.Internals.Logging
 {
+// ReSharper disable once InconsistentNaming
 	public class Log_Tests
 	{
 		[Fact]
