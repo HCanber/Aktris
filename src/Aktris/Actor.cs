@@ -6,7 +6,9 @@ using System.Text.RegularExpressions;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.Helpers;
+using Aktris.Internals.Logging;
 using Aktris.JetBrainsAnnotations;
+using Aktris.Logging;
 using Aktris.Supervision;
 
 namespace Aktris
@@ -19,6 +21,7 @@ namespace Aktris
 		private InternalActorRef _self;
 		private readonly ActorSystem _system;
 		private LocalActorRefFactory _localActorRefFactory;
+		private ILogger _logger;
 
 
 		protected Actor()
@@ -85,7 +88,8 @@ namespace Aktris
 
 		internal SupervisorStrategy GetSupervisorStrategy() { return SupervisorStrategy ?? SupervisorStrategy.DefaultStrategy; }
 
-		protected void Stop() { _self.Stop(); }
+		protected ILogger Log { get { return _logger ?? (_logger = new LoggingAdapter(_system.EventStream, this)); } }
+
 
 
 		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
@@ -136,6 +140,7 @@ namespace Aktris
 		{
 			((InternalActorRef)actorToImmediatelyStop).Stop();
 		}
+		protected void Stop() { _self.Stop(); }
 
 		// API for the user that implements an actor to define message handlers -----------------------------------------
 
