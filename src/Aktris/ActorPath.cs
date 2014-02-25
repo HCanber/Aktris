@@ -52,6 +52,14 @@ namespace Aktris
 			return sb.ToString();
 		}
 
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+			AppendString(sb);
+			return sb.ToString();
+		}
+
+		protected internal abstract void AppendString(StringBuilder sb);
 		protected internal abstract void AppendDebugString(StringBuilder sb);
 
 		public static ActorPath operator /(ActorPath parent, string child)

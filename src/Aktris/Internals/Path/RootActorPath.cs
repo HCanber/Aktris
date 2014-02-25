@@ -63,6 +63,10 @@ namespace Aktris.Internals.Path
 			return !Equals(left, right);
 		}
 
+		protected internal override void AppendString(StringBuilder sb)
+		{
+			sb.Append(_name);
+		}
 		protected internal override void AppendDebugString(StringBuilder sb)
 		{
 			sb.Append(_name);

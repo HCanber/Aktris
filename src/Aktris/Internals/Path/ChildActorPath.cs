@@ -87,23 +87,33 @@ namespace Aktris.Internals.Path
 			return (_parent.GetHashCode() * 397) ^ _name.GetHashCode();
 		}
 
+		protected internal override void AppendString(StringBuilder sb)
+		{
+			AppendStringWithoutId(sb);
+		}
+
 		protected internal override void AppendDebugString(StringBuilder sb)
 		{
-			AppendDebugStringWithoutId(sb);
+			AppendStringWithoutId(sb);
+			AppendIdFragment(sb);
+		}
+
+		private void AppendIdFragment(StringBuilder sb)
+		{
 			sb.Append('#').Append(_instanceId);
 		}
 
-		private void AppendDebugStringWithoutId(StringBuilder sb)
+		private void AppendStringWithoutId(StringBuilder sb)
 		{
 			var parentAsChild = _parent as ChildActorPath;
 			if(parentAsChild != null)
 			{
-				parentAsChild.AppendDebugStringWithoutId(sb);
+				parentAsChild.AppendStringWithoutId(sb);
 				sb.Append('/');
 			}
 			else
 			{
-				_parent.AppendDebugString(sb);
+				_parent.AppendString(sb);
 			}
 			sb.Append(_name);
 		}
