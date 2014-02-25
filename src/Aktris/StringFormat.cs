@@ -2,7 +2,7 @@
 using System.Text;
 using Aktris.JetBrainsAnnotations;
 
-namespace Aktris.Internals
+namespace Aktris
 {
 	public static class StringFormat
 	{

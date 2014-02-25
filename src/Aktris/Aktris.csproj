@@ -129,7 +129,7 @@
     <Compile Include="Internals\MinimalActorRef.cs" />
     <Compile Include="Internals\Path\RootActorPath.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
-    <Compile Include="Internals\StringFormat.cs" />
+    <Compile Include="StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
     <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
     <Compile Include="Internals\IUniqueNameCreator.cs" />
