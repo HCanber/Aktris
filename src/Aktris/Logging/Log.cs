@@ -12,17 +12,23 @@ namespace Aktris.Logging
 		private static readonly IReadOnlyCollection<LogLevel> _AllLevels;
 		private static readonly IReadOnlyCollection<LogLevelWithType> _AllLevelsWithType;
 		private static readonly IReadOnlyCollection<LogLevelWithType>[] _SubscribeLevels;
+		private const int _OffIndex = 0;
+		private const int _ErrorIndex = 1;
+		private const int _WarningIndex = 2;
+		private const int _InfoIndex = 3;
+		private const int _DebugIndex = 4;
+
 
 		static Log()
 		{
 			_AllLevels = (new[] { LogLevel.Error, LogLevel.Warning, LogLevel.Info, LogLevel.Debug }).ToReadOnlyCollection();
 			var allLevelsWithType =(new[] { LogLevelWithType.Error, LogLevelWithType.Warning, LogLevelWithType.Info, LogLevelWithType.Debug }).ToReadOnlyCollection();
 			var subscribeLevels=new IReadOnlyCollection<LogLevelWithType>[5];
-			subscribeLevels[0] = EmptyReadonlyCollection<LogLevelWithType>.Instance;
-			subscribeLevels[1] = allLevelsWithType.Where(l => l <= 1).ToReadOnlyCollection();
-			subscribeLevels[2] = allLevelsWithType.Where(l => l <= 2).ToReadOnlyCollection();
-			subscribeLevels[3] = allLevelsWithType.Where(l => l <= 3).ToReadOnlyCollection();
-			subscribeLevels[4] = allLevelsWithType.Where(l => l <= 4).ToReadOnlyCollection();
+			subscribeLevels[_OffIndex] = EmptyReadonlyCollection<LogLevelWithType>.Instance;
+			subscribeLevels[_ErrorIndex] = allLevelsWithType.Where(l => l <= LogLevel.Error).ToReadOnlyCollection();
+			subscribeLevels[_WarningIndex] = allLevelsWithType.Where(l => l <= LogLevel.Warning).ToReadOnlyCollection();
+			subscribeLevels[_InfoIndex] = allLevelsWithType.Where(l => l <= LogLevel.Info).ToReadOnlyCollection();
+			subscribeLevels[_DebugIndex] = allLevelsWithType.Where(l => l <= LogLevel.Debug).ToReadOnlyCollection();
 			_SubscribeLevels = subscribeLevels;
 			_AllLevelsWithType = allLevelsWithType;
 		}
@@ -32,7 +38,21 @@ namespace Aktris.Logging
 
 		public static IReadOnlyCollection<LogLevelWithType> GetSubscribeLevels(LogLevel logLevel)
 		{
-			return _SubscribeLevels[(int) logLevel];
+			switch(logLevel)
+			{
+				case LogLevel.Off:
+					return _SubscribeLevels[_OffIndex];
+				case LogLevel.Error:
+					return _SubscribeLevels[_ErrorIndex];
+				case LogLevel.Warning:
+					return _SubscribeLevels[_WarningIndex];
+				case LogLevel.Info:
+					return _SubscribeLevels[_InfoIndex];
+				case LogLevel.Debug:
+					return _SubscribeLevels[_DebugIndex];
+				default:
+					throw new ArgumentOutOfRangeException("logLevel");
+			}
 		}
 
 		public static bool IsValidLogLevel(LogLevel logLevel)

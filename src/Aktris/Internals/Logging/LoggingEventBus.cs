@@ -16,7 +16,7 @@ namespace Aktris.Internals.Logging
 		private readonly ActorRef _deadLetterActor;
 		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 		private readonly List<ActorRef> _loggers = new List<ActorRef>();
-		private LogLevel _logLevel = LogLevel.Error;
+		private LogLevel _logLevels = LogLevel.Error;
 
 
 		protected LoggingEventBus([NotNull] ActorRef deadLetterActor)
@@ -25,27 +25,30 @@ namespace Aktris.Internals.Logging
 			_deadLetterActor = deadLetterActor;
 		}
 
-		public LogLevel LogLevel
+		
+
+		public LogLevel LogLevels
 		{
-			get { return _lock.Read(() => _logLevel); }
+			get { return _lock.Read(() => _logLevels); }
 			set
 			{
-				_lock.Write(() =>
+				if(value != _logLevels)
 				{
-					if(value > _logLevel)
+					_lock.Write(() =>
 					{
-						// subscribe if previously ignored and now requested
-						var prevUnsubscribedThatShouldBeSubscribed = Log.GetSubscribeLevels(value).Where(l => l > _logLevel);
-						AllLoggersWhenInLock((a,t)=>Subscribe(a,t), prevUnsubscribedThatShouldBeSubscribed);						
-					}
-					else if(value<_logLevel)
-					{
-						// unsubscribe if previously registered and now ignored
-						var prevSubscribedThatShouldBeUnsubscribed = Log.GetSubscribeLevels(_logLevel).Where(l => l > value);
-						AllLoggersWhenInLock((subscriber, to) => Unsubscribe(subscriber, to),prevSubscribedThatShouldBeUnsubscribed);
-					}
-					_logLevel = value;
-				});
+						if(value != _logLevels)
+						{
+							// subscribe if previously ignored and now requested
+							var prevUnsubscribedThatShouldBeSubscribed = Log.GetSubscribeLevels(value).Where(l => !_logLevels.HasFlag(l.LogLevel));
+							AllLoggersWhenInLock((a, t) => Subscribe(a, t), prevUnsubscribedThatShouldBeSubscribed);
+
+							// unsubscribe if previously registered and now ignored
+							var prevSubscribedThatShouldBeUnsubscribed = Log.GetSubscribeLevels(_logLevels).Where(l => !_logLevels.HasFlag(l.LogLevel));
+							AllLoggersWhenInLock((subscriber, to) => Unsubscribe(subscriber, to), prevSubscribedThatShouldBeUnsubscribed);
+							_logLevels = value;
+						}
+					});
+				}
 			}
 		}
 
@@ -99,7 +102,7 @@ namespace Aktris.Internals.Logging
 			_lock.Write(() =>
 			{
 				_loggers.Add(stdOutLogger);
-				_logLevel = logLevel;
+				_logLevels = logLevel;
 			});
 		}
 

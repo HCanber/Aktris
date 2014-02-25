@@ -12,8 +12,8 @@ namespace Aktris.Test.Logging
 		InlineData(LogLevel.Off, 0),
 		InlineData(LogLevel.Error, 1),
 		InlineData(LogLevel.Warning, 2),
-		InlineData(LogLevel.Info, 3),
-		InlineData(LogLevel.Debug, 4),
+		InlineData(LogLevel.Info, 4),
+		InlineData(LogLevel.Debug, 8),
 		]
 		public void Level_MustBe_Value(LogLevel logLevel, int value)
 		{
