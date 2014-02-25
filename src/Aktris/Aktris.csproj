@@ -67,6 +67,7 @@
     <Compile Include="Internals\Concurrency\TaskHelper.cs" />
     <Compile Include="Internals\Concurrency\Promise.cs" />
     <Compile Include="Internals\Concurrency\TaskTimeoutExtensions.cs" />
+    <Compile Include="Internals\Logging\LoggingAdapter.cs" />
     <Compile Include="Internals\PromiseActorRef.cs" />
     <Compile Include="Internals\ConcurrentSet.cs" />
     <Compile Include="Internals\GuardLock.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Internals\Logging\LookupClassification.cs" />
     <Compile Include="Internals\Logging\StandardOutLogger.cs" />
     <Compile Include="Internals\Logging\WarningLogEvent.cs" />
+    <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\Log.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Messages\DeadLetterMessage.cs" />

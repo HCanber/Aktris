@@ -36,6 +36,20 @@ namespace Aktris.Logging
 		public static IReadOnlyCollection<LogLevel> AllLevels { get { return _AllLevels; } }
 		public static IReadOnlyCollection<LogLevelWithType> AllLevelsWithType { get { return _AllLevelsWithType; } }
 
+		/// <summary>
+		/// Splits <paramref name="logLevels"/> to a sequence. So <paramref name="logLevels"/>= LogLevel.Error
+		/// </summary>
+		/// <param name="logLevels"></param>
+		/// <returns></returns>
+		public static IEnumerable<LogLevel> SeparateLogLevelsToSequence(LogLevel logLevels)
+		{
+			if(logLevels == LogLevel.Off) yield break;
+			if(logLevels.HasFlag(LogLevel.Error)) yield return LogLevel.Error;
+			if(logLevels.HasFlag(LogLevel.Warning)) yield return LogLevel.Warning;
+			if(logLevels.HasFlag(LogLevel.Info)) yield return LogLevel.Info;
+			if(logLevels.HasFlag(LogLevel.Debug)) yield return LogLevel.Debug;
+		}
+
 		public static IReadOnlyCollection<LogLevelWithType> GetSubscribeLevels(LogLevel logLevel)
 		{
 			switch(logLevel)
