@@ -92,6 +92,7 @@
     <Compile Include="Internals\Logging\StandardOutLogger.cs" />
     <Compile Include="Internals\Logging\WarningLogEvent.cs" />
     <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\LoggerExtensions.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Messages\DeadLetterMessage.cs" />
     <Compile Include="Bootstrapper.cs" />
