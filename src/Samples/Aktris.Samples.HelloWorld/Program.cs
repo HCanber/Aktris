@@ -16,7 +16,7 @@ namespace Aktris.Samples.HelloWorld
 				settings.StandardOutLoggerSettings.LogLevel = LogLevel.Debug;
 			});
 			system.Start();
-			var actor = system.CreateActor(ActorCreationProperties.Create<HelloWorldActor>());
+			var actor = system.CreateActor(ActorCreationProperties.Create<HelloWorldActor>(),"HelloWorld");
 
 			actor.Send("World", null);
 
@@ -29,7 +29,11 @@ namespace Aktris.Samples.HelloWorld
 	{
 		public HelloWorldActor()
 		{
-			Receive<string>(msg => Console.WriteLine("Hello " + msg + "!"));
+			Receive<string>(msg =>
+			{
+				Log.Debug("Received \"{0}\"", msg);
+				Console.WriteLine("Hello " + msg + "!");
+			});
 		}
 	}
 }
