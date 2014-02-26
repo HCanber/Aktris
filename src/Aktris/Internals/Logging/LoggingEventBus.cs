@@ -95,7 +95,7 @@ namespace Aktris.Internals.Logging
 			var dateFormat = settings.DateFormat;
 			if(!Log.IsValidLogLevel(logLevel))
 			{
-				StandardOutLogger.PrintError(new ErrorLogEvent(GetType().Name, GetType(), string.Format("Unknown StandardOutLogger LogLevel setting: {0}, defaulting to Error", logLevel), new LoggingException()), dateFormat);
+				StandardOutLoggerHelper.PrintError(new ErrorLogEvent(GetType().Name, GetType(), string.Format("Unknown StandardOutLogger LogLevel setting: {0}, defaulting to Error", logLevel), new LoggingException()), dateFormat);
 				logLevel = LogLevel.Error;
 			}
 			Log.GetSubscribeLevels(logLevel).ForEach(level=>Subscribe(stdOutLogger,level.Type));
