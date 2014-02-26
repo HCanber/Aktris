@@ -68,8 +68,11 @@
     <Compile Include="Internals\Concurrency\Promise.cs" />
     <Compile Include="Internals\Concurrency\TaskTimeoutExtensions.cs" />
     <Compile Include="Internals\Logging\ConcurrentConsoleWriter.cs" />
+    <Compile Include="Internals\Logging\DefaultLogger.cs" />
+    <Compile Include="Internals\Logging\InitializeLogger.cs" />
     <Compile Include="Internals\Logging\LineLogFormatter.cs" />
     <Compile Include="Internals\Logging\Log.cs" />
+    <Compile Include="Internals\Logging\LoggerInitialized.cs" />
     <Compile Include="Internals\Logging\LoggingAdapter.cs" />
     <Compile Include="Internals\Logging\StandardOutLoggerHelper.cs" />
     <Compile Include="Internals\PromiseActorRef.cs" />
