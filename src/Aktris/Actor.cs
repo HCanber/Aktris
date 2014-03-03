@@ -90,6 +90,7 @@ namespace Aktris
 
 		protected ILogger Log { get { return _logger ?? (_logger = new LoggingAdapter(_system.EventStream, this)); } }
 
+		protected ActorRef Parent { get { return _self.Parent; } }
 
 
 		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
@@ -127,10 +128,16 @@ namespace Aktris
 			return _self.CreateActor(actorCreationProperties, name);
 		}
 
+		protected ActorRef CreateActor<T>(Func<T> creator, string name = null) where T : Actor
+		{
+			return _self.CreateActor(ActorCreationProperties.Create(creator), name);
+		}
+
 		protected void Watch(ActorRef actorToWatch)
 		{
 			_self.Watch((InternalActorRef)actorToWatch);
 		}
+
 		protected void Unwatch(ActorRef actorToWatch)
 		{
 			_self.Unwatch((InternalActorRef)actorToWatch);

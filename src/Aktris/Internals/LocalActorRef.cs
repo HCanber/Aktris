@@ -60,7 +60,7 @@ namespace Aktris.Internals
 		public uint InstanceId { get { return _path.InstanceId; } }
 
 		public ActorSystem System { get { return _system; } }
-
+		public InternalActorRef Parent { get { return _supervisor;} }
 		public Mailbox Mailbox { get { return _mailbox; } }
 		protected Envelope CurrentMessage { get { return _currentMessage; } }
 
