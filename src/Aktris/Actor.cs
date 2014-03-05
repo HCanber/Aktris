@@ -27,6 +27,7 @@ namespace Aktris
 		private readonly ActorSystem _system;
 		private LocalActorRefFactory _localActorRefFactory;
 		private ILogger _logger;
+		private readonly SelfScheduler _selfScheduler;
 
 		protected Actor()
 		{
@@ -40,6 +41,7 @@ namespace Aktris
 			_self = actorRef;
 			PrepareForConfiguringMessageHandler();
 			_localActorRefFactory = _system.LocalActorRefFactory;
+			_selfScheduler = new SelfScheduler(_system.Scheduler, _self);
 		}
 
 
@@ -99,7 +101,7 @@ namespace Aktris
 
 		protected ActorRef Parent { get { return _self.Parent; } }
 
-		protected IScheduler Scheduler { get { return _system.Scheduler; } }
+		protected SelfScheduler Scheduler { get { return _selfScheduler; } }
 
 		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
 		protected internal virtual void PreStart() {/*Intentionally left blank*/}

@@ -130,6 +130,7 @@
     <Compile Include="Internals\MinimalActorRef.cs" />
     <Compile Include="Internals\Path\RootActorPath.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
+    <Compile Include="SelfScheduler.cs" />
     <Compile Include="StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
     <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
