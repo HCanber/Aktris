@@ -91,6 +91,7 @@
     <Compile Include="Internals\Logging\LookupClassification.cs" />
     <Compile Include="Internals\Logging\StandardOutLogger.cs" />
     <Compile Include="Internals\Logging\WarningLogEvent.cs" />
+    <Compile Include="IScheduler.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\LoggerExtensions.cs" />
     <Compile Include="Logging\LogLevel.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Supervision\SupervisorStrategy.cs" />
     <Compile Include="Supervision\DeciderSupervisorStrategy.cs" />
     <Compile Include="Messages\WatchedActorTerminated.cs" />
+    <Compile Include="Internals\TaskBasedScheduler.cs" />
     <Compile Include="TempNodeHandler.cs" />
   </ItemGroup>
   <ItemGroup>

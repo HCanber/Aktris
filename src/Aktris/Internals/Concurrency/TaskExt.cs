@@ -31,5 +31,32 @@ namespace Aktris.Internals.Concurrency
 			taskCompletionSource.SetException(exception);
 			return taskCompletionSource.Task;
 		}
+
+		public static Task<T> CreateCompletedTask<T>(T result)
+		{
+			var taskCompletionSource = new TaskCompletionSource<T>();
+			taskCompletionSource.SetResult(result);
+			return taskCompletionSource.Task;
+		}
+
+		public static Task CreateCompletedTask()
+		{
+			var taskCompletionSource = new TaskCompletionSource<VoidTypeStruct>();
+			taskCompletionSource.SetResult(default(VoidTypeStruct));
+			return taskCompletionSource.Task;
+		}
+
+		public static Task CreateInfiniteTask()
+		{
+			return CreateInfiniteTask<VoidTypeStruct>();
+		}
+
+		public static Task CreateInfiniteTask<T>()
+		{
+			var taskCompletionSource = new TaskCompletionSource<VoidTypeStruct>();
+			return taskCompletionSource.Task;
+		}
+
+		internal struct VoidTypeStruct { }
 	}
 }

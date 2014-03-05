@@ -18,6 +18,7 @@ namespace Aktris
 			ActionScheduler=new ThreadPoolActionScheduler();
 			DefaultMailboxCreator = scheduler => new UnboundedMailbox(ActionScheduler);
 			Settings=new Settings.Settings();
+			Scheduler = new TaskBasedScheduler();
 		}
 
 		public static Bootstrapper Instance { get { return _Instance; } }
@@ -45,6 +46,7 @@ namespace Aktris
 		public Func<ActorPath, ActorSystem, ActorRef> DeadLetterActorCreator { get; set; }
 		public Func<IActionScheduler, Mailbox> DefaultMailboxCreator { get; set; }
 		public IActionScheduler ActionScheduler { get; set; }
+		public IScheduler Scheduler { get; set; }
 
 		public Settings.Settings Settings { get; set; }
 

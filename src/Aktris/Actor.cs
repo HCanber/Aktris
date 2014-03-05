@@ -28,7 +28,6 @@ namespace Aktris
 		private LocalActorRefFactory _localActorRefFactory;
 		private ILogger _logger;
 
-
 		protected Actor()
 		{
 			LocalActorRef actorRef;
@@ -43,6 +42,8 @@ namespace Aktris
 			_localActorRefFactory = _system.LocalActorRefFactory;
 		}
 
+
+
 		// ReSharper disable once VirtualMemberNeverOverriden.Global   Init is virtual in order to be mockable
 		internal virtual void Init(LocalActorRef self)
 		{
@@ -56,6 +57,7 @@ namespace Aktris
 				_hasBeenInitialized = true;
 			}
 		}
+
 
 
 		/// <summary>
@@ -97,6 +99,7 @@ namespace Aktris
 
 		protected ActorRef Parent { get { return _self.Parent; } }
 
+		protected IScheduler Scheduler { get { return _system.Scheduler; } }
 
 		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
 		protected internal virtual void PreStart() {/*Intentionally left blank*/}

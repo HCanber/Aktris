@@ -26,6 +26,7 @@ namespace Aktris
 		private readonly RootActorPath _rootPath;
 		private readonly IActionScheduler _actionScheduler;
 		private TempNodeHandler _tempNodeHandler;
+		private readonly IScheduler _scheduler;
 
 		private readonly EventStream _eventStream;
 		private ISettings _settings;
@@ -52,7 +53,8 @@ namespace Aktris
 			_rootPath = new RootActorPath("/");
 			_tempNodeHandler = new TempNodeHandler(_rootPath / "temp");
 			_settings = bootstrapper.Settings;
-
+			
+			_scheduler = bootstrapper.Scheduler;
 			_uniqueNameCreator = bootstrapper.UniqueNameCreator;
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 			_deadLetters = bootstrapper.DeadLetterActorCreator(_rootPath / "_DeadLetter", this);
@@ -76,6 +78,7 @@ namespace Aktris
 		internal Mailbox DeadLettersMailbox { get { return _deadLettersMailbox; } }
 		internal IActionScheduler ActionScheduler { get { return _actionScheduler; } }
 		internal ISettings Settings { get { return _settings; } }
+		internal IScheduler Scheduler { get { return _scheduler; } }
 		protected TempNodeHandler TempNodeHandler { get { return _tempNodeHandler; } }
 		internal EventStream EventStream { get { return _eventStream; } }
 

@@ -14,5 +14,6 @@ namespace Aktris
 		IActionScheduler ActionScheduler { get;  }
 		ISettings Settings { get; }
 		ActorSystem CreateSystem(string name);
+		IScheduler Scheduler { get; }
 	}
 }
