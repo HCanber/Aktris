@@ -21,6 +21,7 @@ namespace Aktris.Internals
 		}
 
 		public Mailbox Mailbox { get { return null; } }
+		public InternalActorRef Parent { get { return null; }}
 		public virtual void Suspend() {/* Intentionally left blank */}
 		public virtual void Resume(Exception causedByFailure) {/* Intentionally left blank */}
 		public virtual void Restart(Exception causedByFailure) {/* Intentionally left blank */}
