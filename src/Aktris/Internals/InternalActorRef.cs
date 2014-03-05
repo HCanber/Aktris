@@ -23,5 +23,7 @@ namespace Aktris.Internals
 		void Watch(InternalActorRef actorToWatch);
 		void Unwatch(InternalActorRef actorToWatch);
 		void Stop();
+		void Become(MessageHandler newHandler, bool discardOld = true);
+		void Unbecome();
 	}
 }

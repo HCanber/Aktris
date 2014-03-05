@@ -32,5 +32,7 @@ namespace Aktris.Internals
 		public void UnwatchAndStopChildren() {/* Intentionally left blank */}
 		public void Watch(InternalActorRef actorToWatch) {/* Intentionally left blank */}
 		public void Unwatch(InternalActorRef actorToWatch) {/* Intentionally left blank */}
+		public void Become(MessageHandler newHandler, bool discardOld = true) {/* Intentionally left blank */}
+		public void Unbecome() {/* Intentionally left blank */}
 	}
 }

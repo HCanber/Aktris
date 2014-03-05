@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.Remoting.Contexts;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Aktris.Exceptions;
 using Aktris.Internals;
+using Aktris.Internals.Concurrency;
 using Aktris.Internals.Helpers;
 using Aktris.Internals.Logging;
 using Aktris.JetBrainsAnnotations;
@@ -16,6 +20,7 @@ namespace Aktris
 	public abstract class Actor : IActorCreator
 	{
 		private bool _hasBeenInitialized;
+		private bool _mayConfigureHandlers;
 		private MessageHandlerConfigurator _constructorMessageHandlerConfigurator;
 		private MessageHandler _defaultMessageHandler;
 		private InternalActorRef _self;
@@ -34,7 +39,7 @@ namespace Aktris
 			LocalActorRefStack.MarkActorRefConsumedInStack();
 			_system = actorRef.System;
 			_self = actorRef;
-			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
+			PrepareForConfiguringMessageHandler();
 			_localActorRefFactory = _system.LocalActorRefFactory;
 		}
 
@@ -46,7 +51,7 @@ namespace Aktris
 			_self = self;
 			if(!_hasBeenInitialized)	//Do not perform this when "recreating" the same instance
 			{
-				_defaultMessageHandler = _constructorMessageHandlerConfigurator.CreateMessageHandler();
+				_defaultMessageHandler = BuildNewHandler();
 				_constructorMessageHandlerConfigurator = null;
 				_hasBeenInitialized = true;
 			}
@@ -107,8 +112,9 @@ namespace Aktris
 		/// If the actor has handled the message it should return <c>true</c>; otherwise <c>false</c>.
 		/// </summary>
 		/// <param name="message">The message.</param>
+		/// <param name="sender"></param>
 		/// <returns><c>true</c> if the actor has handled the message; <c>false</c> otherwise.</returns>
-		internal protected virtual bool HandleMessage(object message)
+		internal protected virtual bool HandleMessage(object message, SenderActorRef sender)
 		{
 			return _defaultMessageHandler(message, Sender);
 		}
@@ -165,11 +171,11 @@ namespace Aktris
 		protected void Receive<T>([NotNull] Action<T> handler, Predicate<T> matches = null)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.Receive<T>(handler,matches);
+			_constructorMessageHandlerConfigurator.Receive<T>(handler, matches);
 		}
 
 		/// <summary>
-		/// Swallows all incomming, unhandled messages.
+		/// Swallows all incoming, unhandled messages.
 		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
 		/// In that case, this handler will not be invoked.</remarks>
@@ -232,6 +238,48 @@ namespace Aktris
 		{
 			if(_hasBeenInitialized) throw new InvalidOperationException("You may only call Receive-methods from the constructor.");
 		}
+
+
+		private void PrepareForConfiguringMessageHandler()
+		{
+			if(_mayConfigureHandlers) throw new InvalidOperationException("Already configuring message handlers");
+			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
+			_mayConfigureHandlers = true;
+		}
+
+		private MessageHandler BuildNewHandler()
+		{
+			EnsureMayConfigureMessageHandlers();
+			var newHandler = _constructorMessageHandlerConfigurator.CreateMessageHandler();
+			_mayConfigureHandlers = false;
+			return newHandler;
+		}
+
+		public void Become(Action configure, bool discardOld=true)
+		{
+			PrepareForConfiguringMessageHandler();
+			try
+			{
+				configure();
+				var newHandler=BuildNewHandler();
+				InternalSelf.Become(newHandler,discardOld);
+			}
+			finally
+			{
+				_mayConfigureHandlers = false;
+			}
+		}
+
+		public void Become(MessageHandler newHandler, bool discardOld = true)
+		{
+			InternalSelf.Become(newHandler, discardOld);
+		}
+
+		public void Unbecome()
+		{
+			InternalSelf.Unbecome();
+		}
+
 
 
 

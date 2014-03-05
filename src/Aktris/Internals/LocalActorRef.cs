@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -37,6 +38,7 @@ namespace Aktris.Internals
 		private static readonly IImmutableSet<InternalActorRef> _EmptyActorRefSet = ImmutableHashSet<InternalActorRef>.Empty;
 		private IImmutableSet<InternalActorRef> _watching = _EmptyActorRefSet;
 		private IImmutableSet<InternalActorRef> _watchedBy = _EmptyActorRefSet;
+		private ImmutableStack<MessageHandler> _messageHandlerStack = ImmutableStack<MessageHandler>.Empty;
 
 		public LocalActorRef([NotNull] ActorSystem system, [NotNull] ActorInstantiator actorInstantiator, [NotNull] ActorPath path, [NotNull] Mailbox mailbox, [NotNull] InternalActorRef supervisor)
 		{
@@ -95,6 +97,17 @@ namespace Aktris.Internals
 			return senderActorRef != null ? senderActorRef.Unwrap() : sender;
 		}
 
+		public void Become(MessageHandler newHandler, bool discardOld = true)
+		{
+			var newTail = discardOld && !_messageHandlerStack.IsEmpty ? _messageHandlerStack.Pop() : _messageHandlerStack;
+			_messageHandlerStack = newTail.Push(newHandler);
+		}
+
+		public void Unbecome()
+		{
+			if(!_messageHandlerStack.IsEmpty) 
+				_messageHandlerStack= _messageHandlerStack.Pop();
+		}
 
 		public void HandleMessage(Envelope envelope)
 		{
@@ -109,9 +122,14 @@ namespace Aktris.Internals
 				}
 				else
 				{
-					_actor.Sender = new SenderActorRef(envelope.Sender, this);
-					_actor.HandleMessage(message);
+					var sender = new SenderActorRef(envelope.Sender, this);
+					_actor.Sender = sender;
+					if(_messageHandlerStack.IsEmpty) 
+						_actor.HandleMessage(message, sender);
+					else
+						_messageHandlerStack.Peek()(message, sender);
 				}
+				_currentMessage = null;
 			}
 			catch(Exception ex)
 			{
@@ -119,7 +137,6 @@ namespace Aktris.Internals
 			}
 			finally
 			{
-				_currentMessage = null;
 				_actor.Sender = _deadLetterSender; //TODO: change to use one that directs to deadletter
 			}
 
@@ -178,9 +195,15 @@ namespace Aktris.Internals
 		{
 			try
 			{
+				_messageHandlerStack = ImmutableStack<MessageHandler>.Empty;
 				var actor = NewActorInstance();
 				actor.Init(this); //Init is idempotent so even if NewActorInstance() returns the same instance again this call is safe to make.
 				_actorStatus = ActorStatus.Normal;
+
+				//if _messageHandlers, still is empty, it means we had no Becomes in the constructor, use default-handling, i.e. HandleMessage
+				if(_messageHandlerStack.IsEmpty)
+					_messageHandlerStack = _messageHandlerStack.Push((m, s) => actor.HandleMessage(m, s));
+
 				actor.PreStart();
 				if(recreateCause == null) actor.PreFirstStart();
 				else actor.PostRestart(recreateCause);
@@ -236,8 +259,7 @@ namespace Aktris.Internals
 					}
 					finally
 					{
-						failedActor.Clear();
-						_currentMessage = null;
+						ClearActor(failedActor);
 					}
 					Debug.Assert(_mailbox.IsSuspended, "Mailbox must be suspended during restart, status=" + (_mailbox is MailboxBase ? (_mailbox as MailboxBase).GetMailboxStatusForDebug() : "unknown"));
 
@@ -289,7 +311,7 @@ namespace Aktris.Internals
 			}
 			catch(Exception e)
 			{
-				_actor.Clear();
+				ClearActor(_actor);
 				EscalateError(e, survivors);
 			}
 		}
@@ -485,13 +507,20 @@ namespace Aktris.Internals
 							}
 							finally
 							{
-								_actor.Clear();
+								ClearActor(_actor);
 								_actor = null;
 							}
 						}
 					}
 				}
 			}
+		}
+
+		private void ClearActor(Actor actor)
+		{
+			actor.Clear();
+			_currentMessage = null;
+			_messageHandlerStack = ImmutableStack<MessageHandler>.Empty;
 		}
 
 
