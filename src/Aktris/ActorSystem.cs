@@ -17,14 +17,14 @@ namespace Aktris
 		private readonly IUniqueNameCreator _uniqueNameCreator;
 		private readonly LocalActorRefFactory _localActorRefFactory;
 		private readonly ActorRef _deadLetters;
-		private readonly Func<IScheduler, Mailbox> _defaultMailboxCreator;
+		private readonly Func<IActionScheduler, Mailbox> _defaultMailboxCreator;
 		private readonly Mailbox _deadLettersMailbox;
 		private bool _isStarted;
 		private GuardianActorRef _rootGuardian;
 		private InternalActorRef _systemGuardian;
 		private InternalActorRef _userGuardian;
 		private readonly RootActorPath _rootPath;
-		private readonly IScheduler _scheduler;
+		private readonly IActionScheduler _actionScheduler;
 		private TempNodeHandler _tempNodeHandler;
 
 		private readonly EventStream _eventStream;
@@ -57,7 +57,7 @@ namespace Aktris
 			_localActorRefFactory = bootstrapper.LocalActorRefFactory;
 			_deadLetters = bootstrapper.DeadLetterActorCreator(_rootPath / "_DeadLetter", this);
 			_deadLettersMailbox = new DeadLetterMailbox(_deadLetters);
-			_scheduler = bootstrapper.Scheduler;
+			_actionScheduler = bootstrapper.ActionScheduler;
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
 			_eventStream = new EventStream(this);
 			var standardOutLogger = new StandardOutLogger(new ChildActorPath(_rootPath, "_StandardOutLogger", LocalActorRef.UndefinedInstanceId), this);
@@ -74,7 +74,7 @@ namespace Aktris
 		internal InternalActorRef SystemGuardian { get { return _systemGuardian; } }
 		internal InternalActorRef UserGuardian { get { return _userGuardian; } }
 		internal Mailbox DeadLettersMailbox { get { return _deadLettersMailbox; } }
-		internal IScheduler Scheduler { get { return _scheduler; } }
+		internal IActionScheduler ActionScheduler { get { return _actionScheduler; } }
 		internal ISettings Settings { get { return _settings; } }
 		protected TempNodeHandler TempNodeHandler { get { return _tempNodeHandler; } }
 		internal EventStream EventStream { get { return _eventStream; } }
@@ -101,7 +101,7 @@ namespace Aktris
 
 		public Mailbox CreateDefaultMailbox()
 		{
-			return _defaultMailboxCreator(_scheduler);
+			return _defaultMailboxCreator(_actionScheduler);
 		}
 
 		private GuardianActorRef CreateRootGuardian()

@@ -99,12 +99,12 @@
     <Compile Include="DelegateActorCreationProperties.cs" />
     <Compile Include="Dispatching\DeadLetterMailbox.cs" />
     <Compile Include="Dispatching\Envelope.cs" />
-    <Compile Include="Dispatching\IScheduler.cs" />
+    <Compile Include="Dispatching\IActionScheduler.cs" />
     <Compile Include="Dispatching\Mailbox.cs" />
     <Compile Include="Dispatching\MailboxBase.cs" />
     <Compile Include="Dispatching\SchedulerBasedMailbox.cs" />
-    <Compile Include="Dispatching\SynchronousScheduler.cs" />
-    <Compile Include="Dispatching\ThreadPoolScheduler.cs" />
+    <Compile Include="Dispatching\SynchronousActionScheduler.cs" />
+    <Compile Include="Dispatching\ThreadPoolActionScheduler.cs" />
     <Compile Include="Dispatching\UnboundedMailbox.cs" />
     <Compile Include="Exceptions\ActorKilledException.cs" />
     <Compile Include="Exceptions\CreateActorFailedException.cs" />

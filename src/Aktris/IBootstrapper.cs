@@ -10,8 +10,8 @@ namespace Aktris
 		IUniqueNameCreator UniqueNameCreator { get; }
 		LocalActorRefFactory LocalActorRefFactory { get; }
 		Func<ActorPath, ActorSystem, ActorRef> DeadLetterActorCreator { get; }
-		Func<IScheduler, Mailbox> DefaultMailboxCreator { get;  }
-		IScheduler Scheduler { get;  }
+		Func<IActionScheduler, Mailbox> DefaultMailboxCreator { get;  }
+		IActionScheduler ActionScheduler { get;  }
 		ISettings Settings { get; }
 		ActorSystem CreateSystem(string name);
 	}

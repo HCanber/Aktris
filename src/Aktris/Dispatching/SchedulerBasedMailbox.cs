@@ -5,17 +5,17 @@ namespace Aktris.Dispatching
 {
 	public abstract class SchedulerBasedMailbox : MailboxBase
 	{
-		private readonly IScheduler _scheduler;
+		private readonly IActionScheduler _actionScheduler;
 
-		protected SchedulerBasedMailbox([NotNull] IScheduler scheduler)
+		protected SchedulerBasedMailbox([NotNull] IActionScheduler scheduler)
 		{
 			if(scheduler == null) throw new ArgumentNullException("scheduler");
-			_scheduler = scheduler;
+			_actionScheduler = scheduler;
 		}
 
 		protected override void Schedule(Action action)
 		{
-			_scheduler.Schedule(action);
+			_actionScheduler.Schedule(action);
 		}
 	}
 }

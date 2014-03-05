@@ -10,7 +10,7 @@ namespace Aktris.Dispatching
 	{
 		private readonly ConcurrentQueue<Envelope> _queue = new ConcurrentQueue<Envelope>();
 
-		public UnboundedMailbox([NotNull] IScheduler scheduler)
+		public UnboundedMailbox([NotNull] IActionScheduler scheduler)
 			: base(scheduler)
 		{
 			if(scheduler == null) throw new ArgumentNullException("scheduler");

@@ -15,8 +15,8 @@ namespace Aktris
 			UniqueNameCreator=new UniqueNameCreator();
 			LocalActorRefFactory = new DefaultLocalActorRefFactory();
 			DeadLetterActorCreator = (path,system) => new DeadLetterActorRef(path, system);
-			Scheduler=new ThreadPoolScheduler();
-			DefaultMailboxCreator = scheduler => new UnboundedMailbox(Scheduler);
+			ActionScheduler=new ThreadPoolActionScheduler();
+			DefaultMailboxCreator = scheduler => new UnboundedMailbox(ActionScheduler);
 			Settings=new Settings.Settings();
 		}
 
@@ -43,8 +43,8 @@ namespace Aktris
 		public IUniqueNameCreator UniqueNameCreator { get; set; }
 		public LocalActorRefFactory LocalActorRefFactory { get; set; }
 		public Func<ActorPath, ActorSystem, ActorRef> DeadLetterActorCreator { get; set; }
-		public Func<IScheduler, Mailbox> DefaultMailboxCreator { get; set; }
-		public IScheduler Scheduler { get; set; }
+		public Func<IActionScheduler, Mailbox> DefaultMailboxCreator { get; set; }
+		public IActionScheduler ActionScheduler { get; set; }
 
 		public Settings.Settings Settings { get; set; }
 
