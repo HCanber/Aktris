@@ -12,9 +12,17 @@ using Aktris.Messages;
 
 namespace Aktris.Internals
 {
-	public class PromiseActorRef : EmptyLocalActorRef
+	public static class PromiseActorRef
 	{
-		private readonly IPromise<object> _promise;
+		public static PromiseActorRef<T> Create<T>(ActorSystem system, long timeoutMilliseconds, string targetName)
+		{
+			return PromiseActorRef<T>.Create(system, timeoutMilliseconds, targetName);
+		}
+	}
+
+	public class PromiseActorRef<T> : EmptyLocalActorRef
+	{
+		private readonly IPromise<T> _promise;
 		private readonly ActorRef _deadLetters;
 		private const int _StartedState = 0;
 		private const int _StoppedState = 1;
@@ -22,14 +30,14 @@ namespace Aktris.Internals
 		private static readonly IImmutableSet<InternalActorRef> _EmptyActorRefSet = ImmutableHashSet<InternalActorRef>.Empty;
 		private IImmutableSet<InternalActorRef> _watchedBy = _EmptyActorRefSet;
 
-		public PromiseActorRef([NotNull] ActorPath path, IPromise<object> promise, ActorRef deadLetters, ActorSystem system)
+		public PromiseActorRef([NotNull] ActorPath path, IPromise<T> promise, ActorRef deadLetters, ActorSystem system)
 			: base(path,system)
 		{
 			_promise = promise;
 			_deadLetters = deadLetters;
 		}
 
-		public Task<object> Future { get { return _promise.Future; } }
+		public Task<T> Future { get { return _promise.Future; } }
 
 		public override void Send(object message, ActorRef sender)
 		{
@@ -42,8 +50,19 @@ namespace Aktris.Internals
 				if(message == null) throw new ArgumentNullException("message");
 				var promiseWasCompleted	=
 					(Match<Status.Failure>(message, failure => _promise.TryFailure(failure.Exception))
-					?? Match<Status.Success>(message, success => _promise.TrySuccess(success.Status))
-					?? MatchAll(message, other => _promise.TrySuccess(other))
+					?? Match<Status.Success>(message, success =>
+					{
+						var result = success.Status;
+						if(!(result is T))
+							_promise.TryFailure(new InvalidCastException(string.Format("Expected to receive a response of type {0} but received a {1}. If you expect answers of many types, use the Ask(...) overloads that returns a Task<object>", typeof(T), result.GetType())));
+						return _promise.TrySuccess((T) result);
+					})
+					?? MatchAll(message, result =>
+					{
+						if(!(result is T))
+							_promise.TryFailure(new InvalidCastException(string.Format("Expected to receive a response of type {0} but received a {1}. If you expect answers of many types, use the Ask(...) overloads that returns a Task<object>", typeof(T), result.GetType())));
+						return _promise.TrySuccess((T)result);
+					})
 					).GetValueOrDefault();		//The MatchAll will always return a bool, so the bool? always has a value
 
 				if(!promiseWasCompleted) _deadLetters.Send(message, sender);
@@ -119,13 +138,13 @@ namespace Aktris.Internals
 		}
 
 
-		public static PromiseActorRef Create(ActorSystem system, long timeoutMilliseconds, string targetName)
+		public static PromiseActorRef<T> Create(ActorSystem system, long timeoutMilliseconds, string targetName)
 		{
 			//Create a Promise and a PromiseActorRef
 			var internalSystem = (InternalActorSystem)system;
 			var tempPath = internalSystem.CreateTempActorPath();
-			var promise = new Promise<object>();
-			var promiseActorRef = new PromiseActorRef(tempPath, promise, system.DeadLetters, system);
+			var promise = new Promise<T>();
+			var promiseActorRef = new PromiseActorRef<T>(tempPath, promise, system.DeadLetters, system);
 
 			var timeoutableTask = promise.Future.TimeoutAfter(timeoutMilliseconds);
 
@@ -144,7 +163,7 @@ namespace Aktris.Internals
 
 		public override ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
-			throw new System.NotImplementedException();
+			throw new System.NotImplementedException(string.Format("Trying to create a child to a {0}", GetType()));
 		}
 	}
 }

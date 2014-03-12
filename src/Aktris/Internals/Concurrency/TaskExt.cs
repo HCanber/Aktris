@@ -20,6 +20,21 @@ namespace Aktris.Internals.Concurrency
 			return !task.IsFaulted ? false : task.Exception.Flatten().InnerExceptions.Any(e => e is TException);
 		}
 
+		public static bool ContainsException<T1, T2>(this Task task)
+			where T1 : Exception
+			where T2 : Exception
+		{
+			return !task.IsFaulted ? false : task.Exception.Flatten().InnerExceptions.Any(e => e is T1 || e is T2);
+		}
+
+		public static bool ContainsException<T1, T2, T3>(this Task task)
+			where T1 : Exception
+			where T2 : Exception
+			where T3 : Exception
+		{
+			return !task.IsFaulted ? false : task.Exception.Flatten().InnerExceptions.Any(e => e is T1 || e is T2 || e is T3);
+		}
+
 		public static bool ContainsException<TException>(this AggregateException exception) where TException : Exception
 		{
 			return exception != null && exception.Flatten().InnerExceptions.Any(e => e is TException);
