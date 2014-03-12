@@ -22,5 +22,10 @@ namespace Aktris.Internals
 		public override uint InstanceId { get { return _path.InstanceId; } }
 
 		public override ActorSystem System { get { return _actorSystem; } }
+
+		public override string ToString()
+		{
+			return Path.ToString();
+		}
 	}
 }

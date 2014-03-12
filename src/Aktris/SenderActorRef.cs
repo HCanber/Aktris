@@ -41,5 +41,10 @@ namespace Aktris
 			} while(current != null);
 			return unwrapped;
 		}
+
+		public override string ToString()
+		{
+			return _sender.ToString();
+		}
 	}
 }

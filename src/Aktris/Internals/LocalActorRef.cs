@@ -20,7 +20,7 @@ using Aktris.Messages;
 
 namespace Aktris.Internals
 {
-
+	[DebuggerDisplay("{_path,nq}")]
 	public class LocalActorRef : InternalActorRef
 	{
 		internal const uint UndefinedInstanceId = 0;
@@ -814,6 +814,12 @@ namespace Aktris.Internals
 		private static bool IfMatchSysCause<T>(SystemMessage message, Action<Exception> handler) where T : class, ExceptionSystemMessage
 		{
 			return PatternMatcher.Match<T>(message, m => handler(m.CausedByFailure));
+		}
+
+
+		public override string ToString()
+		{
+			return _path.ToString();
 		}
 
 		private class ActorStatus
