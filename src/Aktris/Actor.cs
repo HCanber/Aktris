@@ -20,8 +20,7 @@ namespace Aktris
 	public abstract class Actor : IActorCreator
 	{
 		private bool _hasBeenInitialized;
-		private bool _mayConfigureHandlers;
-		private MessageHandlerConfigurator _constructorMessageHandlerConfigurator;
+		private Stack<MessageHandlerConfigurator> _constructorMessageHandlerConfigurators=new Stack<MessageHandlerConfigurator>();
 		private MessageHandler _defaultMessageHandler;
 		private InternalActorRef _self;
 		private readonly ActorSystem _system;
@@ -55,7 +54,7 @@ namespace Aktris
 			if(!_hasBeenInitialized)	//Do not perform this when "recreating" the same instance
 			{
 				_defaultMessageHandler = BuildNewHandler();
-				_constructorMessageHandlerConfigurator = null;
+				_constructorMessageHandlerConfigurators.Pop();			
 				_hasBeenInitialized = true;
 			}
 		}
@@ -77,7 +76,7 @@ namespace Aktris
 			}
 			_system = system;
 			_self = actorRef;
-			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
+			PrepareForConfiguringMessageHandler();
 			_localActorRefFactory = localActorRefFactory;
 		}
 
@@ -176,7 +175,7 @@ namespace Aktris
 		protected void Receive<T>([NotNull] Action<T> handler, Predicate<T> matches = null)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.Receive<T>(handler, matches);
+			_constructorMessageHandlerConfigurators.Peek().Receive<T>(handler, matches);
 		}
 
 		/// <summary>
@@ -200,7 +199,7 @@ namespace Aktris
 		protected void ReceiveAny([NotNull] Action<object> handler)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.ReceiveAny(handler);
+			_constructorMessageHandlerConfigurators.Peek().ReceiveAny(handler);
 		}
 
 		/// <summary>
@@ -213,65 +212,63 @@ namespace Aktris
 		protected void ReceiveAnyAndForward(ActorRef receiver)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.ReceiveAnyAndForward(receiver);
+			_constructorMessageHandlerConfigurators.Peek().ReceiveAnyAndForward(receiver);
 		}
 
 		protected void AddReceiver(Type type, Action<object> handler)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
+			_constructorMessageHandlerConfigurators.Peek().AddReceiver(type, handler);
 		}
 		protected void AddReceiver(Type type, Func<object, bool> handler)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
+			_constructorMessageHandlerConfigurators.Peek().AddReceiver(type, handler);
 		}
 
 		protected void AddReceiver(Type type, MessageHandler handler)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.AddReceiver(type, handler);
+			_constructorMessageHandlerConfigurators.Peek().AddReceiver(type, handler);
 		}
 
 		internal void CopyFrom(MessageHandlerConfigurator other)
 		{
 			EnsureMayConfigureMessageHandlers();
-			_constructorMessageHandlerConfigurator.CopyFrom(other);
+			_constructorMessageHandlerConfigurators.Peek().CopyFrom(other);
 		}
 
 		private void EnsureMayConfigureMessageHandlers()
 		{
-			if(_hasBeenInitialized) throw new InvalidOperationException("You may only call Receive-methods from the constructor.");
+			if(_constructorMessageHandlerConfigurators.Count<=0) throw new InvalidOperationException("You may only call Receive-methods from the constructor and inside Become().");
 		}
 
 
 		private void PrepareForConfiguringMessageHandler()
 		{
-			if(_mayConfigureHandlers) throw new InvalidOperationException("Already configuring message handlers");
-			_constructorMessageHandlerConfigurator = new MessageHandlerConfigurator();
-			_mayConfigureHandlers = true;
+			_constructorMessageHandlerConfigurators.Push(new MessageHandlerConfigurator());
 		}
 
 		private MessageHandler BuildNewHandler()
 		{
 			EnsureMayConfigureMessageHandlers();
-			var newHandler = _constructorMessageHandlerConfigurator.CreateMessageHandler();
-			_mayConfigureHandlers = false;
+			var constructorMessageHandlerConfigurator = _constructorMessageHandlerConfigurators.Peek();
+			var newHandler = constructorMessageHandlerConfigurator.CreateMessageHandler();
 			return newHandler;
 		}
 
-		public void Become(Action configure, bool discardOld=true)
+		public void Become(Action configure, bool discardOld = true)
 		{
 			PrepareForConfiguringMessageHandler();
 			try
 			{
 				configure();
-				var newHandler=BuildNewHandler();
-				InternalSelf.Become(newHandler,discardOld);
+				var newHandler = BuildNewHandler();
+				InternalSelf.Become(newHandler, discardOld);
 			}
 			finally
 			{
-				_mayConfigureHandlers = false;
+				_constructorMessageHandlerConfigurators.Pop();
 			}
 		}
 
