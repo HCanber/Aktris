@@ -32,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Fibrous">
-      <HintPath>..\packages\Fibrous.1.0.1\lib\Fibrous.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable">
       <HintPath>..\packages\Microsoft.Bcl.Immutable.1.0.30\lib\portable-net45+win8+wp8\System.Collections.Immutable.dll</HintPath>
