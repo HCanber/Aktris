@@ -52,7 +52,6 @@ namespace Aktris.Dispatching
 		{
 			_systemMessagesQueue.Enqueue(envelope);
 			ScheduleIfNeeded(hasSystemMessage: true);
-
 		}
 
 		private void ProcessMessages()
@@ -112,7 +111,6 @@ namespace Aktris.Dispatching
 		protected abstract void Schedule(Action action);
 
 		protected abstract void InternalEnqueue(Envelope envelope);
-
 
 
 		protected void ScheduleIfNeeded(bool hasSystemMessage = false)

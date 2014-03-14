@@ -69,5 +69,15 @@ namespace Aktris.Internals.Helpers
 			if(list.Count == 0) return EmptyReadonlyCollection<T>.Instance;
 			return new ReadOnlyCollection<T>(list);
 		}
+
+		public static bool IsEmpty<T>(this ICollection<T> list)
+		{
+			return list.Count == 0;
+		}
+
+		public static bool IsNotEmpty<T>(this ICollection<T> list)
+		{
+			return list.Count > 0;
+		}
 	}
 }

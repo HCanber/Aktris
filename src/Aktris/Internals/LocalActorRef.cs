@@ -64,7 +64,7 @@ namespace Aktris.Internals
 		public ActorSystem System { get { return _system; } }
 		public InternalActorRef Parent { get { return _supervisor;} }
 		public Mailbox Mailbox { get { return _mailbox; } }
-		protected Envelope CurrentMessage { get { return _currentMessage; } }
+		public Envelope CurrentMessage { get { return _currentMessage; } }
 
 		public bool IsTerminated { get { return _mailbox.IsClosed; } }
 		void InternalActorRef.Start()
@@ -205,6 +205,7 @@ namespace Aktris.Internals
 					_messageHandlerStack = _messageHandlerStack.Push((m, s) => actor.HandleMessage(m, s));
 
 				actor.PreStart();
+				
 				if(recreateCause == null) actor.PreFirstStart();
 				else actor.PostRestart(recreateCause);
 				return actor;

@@ -50,9 +50,9 @@ namespace Aktris
 
 		public static AskResult<TResponse> AskAndWait<TResponse>(this ActorRef actor, object message, ActorRef sender, long timeoutMilliseconds = Timeout.Infinite)
 		{
-			var task = Ask<TResponse>(actor, message, sender, timeoutMilliseconds);
-			task.Wait();
-			return task;
+			var result = Ask<TResponse>(actor, message, sender, timeoutMilliseconds);
+			result.Wait();
+			return result;
 		}
 
 		public static AskResult<TResponse> Ask<TResponse>(this ActorRef actor, object message, ActorRef sender, long timeoutMilliseconds = Timeout.Infinite)
@@ -88,31 +88,40 @@ namespace Aktris
 
 		public bool HasTimedOut
 		{
-			get { return Task.ContainsException<AskTimeoutException, TimeoutException>(); }
+			get { return _task.ContainsException<AskTimeoutException, TimeoutException>(); }
 		}
 
 		public void Wait()
 		{
-			Task.Wait();
+			if(_task.IsCompleted) return;
+			try
+			{
+				_task.Wait();
+			}
+			catch(AggregateException e)
+			{
+				//Swallow exceptions
+			}
 		}
 
 		public AskResult Result
 		{
 			get
 			{
-				if(_task.IsCompleted) return AskResult.Succeeded;
+				Wait();
 				if(_task.IsFaulted)
 				{
 					return HasTimedOut ? AskResult.TimedOut : AskResult.Failed;
 				}
+				if(!_task.IsCanceled) return AskResult.Succeeded;
 				return AskResult.Unknown;
 			}
 		}
 
 		public T Response { get { return Task.Result; } }
 
-		public Exception FirstException { get { return Task.Exception == null ? null : Task.Exception.Flatten().InnerExceptions.FirstOrDefault(); } }
-		public IReadOnlyList<Exception> AllExceptions { get { return Task.Exception == null ? null : Task.Exception.Flatten().InnerExceptions; } }
+		public Exception FirstException { get { return _task.Exception == null ? null : _task.Exception.Flatten().InnerExceptions.FirstOrDefault(); } }
+		public IReadOnlyList<Exception> AllExceptions { get { return _task.Exception == null ? null : _task.Exception.Flatten().InnerExceptions; } }
 
 		public Task<T> Task { get { return _task; } }
 

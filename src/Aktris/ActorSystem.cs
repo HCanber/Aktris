@@ -81,6 +81,7 @@ namespace Aktris
 		internal IScheduler Scheduler { get { return _scheduler; } }
 		protected TempNodeHandler TempNodeHandler { get { return _tempNodeHandler; } }
 		internal EventStream EventStream { get { return _eventStream; } }
+		internal ISettings Settings { get { return _settings; } }
 
 		public void Start()
 		{

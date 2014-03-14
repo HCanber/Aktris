@@ -15,6 +15,7 @@ namespace Aktris.Internals
 		bool IsTerminated { get; }
 		ActorSystem System { get; }
 		InternalActorRef Parent { get; }
+		Envelope CurrentMessage { get; }
 		void Suspend();
 		void Resume(Exception causedByFailure);
 		void SendSystemMessage(SystemMessage message, ActorRef sender);

@@ -34,5 +34,6 @@ namespace Aktris.Internals
 		public void Unwatch(InternalActorRef actorToWatch) {/* Intentionally left blank */}
 		public void Become(MessageHandler newHandler, bool discardOld = true) {/* Intentionally left blank */}
 		public void Unbecome() {/* Intentionally left blank */}
+		public Envelope CurrentMessage { get { return null; } }
 	}
 }

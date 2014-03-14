@@ -51,13 +51,16 @@
     <Compile Include="ActorPath.cs" />
     <Compile Include="ActorRef.cs" />
     <Compile Include="ActorSystem.cs" />
+    <Compile Include="ActorWithStashing.cs" />
     <Compile Include="AnonymousActor.cs" />
+    <Compile Include="Dispatching\IFirstQueueable.cs" />
     <Compile Include="Exceptions\AskTimeoutException.cs" />
     <Compile Include="Events\ActorEventBus.cs" />
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\EventBusPublisher.cs" />
     <Compile Include="Events\EventBusSubscription.cs" />
     <Compile Include="Exceptions\LoggingException.cs" />
+    <Compile Include="Exceptions\StashOverflowException.cs" />
     <Compile Include="Internals\AutoHandledMessage.cs" />
     <Compile Include="Internals\Concurrency\IPromise.cs" />
     <Compile Include="Internals\Concurrency\TaskExt.cs" />
@@ -128,6 +131,7 @@
     <Compile Include="Internals\Path\RootActorPath.cs" />
     <Compile Include="Internals\PatternMatcher.cs" />
     <Compile Include="SelfScheduler.cs" />
+    <Compile Include="Stashing.cs" />
     <Compile Include="StringFormat.cs" />
     <Compile Include="Internals\InterlockedSpin.cs" />
     <Compile Include="Internals\DefaultLocalActorRefFactory.cs" />
