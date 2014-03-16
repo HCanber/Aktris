@@ -13,6 +13,7 @@ using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals.Children;
 using Aktris.Internals.Helpers;
+using Aktris.Internals.Logging;
 using Aktris.Internals.Path;
 using Aktris.Internals.SystemMessages;
 using Aktris.JetBrainsAnnotations;
@@ -62,7 +63,7 @@ namespace Aktris.Internals
 		public uint InstanceId { get { return _path.InstanceId; } }
 
 		public ActorSystem System { get { return _system; } }
-		public InternalActorRef Parent { get { return _supervisor;} }
+		public InternalActorRef Parent { get { return _supervisor; } }
 		public Mailbox Mailbox { get { return _mailbox; } }
 		public Envelope CurrentMessage { get { return _currentMessage; } }
 
@@ -105,8 +106,8 @@ namespace Aktris.Internals
 
 		public void Unbecome()
 		{
-			if(!_messageHandlerStack.IsEmpty) 
-				_messageHandlerStack= _messageHandlerStack.Pop();
+			if(!_messageHandlerStack.IsEmpty)
+				_messageHandlerStack = _messageHandlerStack.Pop();
 		}
 
 		public void HandleMessage(Envelope envelope)
@@ -124,7 +125,7 @@ namespace Aktris.Internals
 				{
 					var sender = new SenderActorRef(envelope.Sender, this);
 					_actor.Sender = sender;
-					if(_messageHandlerStack.IsEmpty) 
+					if(_messageHandlerStack.IsEmpty)
 						_actor.HandleMessage(message, sender);
 					else
 						_messageHandlerStack.Peek()(message, sender);

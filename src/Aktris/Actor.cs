@@ -143,6 +143,35 @@ namespace Aktris
 			return _self.CreateActor(ActorCreationProperties.Create(creator), name);
 		}
 
+		protected ActorRef CreateAnonymousActor(Action<MessageHandlerConfigurator> configurator, string name = null)
+		{
+			return _self.CreateActor(ActorCreationProperties.CreateAnonymous(configurator), name);
+		}
+
+		protected AskResult<object> AskAnonymous<TMessage>(TMessage message, Action<TMessage, SenderActorRef> messageHandler, long timeoutMs = Timeout.Infinite)
+		{
+			var actor = CreateAnonymousActor(cfg => cfg.Receive(messageHandler));
+			return actor.Ask(message, Self, timeoutMs);
+		}
+
+		protected AskResult<TResponse> AskAnonymous<TResponse>(Func<TResponse> producer, long timeoutMs = Timeout.Infinite)
+		{
+			var actor = CreateAnonymousActor(cfg => cfg.Receive<object>((_, sender) => sender.Reply(producer())));
+			var askResult = actor.Ask(TriggerMessage.Instance, Self, timeoutMs);
+			var convertedResultTask = askResult.Task.Then(t => (TResponse)t.Result);
+			return new AskResult<TResponse>(convertedResultTask);
+		}
+
+		protected TResponse AskAnonymousAndWaitForResult<TResponse>(Func<TResponse> producer, long timeoutMs = Timeout.Infinite)
+		{
+			return AskAnonymous<TResponse>(producer, timeoutMs).Response;
+		}
+
+		private class TriggerMessage
+		{
+			public static readonly TriggerMessage Instance = new TriggerMessage();
+		}
+
 		protected void Watch(ActorRef actorToWatch)
 		{
 			_self.Watch((InternalActorRef)actorToWatch);
