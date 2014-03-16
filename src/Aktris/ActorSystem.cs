@@ -5,6 +5,7 @@ using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.Logging;
 using Aktris.Internals.Path;
+using Aktris.Internals.SystemMessages;
 using Aktris.JetBrainsAnnotations;
 using Aktris.Settings;
 
@@ -58,7 +59,7 @@ namespace Aktris
 			_deadLettersMailbox = new DeadLetterMailbox(_deadLetters);
 			_scheduler = bootstrapper.Scheduler;
 			_defaultMailboxCreator = bootstrapper.DefaultMailboxCreator;
-			_eventStream = new EventStream(_deadLetters, _settings.DebugEventStream);
+			_eventStream = new EventStream(this);
 			var standardOutLogger = new StandardOutLogger(new ChildActorPath(_rootPath, "_StandardOutLogger", LocalActorRef.UndefinedInstanceId), this);
 			_eventStream.StartStandardOutLogger(standardOutLogger, _settings.StandardOutLoggerSettings);
 			_logSource = "ActorSystem:" + name;
@@ -74,7 +75,7 @@ namespace Aktris
 		internal InternalActorRef UserGuardian { get { return _userGuardian; } }
 		internal Mailbox DeadLettersMailbox { get { return _deadLettersMailbox; } }
 		internal IScheduler Scheduler { get { return _scheduler; } }
-
+		internal ISettings Settings { get { return _settings; } }
 		protected TempNodeHandler TempNodeHandler { get { return _tempNodeHandler; } }
 		internal EventStream EventStream { get { return _eventStream; } }
 
@@ -85,6 +86,10 @@ namespace Aktris
 			_systemGuardian = CreateSystemGuardian(_rootGuardian);
 			_userGuardian = CreateUserGuardian(_rootGuardian);
 			_rootGuardian.Start();
+			// chain death watchers so that killing guardian stops the application
+			_systemGuardian.SendSystemMessage(new WatchActor(_userGuardian, _systemGuardian), null);
+			_rootGuardian.SendSystemMessage(new WatchActor(_systemGuardian, _rootGuardian), null);
+			_eventStream.StartDefaultLoggers();
 			_eventStream.LogInfo(_logSource, this, "System started");
 		}
 
@@ -120,6 +125,25 @@ namespace Aktris
 		}
 
 
+		public T CreateInstance<T>(Type type)
+		{
+			var isCreatingAnActor = typeof(T) == typeof(ActorRef);
+			if(!typeof(T).IsAssignableFrom(type))
+			{
+				if(isCreatingAnActor)
+					throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it is not an actor", type.FullName));
+				throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it do not implement {1}", type.FullName, typeof(T).FullName));
+			}
+			var instance = isCreatingAnActor
+				? CreateActor(ActorCreationProperties.Create(() => (Actor) CreateInstance(type)))
+				: CreateInstance(type);
+			return (T) instance;
+		}
+
+		protected object CreateInstance(Type type)
+		{
+			return Activator.CreateInstance(type);
+		}
 
 	}
 }

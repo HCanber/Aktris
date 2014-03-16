@@ -13,19 +13,21 @@ namespace Aktris.Internals.Logging
 {
 	public abstract class LoggingEventBus : ActorEventBus<LogEvent, Type>
 	{
+		private readonly ActorSystem _system;
 		private readonly ActorRef _deadLetterActor;
 		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-		private readonly List<ActorRef> _loggers = new List<ActorRef>();
+		private List<ActorRef> _loggers = new List<ActorRef>();
 		private LogLevel _logLevels = LogLevel.Error;
 
 
-		protected LoggingEventBus([NotNull] ActorRef deadLetterActor)
+		protected LoggingEventBus([NotNull] ActorSystem system)
 		{
-			if(deadLetterActor == null) throw new ArgumentNullException("deadLetterActor");
-			_deadLetterActor = deadLetterActor;
+			if(system == null) throw new ArgumentNullException("system");
+			_system = system;
+			_deadLetterActor = system.DeadLetters;
 		}
 
-		
+
 
 		public LogLevel LogLevels
 		{
@@ -52,7 +54,7 @@ namespace Aktris.Internals.Logging
 			}
 		}
 
-		private void AllLoggersWhenInLock(Action<ActorRef,Type> action, IEnumerable<LogLevelWithType> levels)
+		private void AllLoggersWhenInLock(Action<ActorRef, Type> action, IEnumerable<LogLevelWithType> levels)
 		{
 			foreach(var level in levels)
 			{
@@ -64,11 +66,11 @@ namespace Aktris.Internals.Logging
 		}
 
 
-		private void AddLogger(ActorRef logger, LogLevel logLevel, string logName)
+		private void AddLogger(ActorRef logger, LogLevel logLevels, string logName)
 		{
 			//TODO: Send Initialize message to logger
-			Log.GetSubscribeLevels(logLevel).ForEach(l => Subscribe(logger, l.Type));
-			Publish(new DebugLogEvent(logName,GetType(),"Logger " + logName +" started"));
+			Log.SeparateLogLevelsToSequence(logLevels).ForEach(l => Subscribe(logger, l.Type));
+			Publish(new DebugLogEvent(logName, GetType(), "Logger " + logName + " started"));
 		}
 
 		public abstract bool Subscribe(ActorRef subscriber, Type to);
@@ -78,7 +80,7 @@ namespace Aktris.Internals.Logging
 		public abstract bool Unsubscribe(ActorRef subscriber, Type to);
 
 		public abstract void Publish(object @event);
-	
+
 
 
 
@@ -98,7 +100,7 @@ namespace Aktris.Internals.Logging
 				StandardOutLoggerHelper.PrintError(new ErrorLogEvent(GetType().Name, GetType(), string.Format("Unknown StandardOutLogger LogLevel setting: {0}, defaulting to Error", logLevel), new LoggingException()), dateFormat);
 				logLevel = LogLevel.Error;
 			}
-			Log.GetSubscribeLevels(logLevel).ForEach(level=>Subscribe(stdOutLogger,level.Type));
+			Log.GetSubscribeLevels(logLevel).ForEach(level => Subscribe(stdOutLogger, level.Type));
 			_lock.Write(() =>
 			{
 				_loggers.Add(stdOutLogger);
@@ -108,6 +110,28 @@ namespace Aktris.Internals.Logging
 
 		//TODO: startDefaultLoggers
 		//TODO: stopDefaultLoggers
+
+		public void StartDefaultLoggers()
+		{
+			var logName = GetType().Name + "(" + _system.Name + ")";
+			var logLevels = Log.GetSubscribeLevels(_system.Settings.LogLevel).Aggregate(LogLevel.Off, (v, l) => v | l);
+			var allLoggers = _system.Settings.Loggers ?? new List<Type> { typeof(DefaultLogger) };
+			var loggerTypes = allLoggers.Where(t => t != typeof(StandardOutLogger));
+
+			var loggers = new List<ActorRef>();
+			foreach(var loggerType in loggerTypes)
+			{
+				var logger = _system.CreateInstance<ActorRef>(loggerType);
+				AddLogger(logger, logLevels, logName);
+				loggers.Add(logger);
+			}
+			_lock.Write(() =>
+			{
+				_loggers = loggers;
+				_logLevels = logLevels;
+			});
+
+		}
 	}
 
 }

@@ -94,7 +94,7 @@ namespace Aktris.Internals.Logging
 			var logLevelSequence = Logging.Log.SeparateLogLevelsToSequence(logLevels);
 			foreach(var logLevel in logLevelSequence)
 			{
-				switch(logLevel)
+				switch(logLevel.LogLevel)
 				{
 					case LogLevel.Error:
 						Debug(message, args);

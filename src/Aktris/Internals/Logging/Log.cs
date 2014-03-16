@@ -40,13 +40,13 @@ namespace Aktris.Internals.Logging
 		/// </summary>
 		/// <param name="logLevels"></param>
 		/// <returns></returns>
-		public static IEnumerable<LogLevel> SeparateLogLevelsToSequence(LogLevel logLevels)
+		public static IEnumerable<LogLevelWithType> SeparateLogLevelsToSequence(LogLevel logLevels)
 		{
 			if(logLevels == LogLevel.Off) yield break;
-			if(logLevels.HasFlag(LogLevel.Error)) yield return LogLevel.Error;
-			if(logLevels.HasFlag(LogLevel.Warning)) yield return LogLevel.Warning;
-			if(logLevels.HasFlag(LogLevel.Info)) yield return LogLevel.Info;
-			if(logLevels.HasFlag(LogLevel.Debug)) yield return LogLevel.Debug;
+			if(logLevels.HasFlag(LogLevel.Error)) yield return LogLevelWithType.Error;
+			if(logLevels.HasFlag(LogLevel.Warning)) yield return LogLevelWithType.Warning;
+			if(logLevels.HasFlag(LogLevel.Info)) yield return LogLevelWithType.Info;
+			if(logLevels.HasFlag(LogLevel.Debug)) yield return LogLevelWithType.Debug;
 		}
 
 		public static IReadOnlyCollection<LogLevelWithType> GetSubscribeLevels(LogLevel logLevel)

@@ -6,15 +6,16 @@ namespace Aktris.Internals.Logging
 	public class EventStream : LoggingEventBus
 	{
 		private readonly ActorRef _deadLetterActor;
+		private readonly ActorSystem _system;
 		private readonly bool _debug;
 		//TODO: Add SubchannelClassification, which means that if you listen to a Class, you'll receive any message that is of that type or a subtype.
 		private readonly LookupClassification<object, Type, ActorRef> _subscriptionHandler;
 
-		public EventStream([NotNull] ActorRef deadLetterActor, bool debug = false)
-			: base(deadLetterActor)
+		public EventStream([NotNull] ActorSystem system, bool debug = false)
+			: base(system)
 		{
-			if(deadLetterActor == null) throw new ArgumentNullException("deadLetterActor");
-			_deadLetterActor = deadLetterActor;
+			_deadLetterActor = system.DeadLetters;
+			_system = system;
 			_debug = debug;
 			_subscriptionHandler = new LookupClassification<object, Type, ActorRef>(Classify, Publish);
 		}
@@ -66,7 +67,5 @@ namespace Aktris.Internals.Logging
 			else
 				subscriber.Send(@event, null);
 		}
-
-
 	}
 }
