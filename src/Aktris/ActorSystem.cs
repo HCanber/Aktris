@@ -131,10 +131,13 @@ namespace Aktris
 		public T CreateInstance<T>(Type type)
 		{
 			var isCreatingAnActor = typeof(T) == typeof(ActorRef);
-			if(!typeof(T).IsAssignableFrom(type))
+			if(isCreatingAnActor)
 			{
-				if(isCreatingAnActor)
-					throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it is not an actor", type.FullName));
+				if(!typeof(Actor).IsAssignableFrom(type))
+					throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it is not an actor",type.FullName));
+			}
+			else if(!typeof(T).IsAssignableFrom(type))
+			{
 				throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it do not implement {1}", type.FullName, typeof(T).FullName));
 			}
 			var instance = isCreatingAnActor
