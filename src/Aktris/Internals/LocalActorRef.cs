@@ -80,9 +80,21 @@ namespace Aktris.Internals
 
 		public void Send(object message, ActorRef sender)
 		{
-			sender = UnwrapSenderActorRef(sender);
-			var envelope = new Envelope(this, message, sender ?? _system.DeadLetters);
+			var envelopeSender = UnwrapSenderActorRef(sender) ?? _system.DeadLetters;
+			var envelope = new Envelope(this, message, envelopeSender);
 			_mailbox.Enqueue(envelope);
+			if(_system.Settings.DebugMessages)
+			{
+				var shouldPublish = true;
+				if(sender!=null)
+				{
+					var senderType = sender.GetType();	
+					//Ignore logging sends that comes from PromiseActorRefs since they are logged there instead.
+					shouldPublish = !senderType.IsGenericType || senderType.GetGenericTypeDefinition() != typeof(PromiseActorRef<>);
+				}
+				if(shouldPublish)
+					Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Send: " + envelope));
+			}
 		}
 
 		public void SendSystemMessage(SystemMessage message, ActorRef sender)
@@ -90,6 +102,8 @@ namespace Aktris.Internals
 			sender = UnwrapSenderActorRef(sender);
 			var envelope = new SystemMessageEnvelope(this, message, sender ?? _system.DeadLetters);
 			_mailbox.EnqueueSystemMessage(envelope);
+			if(_system.Settings.DebugSystemMessages)
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(),"Send system message: " + envelope));
 		}
 
 		private ActorRef UnwrapSenderActorRef(ActorRef sender)
@@ -565,13 +579,19 @@ namespace Aktris.Internals
 			}
 		}
 
+		Type InternalActorRef.SafeGetTypeForLogging()
+		{
+			return SafeGetTypeForLogging();
+		}
+
 		protected Type SafeGetTypeForLogging(object logInstance=null)
 		{
+			var actor = _actor;
 			if(logInstance == null)
 			{
-				if(_actor == null)
+				if(actor == null)
 					return GetType();
-				return _actor.GetType();
+				return actor.GetType();
 			}
 			return logInstance.GetType();
 		}

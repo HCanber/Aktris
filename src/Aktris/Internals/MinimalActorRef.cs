@@ -13,7 +13,7 @@ namespace Aktris.Internals
 		public virtual void Stop() {/* Intentionally left blank */}
 		public virtual void HandleMessage(Envelope envelope) {/* Intentionally left blank */}
 		public virtual void HandleSystemMessage(SystemMessageEnvelope envelope) {/* Intentionally left blank */}
-		
+
 		public virtual bool IsTerminated { get { return false; } }
 		public virtual ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
@@ -21,7 +21,7 @@ namespace Aktris.Internals
 		}
 
 		public Mailbox Mailbox { get { return null; } }
-		public InternalActorRef Parent { get { return null; }}
+		public InternalActorRef Parent { get { return null; } }
 		public virtual void Suspend() {/* Intentionally left blank */}
 		public virtual void Resume(Exception causedByFailure) {/* Intentionally left blank */}
 		public virtual void Restart(Exception causedByFailure) {/* Intentionally left blank */}
@@ -35,5 +35,6 @@ namespace Aktris.Internals
 		public void Become(MessageHandler newHandler, bool discardOld = true) {/* Intentionally left blank */}
 		public void Unbecome() {/* Intentionally left blank */}
 		public Envelope CurrentMessage { get { return null; } }
+		public Type SafeGetTypeForLogging() { return GetType(); }
 	}
 }

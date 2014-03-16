@@ -20,8 +20,10 @@ namespace Aktris.Settings
 		IStandardOutLoggerSettings ISettings.StandardOutLoggerSettings { get { return StandardOutLoggerSettings; } }
 		public IEnumerable<Type> Loggers { get { return _loggers; } }
 		public LogLevel LogLevel { get; set; }
-		public bool DebugLifecycle { get; set; }
 		public bool DebugAutoHandle { get; set; }
+		public bool DebugLifecycle { get; set; }
+		public bool DebugMessages { get; set; }
+		public bool DebugSystemMessages { get; set; }
 
 		public bool EnableStandardOutLogger
 		{

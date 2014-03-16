@@ -4,9 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.Concurrency;
+using Aktris.Internals.Logging;
 
 namespace Aktris
 {
@@ -71,8 +73,12 @@ namespace Aktris
 			{
 				return new AskResult<TResponse>(Promise.Failed<TResponse>(new ArgumentOutOfRangeException("timeoutMilliseconds", timeoutMilliseconds, "Timeout must be positive or Infinite=" + Timeout.Infinite + ", question not sent to " + actor)));
 			}
-			var promiseActor = PromiseActorRef.Create<TResponse>(intActor.System, timeoutMilliseconds, actor.ToString());
+			var system = intActor.System;
+			var promiseActor = PromiseActorRef.Create<TResponse>(system, timeoutMilliseconds, actor.ToString());
 			actor.Send(message, promiseActor);	//Send to actor and expect response to promiseActor
+			if(system.Settings.DebugMessages)
+				system.EventStream.Publish(new DebugLogEvent(actor.Path.ToString(), intActor.SafeGetTypeForLogging(), "Ask: " + Envelope.ToString(sender,actor,message)));
+
 			return new AskResult<TResponse>(promiseActor.Future);
 		}
 	}

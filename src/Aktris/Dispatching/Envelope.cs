@@ -27,7 +27,12 @@ namespace Aktris.Dispatching
 
 		public override string ToString()
 		{
-			return StringFormat.SafeFormat("From [{0}] to [{1}]: {2}", Sender, Receiver, Message);
+			return ToString(Sender, Receiver, Message);
+		}
+
+		public static string ToString(ActorRef sender, ActorRef receiver, object message)
+		{
+			return StringFormat.SafeFormat("From [{0}] to [{1}]: {2}", sender, receiver, message);
 		}
 	}
 }

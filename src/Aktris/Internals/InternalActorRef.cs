@@ -26,5 +26,6 @@ namespace Aktris.Internals
 		void Stop();
 		void Become(MessageHandler newHandler, bool discardOld = true);
 		void Unbecome();
+		Type SafeGetTypeForLogging();
 	}
 }
