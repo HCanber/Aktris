@@ -15,6 +15,8 @@ namespace Aktris.Settings
 		/// If this value is <c>null</c> then the <see cref="DefaultLogger"/> is used.
 		/// </summary>
 		IEnumerable<Type> Loggers { get; }
+		bool DebugLifecycle { get; }
+		bool DebugAutoHandle { get; }
 
 		LogLevel LogLevel { get; }
 	}

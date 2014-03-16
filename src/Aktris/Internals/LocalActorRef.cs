@@ -144,6 +144,9 @@ namespace Aktris.Internals
 
 		private void AutoHandleMessage(Envelope envelope)
 		{
+			if(_system.Settings.DebugAutoHandle)
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Received " + typeof(AutoHandledMessage)+ " "+ envelope));
+			
 			var message = envelope.Message;
 			if(message is StopActor)
 			{
@@ -205,7 +208,7 @@ namespace Aktris.Internals
 					_messageHandlerStack = _messageHandlerStack.Push((m, s) => actor.HandleMessage(m, s));
 
 				actor.PreStart();
-				
+				if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(actor), "Started (" + actor + ")"));
 				if(recreateCause == null) actor.PreFirstStart();
 				else actor.PostRestart(recreateCause);
 				return actor;
@@ -561,26 +564,50 @@ namespace Aktris.Internals
 			}
 		}
 
+		protected Type SafeGetTypeForLogging(object logInstance=null)
+		{
+			if(logInstance == null)
+			{
+				if(_actor == null)
+					return GetType();
+				return _actor.GetType();
+			}
+			return logInstance.GetType();
+		}
+
+		protected void Publish(LogEvent logEvent)
+		{
+			try
+			{
+				_system.EventStream.Publish(logEvent);
+			}
+			catch(Exception)
+			{
+				//Just swallow the exception. Not really much we can do to resolve the issue.
+			}
+		}
+
 		// Supervision -------------------------------------------------------------------------------------
 
-		private void Supervise(InternalActorRef actor)
+		private void Supervise(InternalActorRef child)
 		{
 			ChildInfo childInfo;
-			var actorName = actor.Name;
+			var childName = child.Name;
 			if(!_actorStatus.IsTerminating)
 			{
-				if(Children.TryGetByName(actorName, out childInfo))
+				if(Children.TryGetByName(childName, out childInfo))
 				{
 					var childRestartInfo = childInfo as ChildRestartInfo;
 					if(childRestartInfo == null)
 					{
-						childRestartInfo = new ChildRestartInfo(actor);
-						UpdateChildrenCollection(c => c.AddChild(actorName, childRestartInfo));
+						childRestartInfo = new ChildRestartInfo(child);
+						UpdateChildrenCollection(c => c.AddChild(childName, childRestartInfo));
 					}
+					if(_system.Settings.DebugLifecycle)Publish(new DebugLogEvent(_path.ToString(),SafeGetTypeForLogging(),"Now supervising "+child));
 				}
 				else
 				{
-					//TODO: publish(Error(self.path.toString, clazz(actor), "received Supervise from unregistered child " + child + ", this will not end well"))
+					Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Received Supervise from unregistered child " + child));
 				}
 			}
 		}
@@ -605,20 +632,38 @@ namespace Aktris.Internals
 
 		private void HandleWatch(WatchActor message)
 		{
+			var watchee = message.Watchee;
 			var watcher = message.Watcher;
-			if(watcher != this && !_watchedBy.Contains(watcher))
+			if(watchee == this && watcher != this)
 			{
-				_watchedBy = _watchedBy.Add(watcher);
+				if(!_watchedBy.Contains(watcher))
+				{
+					_watchedBy = _watchedBy.Add(watcher);
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now monitoring " + watcher));
+				}
 			}
+			else if(watchee != this && watcher == this)
+				Watch(watchee);
+			else
+				Publish(new WarningLogEvent(_path.ToString(), SafeGetTypeForLogging(), String.Format("BUG: Illegal Watch({0},{1}) for {2}", watchee, watcher, this)));
 		}
 
 		private void HandleUnwatch(UnwatchActor message)
 		{
+			var watchee = message.Watchee;
 			var watcher = message.Watcher;
-			if(watcher != this && !_watchedBy.Contains(watcher))
+			if(watchee == this && watcher != this)
 			{
-				_watchedBy = _watchedBy.Remove(watcher);
+				if(_watchedBy.Contains(watcher))
+				{
+					_watchedBy = _watchedBy.Remove(watcher);
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Stopped monitoring " + watcher));
+				}
 			}
+			else if(watchee != this && watcher == this)
+				Unwatch(watchee);
+			else
+				Publish(new WarningLogEvent(_path.ToString(), SafeGetTypeForLogging(), String.Format("BUG: Illegal Unwatch({0},{1}) for {2}", watchee, watcher, this)));
 		}
 
 		private void TellWatchersWeDied()

@@ -28,7 +28,7 @@ namespace Aktris.Internals.Logging
 		private void DebugLog(string message)
 		{
 			if(_debug)
-				Publish(new DebugLogEvent(GetType().Name, GetType(), message), _deadLetterActor);
+				Publish(new DebugLogEvent(GetType().Name, GetType(), message));
 		}
 
 		public override bool Subscribe([NotNull] ActorRef subscriber, Type to)
