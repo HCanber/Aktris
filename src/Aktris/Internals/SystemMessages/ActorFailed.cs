@@ -21,5 +21,10 @@ namespace Aktris.Internals.SystemMessages
 
 		[NotNull]
 		public Exception CausedByFailure { get { return _causedByFailure; } }
+
+		public override string ToString()
+		{
+			return "ActorFailed: [" + _child + "]. Cause: " + _causedByFailure;
+		}
 	}
 }

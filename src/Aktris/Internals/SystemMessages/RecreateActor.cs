@@ -12,5 +12,10 @@ namespace Aktris.Internals.SystemMessages
 		}
 
 		public Exception CausedByFailure { get { return _causedByFailure; } }
+
+		public override string ToString()
+		{
+			return "RecreateActor" + (_causedByFailure != null ? ", due to failure: " + _causedByFailure : "");
+		}
 	}
 }
