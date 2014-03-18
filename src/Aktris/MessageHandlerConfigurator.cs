@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Aktris.Internals.Helpers;
 using Aktris.JetBrainsAnnotations;
 
@@ -9,6 +10,20 @@ namespace Aktris
 	public class MessageHandlerConfigurator
 	{
 		private List<Tuple<Type, MessageHandler>> _handlers = new List<Tuple<Type, MessageHandler>>();
+
+		/// <summary>
+		/// Registers a handler for incoming messages of the specified type. 
+		/// If <paramref name="matches"/>!=<c>null</c> then this must return true before a message is passed to <paramref name="handler"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T">The type of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T"/></param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T>(Predicate<T> matches, [NotNull] Action<T> handler)
+		{
+			Receive(handler, matches);
+		}
 
 		/// <summary>
 		/// Registers a handler for incoming messages of the specified type. 
@@ -36,6 +51,23 @@ namespace Aktris
 					return false;
 				});
 		}
+
+		/// <summary>
+		/// Registers a handler for incoming messages of any of the specified types. 
+		/// If <paramref name="matches"/>!=<c>null</c> then it
+		/// must return true before a message is passed to <paramref name="handler"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T1">One of the expected types of the message</typeparam>
+		/// <typeparam name="T2">One of the expected types of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T1, T2>(Predicate<object> matches, [NotNull] Action<object> handler)
+		{
+			Receive<T1,T2>(handler, matches);
+		}
+
 		/// <summary>
 		/// Registers a handler for incoming messages of any of the specified types. 
 		/// If <paramref name="matches"/>!=<c>null</c> then it
@@ -51,6 +83,24 @@ namespace Aktris
 		{
 			if(handler == null) throw new ArgumentNullException("handler");
 			Receive(new[] { typeof(T1), typeof(T2) },(o,s)=> handler(o), matches);
+		}
+
+
+		/// <summary>
+		/// Registers a handler for incoming messages of any of the specified types. 
+		/// If <paramref name="matches"/>!=<c>null</c> then it
+		/// must return true before a message is passed to <paramref name="handler"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T1">One of the expected types of the message</typeparam>
+		/// <typeparam name="T2">One of the expected types of the message</typeparam>
+		/// <typeparam name="T3">One of the expected types of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T1, T2, T3>(Predicate<object> matches, [NotNull] Action<object> handler)
+		{
+			Receive<T1,T2,T3>(handler, matches);
 		}
 
 		/// <summary>
@@ -71,6 +121,21 @@ namespace Aktris
 			Receive(new[] { typeof(T1), typeof(T2), typeof(T3) }, (o, s) => handler(o), matches);
 		}
 
+
+		/// <summary>
+		/// Registers a handler for incoming messages of the specified type. 
+		/// If <paramref name="matches"/>!=<c>null</c> then this must return true before a message is passed to <paramref name="handler"/>.
+		/// <typeparamref name="T"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T">The type of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T"/>.</param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T>(Predicate<T> matches, [NotNull] Action<T, SenderActorRef> handler)
+		{
+			Receive<T>(handler, matches);
+		}
 
 		/// <summary>
 		/// Registers a handler for incoming messages of the specified type. 
@@ -111,6 +176,22 @@ namespace Aktris
 		/// <typeparam name="T2">One of the expected types of the message</typeparam>
 		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
 		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T1, T2>(Predicate<object> matches, [NotNull] Action<object, SenderActorRef> handler)
+		{
+			Receive<T1, T2>(handler, matches);
+		}
+
+		/// <summary>
+		/// Registers a handler for incoming messages of any of the specified types. 
+		/// If <paramref name="matches"/>!=<c>null</c> then it
+		/// must return true before a message is passed to <paramref name="handler"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T1">One of the expected types of the message</typeparam>
+		/// <typeparam name="T2">One of the expected types of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
 		public void Receive<T1, T2>([NotNull] Action<object, SenderActorRef> handler, Predicate<object> matches = null)
 		{
 			if(handler == null) throw new ArgumentNullException("handler");
@@ -129,10 +210,42 @@ namespace Aktris
 		/// <typeparam name="T3">One of the expected types of the message</typeparam>
 		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
 		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive<T1, T2, T3>(Predicate<object> matches, [NotNull] Action<object, SenderActorRef> handler)
+		{
+			Receive<T1,T2,T3>(handler, matches);
+		}
+
+		/// <summary>
+		/// Registers a handler for incoming messages of any of the specified types. 
+		/// If <paramref name="matches"/>!=<c>null</c> then it
+		/// must return true before a message is passed to <paramref name="handler"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T1">One of the expected types of the message</typeparam>
+		/// <typeparam name="T2">One of the expected types of the message</typeparam>
+		/// <typeparam name="T3">One of the expected types of the message</typeparam>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
 		public void Receive<T1, T2, T3>([NotNull] Action<object, SenderActorRef> handler, Predicate<object> matches = null)
 		{
 			if(handler == null) throw new ArgumentNullException("handler");
 			Receive(new[] {typeof(T1), typeof(T2), typeof(T3)}, handler, matches);	
+		}
+
+		/// <summary>
+		/// Registers a handler for incoming messages of any of the specified types. 
+		/// If <paramref name="matches"/>!=<c>null</c> then it
+		/// must return true before a message is passed to <paramref name="handler"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <param name="messageTypes">The collection of handled types</param>
+		/// <param name="handler">The message handler that is invoked for incoming messages of the specified type <typeparamref name="T1"/></param>
+		/// <param name="matches">When not <c>null</c> it is used to determine if the message matches.</param>
+		public void Receive(IEnumerable<Type> messageTypes, Predicate<object> matches, [NotNull] Action<object, SenderActorRef> handler)
+		{
+			Receive(messageTypes, handler, matches);
 		}
 
 		/// <summary>
