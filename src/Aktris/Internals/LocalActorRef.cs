@@ -88,7 +88,7 @@ namespace Aktris.Internals
 				var shouldPublish =!( message is LogEvent);
 				if(sender != null)
 				{
-					var senderType = sender.GetType();	
+					var senderType = sender.GetType();
 					//Ignore logging sends that comes from PromiseActorRefs since they are logged there instead.
 					shouldPublish = !senderType.IsGenericType || senderType.GetGenericTypeDefinition() != typeof(PromiseActorRef<>);
 				}
@@ -103,7 +103,7 @@ namespace Aktris.Internals
 			var envelope = new SystemMessageEnvelope(this, message, sender ?? _system.DeadLetters);
 			_mailbox.EnqueueSystemMessage(envelope);
 			if(_system.Settings.DebugSystemMessages)
-				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(),"Send system message: " + envelope));
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Send system message: " + envelope));
 		}
 
 		private ActorRef UnwrapSenderActorRef(ActorRef sender)
@@ -160,8 +160,8 @@ namespace Aktris.Internals
 		private void AutoHandleMessage(Envelope envelope)
 		{
 			if(_system.Settings.DebugAutoHandle)
-				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Received " + typeof(AutoHandledMessage)+ " "+ envelope));
-			
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Received " + typeof(AutoHandledMessage) + " " + envelope));
+
 			var message = envelope.Message;
 			if(message is StopActor)
 			{
@@ -257,24 +257,24 @@ namespace Aktris.Internals
 			if(_actor == null)
 			{
 				//The actor has not yet been created. We can use a simpler approach
-				//TODO: Log 
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Changing recreate into Create after " + cause));
 				CreateActorInstanceDueToFailure();
 			}
 			else if(_actorStatus.IsNotCreatingRecreatingOrTerminating)
 			{
 				var failedActor = _actor;
+				if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Restarting"));
+
 				if(failedActor != null)
 				{
 					//TODO: Stash optional message
 					var optionalMessage = _currentMessage != null ? _currentMessage.Message : null;
 					try
 					{
-						failedActor.PreRestart(cause, optionalMessage); //By default this will unwatch and stop children
-						failedActor.PostStop();
-					}
-					catch(Exception)
-					{
-						//TODO: Log
+						try { failedActor.PostStop(); }
+						catch(Exception e) { Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Exception thrown during actor.PreRestart()", e)); }
+						try { failedActor.PostStop(); }
+						catch(Exception e) { Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Exception thrown during actor.PostStop()", e)); }
 					}
 					finally
 					{
@@ -323,10 +323,8 @@ namespace Aktris.Internals
 				freshActor.PostRestart(cause);
 
 				//Restart children
-				survivors.ForEach(c => c.Restart(cause), (c, e) =>
-				{
-					/*TODO: Log */
-				});
+				survivors.ForEach(c => c.Restart(cause), (c, e) => 
+					Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(freshActor), "Restarting " + c, e)));
 			}
 			catch(Exception e)
 			{
@@ -433,12 +431,12 @@ namespace Aktris.Internals
 		{
 			if(_actor == null)
 			{
-				//TODO: Log "changing Resume into Create after " + cause
+				Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Changing Resume into Create after " + cause));
 				CreateActorInstanceDueToFailure();
 			}
 			else if(_actor.IsCleared && cause != null)
 			{
-				//TODO: Log  "changing Resume into Restart after " + cause
+				Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Changing Resume into Recreate after " + cause));
 				RecreateActor(cause);
 			}
 			else
@@ -478,6 +476,7 @@ namespace Aktris.Internals
 
 					// do not propagate failures during shutdown to the supervisor
 					SetFailedPerpatrator(this);
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Stopping"));
 				}
 			}
 			else
@@ -494,9 +493,9 @@ namespace Aktris.Internals
 			{
 				if(actor != null) actor.PostStop();
 			}
-			catch(Exception)
+			catch(Exception e)
 			{
-				//TODO: Log				
+				Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Exception thrown when calling Actor.PostStop()", e));
 			}
 			finally
 			{
@@ -526,6 +525,7 @@ namespace Aktris.Internals
 							}
 							finally
 							{
+								if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(actor), "Stopped"));
 								ClearActor(_actor);
 								_actor = null;
 							}
@@ -584,7 +584,7 @@ namespace Aktris.Internals
 			return SafeGetTypeForLogging();
 		}
 
-		protected Type SafeGetTypeForLogging(object logInstance=null)
+		protected Type SafeGetTypeForLogging(object logInstance = null)
 		{
 			var actor = _actor;
 			if(logInstance == null)
@@ -624,7 +624,7 @@ namespace Aktris.Internals
 						childRestartInfo = new ChildRestartInfo(child);
 						UpdateChildrenCollection(c => c.AddChild(childName, childRestartInfo));
 					}
-					if(_system.Settings.DebugLifecycle)Publish(new DebugLogEvent(_path.ToString(),SafeGetTypeForLogging(),"Now supervising "+child));
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now supervising " + child));
 				}
 				else
 				{
@@ -720,7 +720,7 @@ namespace Aktris.Internals
 				}
 				catch(Exception e)
 				{
-					//TODO: Log
+					Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Emergency stop: exception in failure handling for " + exception, e));
 					try
 					{
 						Children.GetChildrenRefs().ForEach(c => c.Stop());
@@ -786,11 +786,11 @@ namespace Aktris.Internals
 			var failedChild = (InternalActorRef)actorFailedMessage.Child;
 			if(!Children.TryGetByRef(failedChild, out childInfo))
 			{
-				//TODO: Log string.Format("Dropping Failed({0}) from unknown child {1}", cause, failedChild)));
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), string.Format("Dropping {2} from unknown child {1} with cause: {0}", actorFailedMessage.CausedByFailure, failedChild, typeof(ActorFailed).Name)));
 			}
 			else if(childInfo.Child.InstanceId != failedChild.InstanceId)
 			{
-				//TODO: string.Format("Dropping Failed({0}) from old child {1} (Instance id={2} != {3})", cause, failedChild, childInfo.Child.InstanceId, failedChild.InstanceId)));
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), string.Format("Dropping {4} from old child {1} (Instance id={2} != {3}). Cause: {0}", actorFailedMessage.CausedByFailure, failedChild, childInfo.Child.InstanceId, failedChild.InstanceId, typeof(ActorFailed).Name)));
 			}
 			else
 			{
