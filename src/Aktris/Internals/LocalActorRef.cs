@@ -85,8 +85,8 @@ namespace Aktris.Internals
 			_mailbox.Enqueue(envelope);
 			if(_system.Settings.DebugMessages)
 			{
-				var shouldPublish = true;
-				if(sender!=null)
+				var shouldPublish =!( message is LogEvent);
+				if(sender != null)
 				{
 					var senderType = sender.GetType();	
 					//Ignore logging sends that comes from PromiseActorRefs since they are logged there instead.
