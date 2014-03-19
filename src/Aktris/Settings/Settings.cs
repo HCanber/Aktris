@@ -43,6 +43,10 @@ namespace Aktris.Settings
 			}
 		}
 
+		public void AddLogger<T>() where T : Actor
+		{
+			AddLogger(typeof(T));
+		}
 
 		public void AddLogger(Type type)
 		{
