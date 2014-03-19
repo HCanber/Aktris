@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 
 namespace Aktris.Internals.Logging
@@ -10,6 +11,15 @@ namespace Aktris.Internals.Logging
 		private const string _WarningFormat = "WARN  {0} [{1}] {2}: {3}";
 		private const string _InfoFormat = "INFO  {0} [{1}] {2}: {3}";
 		private const string _DebugFormat = "DEBUG {0} [{1}] {2}: {3}";
+
+		public static string Format(LogEvent e, string dateFormat)
+		{
+			if(e is DebugLogEvent) return FormatDebug((DebugLogEvent)e, dateFormat);
+			else if(e is InfoLogEvent) return FormatInfo((InfoLogEvent)e, dateFormat);
+			else if(e is WarningLogEvent) return FormatWarning((WarningLogEvent)e, dateFormat);
+			else if(e is ErrorLogEvent) return FormatError((ErrorLogEvent)e, dateFormat);
+			throw new Exception("Unknown LogEvent type: "+e.GetType().FullName);
+		}
 
 		public static string FormatError(ErrorLogEvent e, string dateFormat)
 		{

@@ -29,5 +29,10 @@ namespace Aktris.Internals.Logging
 		public DateTime TimestampUtc { get { return _timestampUtc; } }
 
 		public object Message { get { return _message; } }
+
+		public override string ToString()
+		{
+			return LogLevel + ": [" + _logClass.Name + "] " + _message;
+		}
 	}
 }

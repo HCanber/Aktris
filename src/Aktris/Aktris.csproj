@@ -75,6 +75,7 @@
     <Compile Include="Internals\Logging\LoggerInitialized.cs" />
     <Compile Include="Internals\Logging\LoggingAdapter.cs" />
     <Compile Include="Internals\Logging\StandardOutLoggerHelper.cs" />
+    <Compile Include="Internals\Logging\TemporaryFileLogger.cs" />
     <Compile Include="Internals\PromiseActorRef.cs" />
     <Compile Include="Internals\ConcurrentSet.cs" />
     <Compile Include="Internals\GuardLock.cs" />
