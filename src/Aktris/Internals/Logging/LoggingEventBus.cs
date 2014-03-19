@@ -68,7 +68,7 @@ namespace Aktris.Internals.Logging
 
 		private void AddLogger(ActorRef logger, LogLevel logLevels, string logName)
 		{
-			//TODO: Send Initialize message to logger
+			logger.Send(new InitializeLogger(this), null);
 			Log.SeparateLogLevelsToSequence(logLevels).ForEach(l => Subscribe(logger, l.Type));
 			Publish(new DebugLogEvent(logName, GetType(), "Logger " + logName + " started"));
 		}
@@ -108,7 +108,6 @@ namespace Aktris.Internals.Logging
 			});
 		}
 
-		//TODO: startDefaultLoggers
 		//TODO: stopDefaultLoggers
 
 		public void StartDefaultLoggers()
