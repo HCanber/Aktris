@@ -102,6 +102,8 @@ namespace Aktris
 
 		protected SelfScheduler Scheduler { get { return _selfScheduler; } }
 
+		protected EventStream EventStream { get { return _system.EventStream; } }
+
 		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
 		protected internal virtual void PreStart() {/*Intentionally left blank*/}
 		protected internal virtual void PostStop() {/*Intentionally left blank*/}
