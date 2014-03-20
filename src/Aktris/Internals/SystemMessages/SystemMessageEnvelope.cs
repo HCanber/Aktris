@@ -25,7 +25,7 @@ namespace Aktris.Internals.SystemMessages
 
 		public override string ToString()
 		{
-			return StringFormat.SafeFormat("From {0}: {1}", Sender, Message);
+			return StringFormat.SafeFormat("[{0}] -> [{1}]: <{3}> {2}", Sender, Receiver, Message, Message.GetType().Name);
 		}
 	}
 }
