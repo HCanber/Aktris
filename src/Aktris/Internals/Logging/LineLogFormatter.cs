@@ -5,7 +5,7 @@ namespace Aktris.Internals.Logging
 {
 	public static class LineLogFormatter
 	{
-		public const string DefaultDateFormat = "HH:mm:ss.FFF";
+		public const string DefaultDateFormat = "HH:mm:ss.fff";
 		private const string _ErrorFormatException = "ERROR {0} [{1}] {2}: {3}{4}";// 0=Time, 1=Thread, 2=LogSource, 3=Message, Exception
 		private const string _ErrorFormat = "ERROR {0} [{1}] {2}: {3}"; // 0=Time, 1=Thread, 2=LogSource, 3=Message
 		private const string _WarningFormat = "WARN  {0} [{1}] {2}: {3}";
