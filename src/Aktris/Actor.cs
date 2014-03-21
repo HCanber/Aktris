@@ -418,6 +418,20 @@ namespace Aktris
 		}
 
 		/// <summary>
+		/// Forwards all incoming messages of the specified type to the specified actor.
+		/// <typeparamref name="T"/>.
+		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
+		/// In that case, this handler will not be invoked.</remarks>
+		/// </summary>
+		/// <typeparam name="T">The type of the message</typeparam>
+		/// <param name="receiver">The recipient of all forwarded messages</param>
+		public void ReceiveAndForward<T>([NotNull] ActorRef receiver)
+		{
+			if(receiver == null) throw new ArgumentNullException("receiver");
+			_constructorMessageHandlerConfigurators.Peek().ReceiveAndForward<T>(receiver);
+		}
+
+		/// <summary>
 		/// Forwards all incoming messages to the specified actor.
 		/// <remarks>This may only be called from the constructor.</remarks>
 		/// <remarks>Note that handlers registered prior to this may have handled the message already. 
