@@ -31,6 +31,11 @@ namespace Aktris.Internals.Logging
 				Publish(new DebugLogEvent(GetType().Name, GetType(), message));
 		}
 
+		public bool Subscribe<T>([NotNull] ActorRef subscriber)
+		{
+			return Subscribe(subscriber, typeof(T));
+		}
+
 		public override bool Subscribe([NotNull] ActorRef subscriber, Type to)
 		{
 			if(subscriber == null) throw new ArgumentNullException("subscriber");
@@ -44,6 +49,11 @@ namespace Aktris.Internals.Logging
 			var unsubscribed = _subscriptionHandler.Unsubscribe(subscriber);
 			DebugLog("Unsubscribing " + subscriber + " from all channels");
 			return unsubscribed;
+		}
+
+		public bool Unsubscribe<T>([NotNull] ActorRef subscriber)
+		{
+			return Unsubscribe(subscriber, typeof(T));
 		}
 
 		public override bool Unsubscribe([NotNull] ActorRef subscriber, Type to)

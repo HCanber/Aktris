@@ -102,6 +102,20 @@ namespace Aktris
 			return _userGuardian.CreateActor(actorCreationProperties, name);
 		}
 
+		public ActorRef CreateActor<T>(Func<T> creator, string name = null) where T : Actor
+		{
+			return CreateActor(ActorCreationProperties.Create(creator), name);
+		}
+
+
+		public ActorRef CreateActor(Type actorType, string name = null)
+		{
+			if(!typeof(Actor).IsAssignableFrom(actorType))
+				throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it is not an actor", actorType.FullName));
+			var instance = CreateActor(ActorCreationProperties.Create(() => (Actor)CreateInstance(actorType)));
+			return (ActorRef)instance;
+		}
+
 		public Mailbox CreateDefaultMailbox()
 		{
 			return _defaultMailboxCreator(_actionScheduler);
@@ -130,20 +144,12 @@ namespace Aktris
 
 		public T CreateInstance<T>(Type type)
 		{
-			var isCreatingAnActor = typeof(T) == typeof(ActorRef);
-			if(isCreatingAnActor)
-			{
-				if(!typeof(Actor).IsAssignableFrom(type))
-					throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it is not an actor",type.FullName));
-			}
-			else if(!typeof(T).IsAssignableFrom(type))
+			if(!typeof(T).IsAssignableFrom(type))
 			{
 				throw new ArgumentException(string.Format("Cannot create an instance of type {0} since it do not implement {1}", type.FullName, typeof(T).FullName));
 			}
-			var instance = isCreatingAnActor
-				? CreateActor(ActorCreationProperties.Create(() => (Actor) CreateInstance(type)))
-				: CreateInstance(type);
-			return (T) instance;
+			var instance = CreateInstance(type);
+			return (T)instance;
 		}
 
 		protected object CreateInstance(Type type)

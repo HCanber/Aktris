@@ -59,6 +59,7 @@
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\EventBusPublisher.cs" />
     <Compile Include="Events\EventBusSubscription.cs" />
+    <Compile Include="Exceptions\LoggerInitializationException.cs" />
     <Compile Include="Exceptions\LoggingException.cs" />
     <Compile Include="Exceptions\StashOverflowException.cs" />
     <Compile Include="Internals\AutoHandledMessage.cs" />

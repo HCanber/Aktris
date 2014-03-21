@@ -8,6 +8,7 @@ using Aktris.Dispatching;
 using Aktris.Exceptions;
 using Aktris.Internals;
 using Aktris.Internals.Concurrency;
+using Aktris.Internals.Helpers;
 using Aktris.Internals.Logging;
 
 namespace Aktris
@@ -136,7 +137,8 @@ namespace Aktris
 			_task.Wait();
 			if(_task.IsCompleted)
 			{
-				onResponse(_task.Result);
+				if(onResponse!=null)
+					onResponse(_task.Result);
 			}
 			else if(_task.IsFaulted)
 			{
@@ -159,6 +161,24 @@ namespace Aktris
 				}
 				throw aggregateException;
 			}
+		}
+		public TResult Handle<TResult>(Func<T,TResult> onResponse, Func<TResult> onTimeout, Func<IReadOnlyList<Exception>,TResult> onException)
+		{
+			_task.Wait();
+			if(_task.IsCompleted)
+			{
+				return onResponse(_task.Result);
+			}
+
+			var aggregateException = _task.Exception;
+			var innerExceptions = aggregateException == null
+				? (IReadOnlyList<Exception>) EmptyReadonlyCollection<Exception>.Instance
+				: (IReadOnlyList<Exception>) aggregateException.Flatten().InnerExceptions;
+			if(_task.IsCanceled || innerExceptions.Any(e => e is AskTimeoutException || e is TimeoutException))
+			{
+				return onTimeout();
+			}
+			return onException(innerExceptions);
 		}
 
 		public void ThrowIfFailed()

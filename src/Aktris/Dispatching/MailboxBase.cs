@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using Aktris.Internals;
+using Aktris.Internals.Logging;
 using Aktris.Internals.SystemMessages;
 using Aktris.JetBrainsAnnotations;
 
@@ -80,6 +81,11 @@ namespace Aktris.Dispatching
 			SystemMessageEnvelope envelope;
 			while(_systemMessagesQueue.TryDequeue(out envelope))
 			{
+				var system = _actor.System;
+				if(system.Settings.DebugSystemMessages && !_actor.IsLogger)
+				{
+					system.EventStream.Publish(new DebugLogEvent(_actor.Path.ToString(),_actor.SafeGetTypeForLogging(),"Processing system message: " + envelope));
+				}
 				_actor.HandleSystemMessage(envelope);
 			}
 		}
@@ -91,6 +97,11 @@ namespace Aktris.Dispatching
 				Envelope message;
 				while(TryGetMessageToProcess(out message))
 				{
+					var system = _actor.System;
+					if(system.Settings.DebugMessages && !_actor.IsLogger)
+					{
+						system.EventStream.Publish(new DebugLogEvent(_actor.Path.ToString(), _actor.SafeGetTypeForLogging(), "Processing message: " + message));
+					}
 					HandleMessage(message);
 					ProcessAllSystemMessages();
 				}

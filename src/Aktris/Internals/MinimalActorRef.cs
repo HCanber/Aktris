@@ -15,6 +15,8 @@ namespace Aktris.Internals
 		public virtual void HandleSystemMessage(SystemMessageEnvelope envelope) {/* Intentionally left blank */}
 
 		public virtual bool IsTerminated { get { return false; } }
+		public virtual bool IsLogger { get; set; }
+
 		public virtual ActorRef CreateActor(ActorCreationProperties actorCreationProperties, string name = null)
 		{
 			throw new InvalidOperationException(string.Format("Creating children to {0} is not allowed.", GetType()));

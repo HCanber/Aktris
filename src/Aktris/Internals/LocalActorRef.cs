@@ -68,6 +68,9 @@ namespace Aktris.Internals
 		public Envelope CurrentMessage { get { return _currentMessage; } }
 
 		public bool IsTerminated { get { return _mailbox.IsClosed; } }
+
+		public bool IsLogger { get; set; }
+
 		void InternalActorRef.Start()
 		{
 			_mailbox.SetActor(this);

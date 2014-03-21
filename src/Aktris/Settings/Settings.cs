@@ -13,6 +13,7 @@ namespace Aktris.Settings
 		{
 			StandardOutLoggerSettings = new StandardOutLoggerSettings();
 			LogLevel = LogLevel.Error;
+			LoggerStartTimeout = TimeSpan.FromSeconds(3);
 		}
 
 		public bool DebugEventStream { get; set; }
@@ -24,6 +25,7 @@ namespace Aktris.Settings
 		public bool DebugLifecycle { get; set; }
 		public bool DebugMessages { get; set; }
 		public bool DebugSystemMessages { get; set; }
+		public TimeSpan LoggerStartTimeout { get; set; }
 
 		public bool EnableStandardOutLogger
 		{
@@ -45,12 +47,22 @@ namespace Aktris.Settings
 
 		public void AddLogger<T>() where T : Actor
 		{
-			AddLogger(typeof(T));
+			InternalAddLogger(typeof(T),false);
+		}
+
+		public void AddStandardOutLogger()
+		{
+			InternalAddLogger(typeof(StandardOutLogger),false);
 		}
 
 		public void AddLogger(Type type)
 		{
-			if(!typeof(Actor).IsAssignableFrom(type)) throw new ArgumentException(string.Format("The specified type {0} must implement {1}", type.FullName, typeof(Actor).Name));
+			InternalAddLogger(type, true);
+		}
+
+		private void InternalAddLogger(Type type, bool checkType)
+		{
+			if(checkType && !typeof(Actor).IsAssignableFrom(type)) throw new ArgumentException(string.Format("The specified type {0} must implement {1}", type.FullName, typeof(Actor).Name));
 			if(_loggers == null)
 			{
 				_loggers = new List<Type>();

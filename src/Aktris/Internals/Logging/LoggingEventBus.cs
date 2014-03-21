@@ -18,6 +18,8 @@ namespace Aktris.Internals.Logging
 		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 		private List<ActorRef> _loggers = new List<ActorRef>();
 		private LogLevel _logLevels = LogLevel.Error;
+		private StandardOutLogger _stdOutLogger;
+		private int _loggerId = 0;
 
 
 		protected LoggingEventBus([NotNull] ActorSystem system)
@@ -66,12 +68,6 @@ namespace Aktris.Internals.Logging
 		}
 
 
-		private void AddLogger(ActorRef logger, LogLevel logLevels, string logName)
-		{
-			logger.Send(new InitializeLogger(this), null);
-			Log.SeparateLogLevelsToSequence(logLevels).ForEach(l => Subscribe(logger, l.Type));
-			Publish(new DebugLogEvent(logName, GetType(), "Logger " + logName + " started"));
-		}
 
 		public abstract bool Subscribe(ActorRef subscriber, Type to);
 
@@ -86,6 +82,7 @@ namespace Aktris.Internals.Logging
 
 		public void StartStandardOutLogger(StandardOutLogger standardOutLogger, IStandardOutLoggerSettings settings)
 		{
+			_stdOutLogger = standardOutLogger;
 			SetupStandardOutLogger(standardOutLogger, settings);
 			Publish(new DebugLogEvent(GetType().Name, GetType(), "StandardOutLogger started"));
 
@@ -93,7 +90,7 @@ namespace Aktris.Internals.Logging
 
 		private void SetupStandardOutLogger(StandardOutLogger stdOutLogger, IStandardOutLoggerSettings settings)
 		{
-			LogLevel logLevel = settings.LogLevel;
+			var logLevel = settings.LogLevel;
 			var dateFormat = settings.DateFormat;
 			if(!Log.IsValidLogLevel(logLevel))
 			{
@@ -110,18 +107,23 @@ namespace Aktris.Internals.Logging
 
 		//TODO: stopDefaultLoggers
 
+
 		public void StartDefaultLoggers()
 		{
 			var logName = GetType().Name + "(" + _system.Name + ")";
 			var logLevels = Log.GetSubscribeLevels(_system.Settings.LogLevel).Aggregate(LogLevel.Off, (v, l) => v | l);
-			var allLoggers = _system.Settings.Loggers ?? new List<Type> { typeof(DefaultLogger) };
-			var loggerTypes = allLoggers.Where(t => t != typeof(StandardOutLogger));
-
+			var allLoggers = _system.Settings.Loggers!=null ? _system.Settings.Loggers.ToList() : new List<Type> { typeof(DefaultLogger) };
+			var loggerTypes = allLoggers.Where(t => t != typeof(StandardOutLogger)).ToList();	//Remove StandardOutLogger if it has been specified
+			var stdOutLoggerShouldBeUsed = allLoggers.Count - loggerTypes.Count != 0;		//If the counts diffs then allLoggers contained StandardOutLogger
 			var loggers = new List<ActorRef>();
 			foreach(var loggerType in loggerTypes)
 			{
-				var logger = _system.CreateInstance<ActorRef>(loggerType);
-				AddLogger(logger, logLevels, logName);
+				var id = Interlocked.Increment(ref _loggerId);
+				var name = "log-" + id + "-" + loggerType.Name;
+
+				var logger =(InternalActorRef) _system.CreateActor(loggerType,name);
+				logger.IsLogger = true;
+				AddLogger(logger, logLevels, logName, name);
 				loggers.Add(logger);
 			}
 			_lock.Write(() =>
@@ -129,8 +131,34 @@ namespace Aktris.Internals.Logging
 				_loggers = loggers;
 				_logLevels = logLevels;
 			});
-
+			Publish(new DebugLogEvent(logName, GetType(), "Default Loggers started"));
+			if(!stdOutLoggerShouldBeUsed)
+			{				
+				_stdOutLogger.Send(new DebugLogEvent(logName,GetType(), "Removing "+typeof(StandardOutLogger).Name+". Add it to Settings.Loggers in order for it to not be removed."),null);
+				Unsubscribe(_stdOutLogger);
+			}
 		}
+
+		private void AddLogger(ActorRef logger, LogLevel logLevels, string logName, string loggerName)
+		{
+			var timeout = _system.Settings.LoggerStartTimeout;
+			var reply = logger.AskAndWait(new InitializeLogger(this), null, timeout)
+				.Handle<object>(
+					replyMsg => replyMsg,
+					() =>
+					{
+						Publish(new WarningLogEvent(logName, GetType(), "Logger " + loggerName + " did not respond within " + timeout + " to " + typeof(InitializeLogger).Name + "(bus)"));
+						return "[TIMEOUT]";
+					},
+					exceptions => exceptions.FirstOrDefault()
+				);
+			if(reply.GetType() != typeof(LoggerInitialized))
+				throw new LoggerInitializationException("Logger " + loggerName + " did not respond with " + typeof(LoggerInitialized).Name + ", sent instead " + reply);
+
+			Log.SeparateLogLevelsToSequence(logLevels).ForEach(l => Subscribe(logger, l.Type));
+			Publish(new DebugLogEvent(logName, GetType(), "Logger " + loggerName + " started"));
+		}
+
 	}
 
 }

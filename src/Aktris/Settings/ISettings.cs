@@ -21,5 +21,6 @@ namespace Aktris.Settings
 		bool DebugMessages { get; }
 		bool DebugSystemMessages { get; }
 		LogLevel LogLevel { get; }
+		TimeSpan LoggerStartTimeout { get; }
 	}
 }
