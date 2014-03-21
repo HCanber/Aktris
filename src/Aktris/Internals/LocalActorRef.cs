@@ -663,7 +663,7 @@ namespace Aktris.Internals
 				if(!_watchedBy.Contains(watcher))
 				{
 					_watchedBy = _watchedBy.Add(watcher);
-					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now watched by " + watcher));
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now watched by [" + watcher+"]"));
 				}
 			}
 			else if(watchee != this && watcher == this)
