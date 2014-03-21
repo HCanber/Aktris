@@ -32,7 +32,13 @@ namespace Aktris.Dispatching
 
 		public static string ToString(ActorRef sender, ActorRef receiver, object message)
 		{
-			return StringFormat.SafeFormat("[{0}] -> [{1}]: <{3}> {2}", sender, receiver, message, message.GetType().Name);
+			var messageStr = message.ToString();
+			var messageType = message.GetType();
+			var messageTypeStr = messageType.ToString();
+			var messageTypeName = messageType.Name;
+			if(messageStr==messageTypeStr)
+				return StringFormat.SafeFormat("<{2}> [{0}] -> [{1}]", sender, receiver, messageTypeName);
+			return StringFormat.SafeFormat("<{2}> [{0}] -> [{1}]: {3}", sender, receiver, messageTypeName, messageStr);
 		}
 	}
 }

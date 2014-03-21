@@ -25,7 +25,14 @@ namespace Aktris.Internals.SystemMessages
 
 		public override string ToString()
 		{
-			return StringFormat.SafeFormat("[{0}] -> [{1}]: <{3}> {2}", Sender, Receiver, Message, Message.GetType().Name);
+			var message = Message;
+			var messageStr = message.ToString();
+			var messageType = message.GetType();
+			var messageTypeStr = message.GetType().Name;
+			var messageTypeName = messageType.Name;
+			if(messageStr == messageTypeStr)
+				return StringFormat.SafeFormat("<{2}> [{0}] -> [{1}]", Sender, Receiver, messageTypeName);
+			return StringFormat.SafeFormat("<{2}> [{0}] -> [{1}]: {3}", Sender, Receiver, messageTypeName, messageStr);
 		}
 	}
 }
