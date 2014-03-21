@@ -70,6 +70,7 @@
     <Compile Include="Internals\Concurrency\TaskTimeoutExtensions.cs" />
     <Compile Include="Internals\Logging\ConcurrentConsoleWriter.cs" />
     <Compile Include="Internals\Logging\DefaultLogger.cs" />
+    <Compile Include="Internals\Logging\ExceptionFormatter.cs" />
     <Compile Include="Internals\Logging\InitializeLogger.cs" />
     <Compile Include="Internals\Logging\LineLogFormatter.cs" />
     <Compile Include="Internals\Logging\Log.cs" />

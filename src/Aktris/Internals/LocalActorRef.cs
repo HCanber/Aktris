@@ -881,7 +881,7 @@ namespace Aktris.Internals
 
 		/// <summary>If the message is of the specified type then the handler is invoked and true is returned. </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static bool IfMatchSysCause<T>(SystemMessage message, Action<Exception> handler) where T : class, ExceptionSystemMessage
+		private static bool IfMatchSysCause<T>(SystemMessage message, Action<Exception> handler) where T : ExceptionSystemMessage
 		{
 			return PatternMatcher.Match<T>(message, m => handler(m.CausedByFailure));
 		}

@@ -21,5 +21,13 @@ namespace Aktris.Internals.Logging
 		public override LogLevel LogLevel { get { return LogLevel.Error; } }
 
 		public Exception Cause { get { return _cause; } }
+
+		public override string ToString()
+		{
+			var msg = base.ToString();
+			return _cause == null 
+				? msg 
+				: ExceptionFormatter.DebugFormat(_cause, msg + " Cause:\n");
+		}
 	}
 }
