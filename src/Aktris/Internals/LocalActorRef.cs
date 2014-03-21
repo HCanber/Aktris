@@ -93,7 +93,7 @@ namespace Aktris.Internals
 					shouldPublish = !senderType.IsGenericType || senderType.GetGenericTypeDefinition() != typeof(PromiseActorRef<>);
 				}
 				if(shouldPublish)
-					Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Send: " + envelope));
+					Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Received: " + envelope));
 			}
 		}
 
@@ -103,7 +103,7 @@ namespace Aktris.Internals
 			var envelope = new SystemMessageEnvelope(this, message, sender ?? _system.DeadLetters);
 			_mailbox.EnqueueSystemMessage(envelope);
 			if(_system.Settings.DebugSystemMessages)
-				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Send system message: " + envelope));
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Received system message: " + envelope));
 		}
 
 		private ActorRef UnwrapSenderActorRef(ActorRef sender)
@@ -660,7 +660,7 @@ namespace Aktris.Internals
 				if(!_watchedBy.Contains(watcher))
 				{
 					_watchedBy = _watchedBy.Add(watcher);
-					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now monitoring " + watcher));
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now watched by " + watcher));
 				}
 			}
 			else if(watchee != this && watcher == this)
