@@ -23,7 +23,7 @@ namespace Aktris.Internals.SystemMessages
 
 		public override string ToString()
 		{
-			return "Child: [" + _child + "]" + CauseToString(". Cause: ");
+			return "Failed child: [" + _child + "]" + CauseToString(". Cause: ");
 		}
 	}
 }

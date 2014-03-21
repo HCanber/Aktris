@@ -15,5 +15,10 @@ namespace Aktris.Messages
 
 		[NotNull]
 		public ActorRef TerminatedActor { get { return _terminatedActor; } }
+
+		public override string ToString()
+		{
+			return "Terminated: [" + _terminatedActor + "]";
+		}
 	}
 }

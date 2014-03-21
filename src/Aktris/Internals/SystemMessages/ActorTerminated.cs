@@ -10,5 +10,10 @@
 		}
 
 		public InternalActorRef TerminatedActor { get { return _terminatedActor; } }
+
+		public override string ToString()
+		{
+			return "Terminated: [" + _terminatedActor + "]";
+		}
 	}
 }
