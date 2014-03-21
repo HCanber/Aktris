@@ -266,7 +266,7 @@ namespace Aktris.Internals
 			else if(_actorStatus.IsNotCreatingRecreatingOrTerminating)
 			{
 				var failedActor = _actor;
-				if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Restarting"));
+				if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Restarting"+ExceptionFormatter.DebugFormat(cause," due to ")));
 
 				if(failedActor != null)
 				{
