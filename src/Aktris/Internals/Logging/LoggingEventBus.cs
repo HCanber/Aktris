@@ -142,8 +142,8 @@ namespace Aktris.Internals.Logging
 		private void AddLogger(ActorRef logger, LogLevel logLevels, string logName, string loggerName)
 		{
 			var timeout = _system.Settings.LoggerStartTimeout;
-			var reply = logger.AskAndWait(new InitializeLogger(this), null, timeout)
-				.Handle<object>(
+			var askResult = logger.Ask(new InitializeLogger(this), null, timeout)
+				.Transform<object>(
 					replyMsg => replyMsg,
 					() =>
 					{
@@ -152,8 +152,9 @@ namespace Aktris.Internals.Logging
 					},
 					exceptions => exceptions.FirstOrDefault()
 				);
-			if(reply.GetType() != typeof(LoggerInitialized))
-				throw new LoggerInitializationException("Logger " + loggerName + " did not respond with " + typeof(LoggerInitialized).Name + ", sent instead " + reply);
+			var response = askResult.Response;
+			if(response.GetType() != typeof(LoggerInitialized))
+				throw new LoggerInitializationException("Logger " + loggerName + " did not respond with " + typeof(LoggerInitialized).Name + ", sent instead " + response);
 
 			Log.SeparateLogLevelsToSequence(logLevels).ForEach(l => Subscribe(logger, l.Type));
 			Publish(new DebugLogEvent(logName, GetType(), "Logger " + loggerName + " started"));
