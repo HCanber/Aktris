@@ -8,22 +8,22 @@ namespace Aktris.Supervision
 {
 	public abstract class SupervisorStrategy
 	{
-		private static readonly SupervisorStrategy _DefaultStrategy = new OneForOneSupervisorStrategy(DefaultDecider);
+		private static readonly SupervisorStrategy _DefaultStrategy = new OneForOneSupervisorStrategy(decider: DefaultDecider);
 
-		public bool HandleFailure(ChildRestartInfo failedActorRestartInfo, Exception cause, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
+		public bool HandleFailure(RestartableChildRestartInfo failedActorRestartInfo, Exception cause, IReadOnlyCollection<RestartableChildRestartInfo> allSiblingsIncludingFailingActor)
 		{
 			var action = DecideHowToHandle(cause) ?? SupervisorAction.Escalate;
-			var failingActor = failedActorRestartInfo.Child;
+			var failingActor = failedActorRestartInfo.Actor;
 			switch(action)
 			{
 				case SupervisorAction.Resume:
 					ResumeActor(failingActor, cause);
 					break;
 				case SupervisorAction.Restart:
-					HandleRestart(failingActor, cause, failedActorRestartInfo, actorWithSiblings);
+					HandleRestart(failedActorRestartInfo, cause, allSiblingsIncludingFailingActor);
 					break;
 				case SupervisorAction.Stop:
-					HandleStop(failingActor, cause, failedActorRestartInfo, actorWithSiblings);
+					HandleStop(failedActorRestartInfo, cause, allSiblingsIncludingFailingActor);
 					break;
 				case SupervisorAction.Escalate:
 					return false;
@@ -33,8 +33,8 @@ namespace Aktris.Supervision
 			return true;
 		}
 
-		protected abstract void HandleRestart(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings);
-		protected abstract void HandleStop(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings);
+		protected abstract void HandleRestart(RestartableChildRestartInfo failed, Exception cause, IReadOnlyCollection<RestartableChildRestartInfo> allSiblingsIncludingFailed);
+		protected abstract void HandleStop(RestartableChildRestartInfo failed, Exception cause, IReadOnlyCollection<RestartableChildRestartInfo> allSiblingsIncludingFailed);
 
 
 		protected void ResumeActor(ActorRef actor, Exception cause)

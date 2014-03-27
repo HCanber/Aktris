@@ -1,20 +1,21 @@
 using System;
+using System.Runtime.Remoting.Messaging;
 using Aktris.Internals.Children;
 
 namespace Aktris.Supervision
 {
 	public abstract class DeciderSupervisorStrategy : SupervisorStrategy
 	{
-		private readonly uint? _maxNrOfRetries;
+		private readonly int _maxNrOfRetries;
 		private readonly Func<Exception, SupervisorAction> _decider;
+		private int _withinTimeRangeMs;
 
-		protected DeciderSupervisorStrategy(Func<Exception, SupervisorAction> decider, uint? maxNrOfRetries)
+		protected DeciderSupervisorStrategy(Func<Exception, SupervisorAction> decider, uint? maxNrOfRetries, TimeSpan? withinTimeRange)
 		{
-			_maxNrOfRetries = maxNrOfRetries;
+			_maxNrOfRetries = maxNrOfRetries.HasValue ? (int)maxNrOfRetries : -1;
 			_decider = decider ?? DefaultDecider;
+			_withinTimeRangeMs = withinTimeRange.HasValue ? (int)withinTimeRange.Value.TotalMilliseconds : -1;
 		}
-
-		protected uint? MaxNrOfRetries { get { return _maxNrOfRetries; } }
 
 		protected Func<Exception, SupervisorAction> Decider { get { return _decider; } }
 
@@ -23,10 +24,9 @@ namespace Aktris.Supervision
 			return _decider(cause);
 		}
 
-		protected bool IsOkToRestart(ChildRestartInfo restartInfo)
+		protected bool IsOkToRestart(RestartableChildRestartInfo restartableChildRestartInfo)
 		{
-			if(!_maxNrOfRetries.HasValue) return true;
-			return restartInfo.NumberOfRestarts < _maxNrOfRetries.Value;
+			return restartableChildRestartInfo.RequestRestartPermission(_maxNrOfRetries, _withinTimeRangeMs);
 		}
 	}
 }

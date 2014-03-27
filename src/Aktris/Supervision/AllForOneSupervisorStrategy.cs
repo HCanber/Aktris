@@ -10,33 +10,34 @@ namespace Aktris.Supervision
 	{
 		private static readonly AllForOneSupervisorStrategy _DefaultInstance=new AllForOneSupervisorStrategy(SupervisorStrategy.DefaultDecider);
 
-		public AllForOneSupervisorStrategy(Func<Exception, SupervisorAction> decider = null, uint? maxNrOfRetries = null)
-			: base(decider, maxNrOfRetries)
+		public AllForOneSupervisorStrategy(Func<Exception, SupervisorAction> decider = null, uint? maxNrOfRetries = null, TimeSpan? withinTimeRange = null)
+			: base(decider, maxNrOfRetries,withinTimeRange)
 		{
 		}
 
 		public static AllForOneSupervisorStrategy DefaultAllForOne { get { return _DefaultInstance; } }
 
 
-		protected override void HandleRestart(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
+		protected override void HandleRestart(RestartableChildRestartInfo failed, Exception cause, IReadOnlyCollection<RestartableChildRestartInfo> allSiblingsIncludingFailed)
 		{
-			if(actorWithSiblings.Count > 0)
+			if(allSiblingsIncludingFailed.Count > 0)
 			{
-				var okToRestartAllChildren = actorWithSiblings.All(IsOkToRestart);
+				var okToRestartAllChildren = allSiblingsIncludingFailed.All(IsOkToRestart);
 				if(okToRestartAllChildren)
 				{
-					actorWithSiblings.ForEach(c => RestartActor(c.Child, cause,shouldSuspendFirst: c.Child!=failingActor));
+					var failingActor = failed.Actor;
+					allSiblingsIncludingFailed.ForEach(c => RestartActor(c.Actor, cause,shouldSuspendFirst: c.Actor!=failingActor));
 				}
 				else
 				{
-					actorWithSiblings.ForEach(c => StopActor(c.Child, cause));
+					allSiblingsIncludingFailed.ForEach(c => StopActor(c.Actor, cause));
 				}
 			}
 		}
 
-		protected override void HandleStop(ActorRef failingActor, Exception cause, ChildRestartInfo restartInfo, IReadOnlyCollection<ChildRestartInfo> actorWithSiblings)
+		protected override void HandleStop(RestartableChildRestartInfo failed, Exception cause, IReadOnlyCollection<RestartableChildRestartInfo> allSiblingsIncludingFailed)
 		{
-			actorWithSiblings.ForEach(c => StopActor(c.Child, cause));
+			allSiblingsIncludingFailed.ForEach(c => StopActor(c.Actor, cause));
 		}
 
 	}

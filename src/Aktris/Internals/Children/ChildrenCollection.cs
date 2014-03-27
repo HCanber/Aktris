@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using Aktris.Exceptions;
@@ -18,12 +19,14 @@ namespace Aktris.Internals.Children
 
 		public abstract bool TryGetByRef(ActorRef actorRef, out ChildRestartInfo info);
 		public abstract bool TryGetByName(string actorName, out ChildInfo info);
+		public abstract ChildrenCollection AddChild(ChildRestartInfo childRestartInfo);
 		public abstract ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo);
 		public abstract ChildrenCollection RemoveChild(ActorRef child);
 		public abstract IEnumerable<InternalActorRef> GetChildrenRefs();
 		public abstract IEnumerable<ChildRestartInfo> GetChildren();
 		public abstract ChildrenCollection IsAboutToTerminate(ActorRef child);
 		public abstract bool HasChildrenThatAreTerminating();
+		public abstract IEnumerable<KeyValuePair<string, ChildRestartInfo>> GetChildrenWithName();
 	}
 
 	public class EmptyChildrenCollection : ChildrenCollection
@@ -54,6 +57,11 @@ namespace Aktris.Internals.Children
 			return false;
 		}
 
+		public override ChildrenCollection AddChild(ChildRestartInfo childRestartInfo)
+		{
+			return NormalChildrenCollection.CreateNew(ImmutableDictionary<string, ChildInfo>.Empty.Add(childRestartInfo.Child.Name, childRestartInfo));
+		}
+
 		public override ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo)
 		{
 			return NormalChildrenCollection.CreateNew(ImmutableDictionary<string, ChildInfo>.Empty.Add(name, childRestartInfo));
@@ -70,6 +78,11 @@ namespace Aktris.Internals.Children
 		}
 
 		public override IEnumerable<ChildRestartInfo> GetChildren()
+		{
+			yield break;
+		}
+
+		public override IEnumerable<KeyValuePair<string, ChildRestartInfo>> GetChildrenWithName()
 		{
 			yield break;
 		}
@@ -111,6 +124,13 @@ namespace Aktris.Internals.Children
 			return Create(Children.Remove(name));
 		}
 
+		public override ChildrenCollection AddChild(ChildRestartInfo childRestartInfo)
+		{
+			var name = childRestartInfo.Child.Name;
+			var newChildren = Children.ContainsKey(name) ? Children.Remove(name).Add(name, childRestartInfo) : Children.Add(name, childRestartInfo);
+			return Create(newChildren);
+		}
+
 		public override ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo)
 		{
 			var newChildren = Children.ContainsKey(name) ? Children.Remove(name).Add(name, childRestartInfo) : Children.Add(name, childRestartInfo);
@@ -148,6 +168,11 @@ namespace Aktris.Internals.Children
 			return Children.Values.Where(i => i is ChildRestartInfo).Cast<ChildRestartInfo>();
 		}
 
+		public override IEnumerable<KeyValuePair<string, ChildRestartInfo>> GetChildrenWithName()
+		{
+			return Children.Where(kvp => kvp.Value is ChildRestartInfo).Select(kvp => new KeyValuePair<string, ChildRestartInfo>(kvp.Key, (ChildRestartInfo)kvp.Value));
+		}
+
 		public override bool TryGetByName(string actorName, out ChildInfo child)
 		{
 			return Children.TryGetValue(actorName, out child);
@@ -179,7 +204,7 @@ namespace Aktris.Internals.Children
 	public sealed class TerminatedChildrenCollection : EmptyChildrenCollection
 	{
 		public static readonly TerminatedChildrenCollection Instance = new TerminatedChildrenCollection();
-		private TerminatedChildrenCollection(){ }
+		private TerminatedChildrenCollection() { }
 
 		public override ChildrenCollection AddChild(string name, ChildRestartInfo childRestartInfo) { return this; }
 		public override ChildrenCollection ReserveName(string name)
@@ -281,33 +306,107 @@ namespace Aktris.Internals.Children
 	{
 	}
 
+	[DebuggerDisplay("[{Child,nq}] {NumberOfRestarts} restarts")]
 	public class ChildRestartInfo : ChildInfo
 	{
 		private readonly InternalActorRef _child;
 		private readonly uint _numberOfRestarts = 0;
+		private readonly long _restartTimeWindowStartTicks;
 
 		public ChildRestartInfo(InternalActorRef child)
-			: this(child, 0)
+			: this(child, 0, 0)
 		{
 		}
 
-		private ChildRestartInfo(InternalActorRef child, uint numberOfRestarts)
+		private ChildRestartInfo(InternalActorRef child, uint numberOfRestarts, long restartTimeWindowStartTicks)
 		{
 			_child = child;
 			_numberOfRestarts = numberOfRestarts;
+			_restartTimeWindowStartTicks = restartTimeWindowStartTicks;
 		}
 
 		public InternalActorRef Child { get { return _child; } }
 		public uint NumberOfRestarts { get { return _numberOfRestarts; } }
+		public long RestartTimeWindowStartTicks { get { return _restartTimeWindowStartTicks; } }
 
-		public ChildRestartInfo IncreaseNumberOfRestarts()
+		public ChildRestartInfo CreateUpdate(uint retries, long restartTimeWindowStartTicks)
 		{
-			return new ChildRestartInfo(_child, _numberOfRestarts + 1);
+			return new ChildRestartInfo(_child, retries, restartTimeWindowStartTicks > 0 ? restartTimeWindowStartTicks : 0);
+		}
+	}
+
+	public interface RestartableChildRestartInfo : ChildInfo
+	{
+		ActorRef Actor { get; }
+		bool RequestRestartPermission(int maxRetriesAllowed, int restartTimeWindowMs);
+	}
+
+	public class InternalRestartableChildRestartInfo : RestartableChildRestartInfo
+	{
+		private ChildRestartInfo _info;
+		private bool _isUpdated;
+
+		public InternalRestartableChildRestartInfo(ChildRestartInfo info)
+		{
+			_info = info;
 		}
 
-		public ChildRestartInfo ResetNumberOfRestarts()
+		public bool IsUpdated
 		{
-			return new ChildRestartInfo(_child, 0);
+			get { return _isUpdated; }
+		}
+		
+		public ChildRestartInfo Info
+		{
+			get { return _info; }
+		}
+
+		public ActorRef Actor { get { return _info.Child; } }
+
+		public bool RequestRestartPermission(int maxRetriesAllowed, int restartTimeWindowMs)
+		{
+			if(maxRetriesAllowed >= 0)
+			{
+				if(maxRetriesAllowed == 0) return false;
+				if(restartTimeWindowMs <= 0)
+				{
+					return IncreaseAndCheckNumberOfRetries(maxRetriesAllowed);
+				}
+				return CheckWindow(maxRetriesAllowed, (uint)restartTimeWindowMs);
+			}
+			if(restartTimeWindowMs > 0)
+			{
+				return CheckWindow(1, (uint)restartTimeWindowMs);
+			}
+			return true;
+		}
+
+		private bool CheckWindow(int maxRetriesAllowed, uint restartTimeWindowMs)
+		{
+			var now = DateTime.UtcNow.Ticks;
+			var windowStart = Info.RestartTimeWindowStartTicks;
+			if(windowStart == 0)
+				windowStart = now;
+			var insideWindow = now - windowStart <= TimeSpan.TicksPerMillisecond * restartTimeWindowMs;
+			if(insideWindow)
+			{
+				return IncreaseAndCheckNumberOfRetries(maxRetriesAllowed, windowStart);
+			}
+			Update(1, windowStart);
+			return true;
+		}
+
+		private bool IncreaseAndCheckNumberOfRetries(int maxRetriesAllowed, long windowStart = -1)
+		{
+			Update(Info.NumberOfRestarts + 1, windowStart);
+			return Info.NumberOfRestarts <= maxRetriesAllowed;
+
+		}
+
+		private void Update(uint retries, long windowStart)
+		{
+			_info = Info.CreateUpdate(retries, windowStart);
+			_isUpdated = true;
 		}
 	}
 
