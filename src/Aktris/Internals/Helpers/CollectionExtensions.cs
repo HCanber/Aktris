@@ -64,11 +64,17 @@ namespace Aktris.Internals.Helpers
 
 		public static IReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> sequence)
 		{
-			if(sequence==null)return EmptyReadonlyCollection<T>.Instance;
+			return ToReadOnlyList(sequence);
+		}
+
+		public static IReadOnlyList<T> ToReadOnlyList<T>(this IEnumerable<T> sequence)
+		{
+			if(sequence == null) return EmptyReadonlyCollection<T>.Instance;
 			var list = sequence.ToList();
 			if(list.Count == 0) return EmptyReadonlyCollection<T>.Instance;
 			return new ReadOnlyCollection<T>(list);
 		}
+
 
 		public static bool IsEmpty<T>(this ICollection<T> list)
 		{
