@@ -131,7 +131,7 @@ namespace Aktris.Internals.Concurrency
 			task.ContinueWith((antecedent, state) =>
 			{
 				// Recover our state data
-				var tuple = (Tuple<Timer, TaskCompletionSource<VoidTypeStruct>>)state;
+				var tuple = (Tuple<Timer, TaskCompletionSource<T>>)state;
 
 				// Cancel the Timer
 				tuple.Item1.Dispose();
