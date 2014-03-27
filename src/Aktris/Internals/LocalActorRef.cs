@@ -88,7 +88,7 @@ namespace Aktris.Internals
 			_mailbox.Enqueue(envelope);
 			if(_system.Settings.DebugMessages)
 			{
-				var shouldPublish =!( message is LogEvent);
+				var shouldPublish = !(message is LogEvent);
 				if(sender != null)
 				{
 					var senderType = sender.GetType();
@@ -226,8 +226,10 @@ namespace Aktris.Internals
 					_messageHandlerStack = _messageHandlerStack.Push((m, s) => actor.HandleMessage(m, s));
 
 				actor.PreStart();
-				if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(actor), "Started (" + actor + ")"));
-				if(recreateCause == null) actor.PreFirstStart();
+				var isFirstStart = recreateCause == null;
+				if(_system.Settings.DebugLifecycle) 
+					Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(actor), isFirstStart ? "Started (" + actor + ")" : "Restarted ("+ actor +") due to " + ExceptionFormatter.DebugFormat(recreateCause)));
+				if(isFirstStart) actor.PreFirstStart();
 				else actor.PostRestart(recreateCause);
 				return actor;
 			}
@@ -261,23 +263,26 @@ namespace Aktris.Internals
 			{
 				//The actor has not yet been created. We can use a simpler approach
 				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Changing recreate into Create after " + cause));
-				CreateActorInstanceDueToFailure();
+				CreateActorInstanceDueToFailure(cause);
 			}
 			else if(_actorStatus.IsNotCreatingRecreatingOrTerminating)
 			{
 				var failedActor = _actor;
-				if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Restarting"+ExceptionFormatter.DebugFormat(cause," due to ")));
 
 				if(failedActor != null)
 				{
 					//TODO: Stash optional message
-					var optionalMessage = _currentMessage != null ? _currentMessage.Message : null;
+					object optionalMessage = null;
+					ActorRef optionalSender = null;
+					if(_currentMessage != null)
+					{
+						optionalMessage = _currentMessage.Message;
+						optionalSender = _currentMessage.Sender;
+					}
 					try
 					{
-						try { failedActor.PostStop(); }
+						try { failedActor.PreRestart(cause, optionalMessage, optionalSender); }
 						catch(Exception e) { Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Exception thrown during actor.PreRestart()", e)); }
-						try { failedActor.PostStop(); }
-						catch(Exception e) { Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(failedActor), "Exception thrown during actor.PostStop()", e)); }
 					}
 					finally
 					{
@@ -326,7 +331,7 @@ namespace Aktris.Internals
 				freshActor.PostRestart(cause);
 
 				//Restart children
-				survivors.ForEach(c => c.Restart(cause), (c, e) => 
+				survivors.ForEach(c => c.Restart(cause), exceptionHandler: (c, e) =>
 					Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(freshActor), "Restarting " + c, e)));
 			}
 			catch(Exception e)
@@ -336,7 +341,7 @@ namespace Aktris.Internals
 			}
 		}
 
-		private void CreateActorInstanceDueToFailure()
+		private void CreateActorInstanceDueToFailure(Exception cause)
 		{
 			Debug.Assert(_mailbox.IsSuspended, "Mailbox must be suspended during restart, status=" + (_mailbox is MailboxBase ? (_mailbox as MailboxBase).GetMailboxStatusForDebug() : "unknown"));
 			Debug.Assert(_failPerpatrator == this, "Perpetrator should be this instance");
@@ -345,15 +350,15 @@ namespace Aktris.Internals
 			Children.GetChildrenRefs().ForEach(c => c.Stop());
 
 			//If we have children we must wait for, then set status to creating, so we know what to do when all children have terminated
-			var weHaveChildrenWeMustWaitFor = InterlockedSpin.ConditionallySwap(ref _actorStatus, _ => Children.HasChildrenThatAreTerminating(), ActorStatus.Creating);
+			var weHaveChildrenWeMustWaitFor = InterlockedSpin.ConditionallySwap(ref _actorStatus, _ => Children.HasChildrenThatAreTerminating(), ActorStatus.Creating(cause));
 
 			if(!weHaveChildrenWeMustWaitFor)
 			{
-				FinishCreateActorInstanceDueToFailure();
+				FinishCreateActorInstanceDueToFailure(cause);
 			}
 		}
 
-		private void FinishCreateActorInstanceDueToFailure()
+		private void FinishCreateActorInstanceDueToFailure(Exception cause)
 		{
 			try
 			{
@@ -365,7 +370,7 @@ namespace Aktris.Internals
 			}
 			try
 			{
-				CreateActorInstance();
+				CreateActorInstance(cause);
 			}
 			catch(Exception ex)
 			{
@@ -435,7 +440,7 @@ namespace Aktris.Internals
 			if(_actor == null)
 			{
 				Publish(new ErrorLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Changing Resume into Create after " + cause));
-				CreateActorInstanceDueToFailure();
+				CreateActorInstanceDueToFailure(cause);
 			}
 			else if(_actor.IsCleared && cause != null)
 			{
@@ -564,11 +569,11 @@ namespace Aktris.Internals
 					}
 					else if(_actorStatus.IsRecreating)
 					{
-						FinishRecreateActor(_actor, _actorStatus.RecreatingCause);
+						FinishRecreateActor(_actor, _actorStatus.Cause);
 					}
 					else if(_actorStatus.IsCreating)
 					{
-						FinishCreateActorInstanceDueToFailure();
+						FinishCreateActorInstanceDueToFailure(_actorStatus.Cause);
 					}
 				}
 			}
@@ -663,7 +668,7 @@ namespace Aktris.Internals
 				if(!_watchedBy.Contains(watcher))
 				{
 					_watchedBy = _watchedBy.Add(watcher);
-					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now watched by [" + watcher+"]"));
+					if(_system.Settings.DebugLifecycle) Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), "Now watched by [" + watcher + "]"));
 				}
 			}
 			else if(watchee != this && watcher == this)
@@ -692,7 +697,8 @@ namespace Aktris.Internals
 
 		private void TellWatchersWeDied()
 		{
-			foreach(var watcher in _watchedBy)
+			//Tell all that are watching us that we terminated (all but the parent/supervisor since it receives an ActorTerminated by default)
+			foreach(var watcher in _watchedBy.Where(w => w != _supervisor))
 			{
 				watcher.SendSystemMessage(new ActorTerminated(this), this);
 			}
@@ -785,22 +791,36 @@ namespace Aktris.Internals
 		private void HandleActorFailure(ActorFailed actorFailedMessage)
 		{
 			//_currentMessage=new Envelope(this,actorFailedMessage, actorFailedMessage.Child);
-			ChildRestartInfo childInfo;
+			ChildRestartInfo failedChildInfo;
 			var failedChild = (InternalActorRef)actorFailedMessage.Child;
-			if(!Children.TryGetByRef(failedChild, out childInfo))
+			var children = Children;
+			if(!children.TryGetByRef(failedChild, out failedChildInfo))
 			{
 				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), string.Format("Dropping {2} from unknown child {1} with cause: {0}", actorFailedMessage.CausedByFailure, failedChild, typeof(ActorFailed).Name)));
 			}
-			else if(childInfo.Child.InstanceId != failedChild.InstanceId)
+			else if(failedChildInfo.Child.InstanceId != failedChild.InstanceId)
 			{
-				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), string.Format("Dropping {4} from old child {1} (Instance id={2} != {3}). Cause: {0}", actorFailedMessage.CausedByFailure, failedChild, childInfo.Child.InstanceId, failedChild.InstanceId, typeof(ActorFailed).Name)));
+				Publish(new DebugLogEvent(_path.ToString(), SafeGetTypeForLogging(), string.Format("Dropping {4} from old child {1} (Instance id={2} != {3}). Cause: {0}", actorFailedMessage.CausedByFailure, failedChild, failedChildInfo.Child.InstanceId, failedChild.InstanceId, typeof(ActorFailed).Name)));
 			}
 			else
 			{
 				var cause = actorFailedMessage.CausedByFailure;
-				if(!_actor.GetSupervisorStrategy().HandleFailure(childInfo, cause, Children.GetChildren().ToReadOnlyCollection()))
+				var updateableSiblingsInclFailed = children.GetChildrenWithName().Select(kvp => new InternalRestartableChildRestartInfo(kvp.Value)).ToReadOnlyList();
+				var failedUpdatedable = new InternalRestartableChildRestartInfo(failedChildInfo);
+				var wasHandled = _actor.GetSupervisorStrategy().HandleFailure(failedUpdatedable, cause, updateableSiblingsInclFailed);
+
+				var numberOfChildren = updateableSiblingsInclFailed.Count;
+				for(int i = 0; i < numberOfChildren; i++)
 				{
-					//It was not handle. Escalate by rethrowing the exception.
+					var child = updateableSiblingsInclFailed[i];
+					if(child.IsUpdated) UpdateChildrenCollection(coll => coll.AddChild(child.Info));
+				}
+				if(failedUpdatedable.IsUpdated)
+					UpdateChildrenCollection(coll => coll.AddChild(failedUpdatedable.Info));
+
+				if(!wasHandled)
+				{
+					//It was not handle. Escalate by "rethrowing" the exception to the parent.
 					EscalateError(cause);
 				}
 			}
@@ -896,13 +916,11 @@ namespace Aktris.Internals
 		{
 			private static readonly ActorStatus _NormalInstance;
 			private static readonly ActorStatus _TerminatingInstance;
-			private static readonly ActorStatus _CreatingInstance;
 
 			static ActorStatus()
 			{
 				_NormalInstance = new ActorStatus();
 				_TerminatingInstance = new ActorStatus();
-				_CreatingInstance = new ActorStatus();
 			}
 
 			protected ActorStatus()
@@ -911,31 +929,38 @@ namespace Aktris.Internals
 
 			public bool IsNotCreatingRecreatingOrTerminating { get { return ReferenceEquals(this, _NormalInstance); } }
 			public bool IsTerminating { get { return ReferenceEquals(this, _TerminatingInstance); } }
-			public bool IsCreating { get { return ReferenceEquals(this, _CreatingInstance); } }
+			public virtual bool IsCreating { get { return false; } }
 			public virtual bool IsRecreating { get { return false; } }
-			public virtual Exception RecreatingCause { get { return null; } }
+			public virtual Exception Cause { get { return null; } }
 
 			public static ActorStatus Normal { get { return _NormalInstance; } }
 			public static ActorStatus Terminating { get { return _TerminatingInstance; } }
-			public static ActorStatus Creating { get { return _CreatingInstance; } }
+
+			public static ActorStatus Creating(Exception cause)
+			{
+				return new CauseStatus(cause,false);
+			} 
 
 			public static ActorStatus Recreating(Exception cause)
 			{
-				return new RecreationStatus(cause);
+				return new CauseStatus(cause,true);
 			}
 
-			private class RecreationStatus : ActorStatus
+			private class CauseStatus : ActorStatus
 			{
 				private readonly Exception _cause;
+				private readonly bool _isRecreating;
 
-				public RecreationStatus(Exception cause)
+				public CauseStatus(Exception cause, bool isRecreating	)
 					: base()
 				{
 					_cause = cause;
+					_isRecreating = isRecreating;
 				}
 
-				public override bool IsRecreating { get { return true; } }
-				public override Exception RecreatingCause { get { return _cause; } }
+				public override bool IsRecreating { get { return _isRecreating; } }
+				public override bool IsCreating { get { return _isRecreating; } }
+				public override Exception Cause { get { return _cause; } }
 			}
 		}
 	}

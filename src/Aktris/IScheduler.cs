@@ -6,7 +6,7 @@ namespace Aktris
 {
 	public interface IScheduler
 	{
-		Task ScheduleSendOnce(int initialDelayMs, ActorRef receiver, ActorRef sender, object message, CancellationToken cancellationToken);
+		Task ScheduleSend(int initialDelayMs, ActorRef receiver, ActorRef sender, object message, CancellationToken cancellationToken);
 		Task ScheduleOnce(int initialDelayMs, Action action, CancellationToken cancellationToken);
 
 		Task ScheduleSendRepeatedly(int initialDelayMs, int intervalMs, ActorRef receiver, ActorRef sender, object message, CancellationToken cancellationToken);
@@ -17,17 +17,17 @@ namespace Aktris
 	{
 		public static Task ScheduleSendOnce(this IScheduler scheduler, TimeSpan initialDelay, ActorRef receiver, ActorRef sender, object message)
 		{
-			return scheduler.ScheduleSendOnce((int) initialDelay.TotalMilliseconds, receiver, sender, message, CancellationToken.None);
+			return scheduler.ScheduleSend((int) initialDelay.TotalMilliseconds, receiver, sender, message, CancellationToken.None);
 		}
 
 		public static Task ScheduleSendOnce(this IScheduler scheduler, TimeSpan initialDelay, ActorRef receiver, ActorRef sender, object message, CancellationToken cancellationToken)
 		{
-			return scheduler.ScheduleSendOnce((int) initialDelay.TotalMilliseconds, receiver, sender, message, cancellationToken);
+			return scheduler.ScheduleSend((int) initialDelay.TotalMilliseconds, receiver, sender, message, cancellationToken);
 		}
 
 		public static Task ScheduleSendOnce(this IScheduler scheduler, int initialDelayMs, ActorRef receiver, ActorRef sender, object message)
 		{
-			return scheduler.ScheduleSendOnce(initialDelayMs, receiver, sender, message, CancellationToken.None);
+			return scheduler.ScheduleSend(initialDelayMs, receiver, sender, message, CancellationToken.None);
 		}
 
 

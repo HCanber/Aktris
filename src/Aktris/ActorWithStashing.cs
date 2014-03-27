@@ -36,7 +36,7 @@ namespace Aktris
 		/// <summary>
 		///  Prepends all messages in the stash to the mailbox, clears the stash and stops all children.
 		/// </summary>
-		protected internal override void PreRestart(Exception cause, object message)
+		protected internal override void PreRestart(Exception cause, object message, ActorRef optionalSender)
 		{
 			try
 			{
@@ -44,7 +44,7 @@ namespace Aktris
 			}
 			finally
 			{
-				base.PreRestart(cause, message);
+				base.PreRestart(cause, message,optionalSender);
 			}
 		}
 	}

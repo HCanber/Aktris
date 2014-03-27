@@ -7,7 +7,7 @@ namespace Aktris.Internals
 {
 	public class TaskBasedScheduler : IScheduler
 	{
-		public Task ScheduleSendOnce(int initialDelayMs, ActorRef receiver, ActorRef sender, object message, CancellationToken cancellationToken)
+		public Task ScheduleSend(int initialDelayMs, ActorRef receiver, ActorRef sender, object message, CancellationToken cancellationToken)
 		{
 			var internalReceiver = (InternalActorRef)receiver;
 			return InternalScheduleOnce(initialDelayMs, () =>

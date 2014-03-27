@@ -107,7 +107,7 @@ namespace Aktris
 		protected internal virtual void PreFirstStart() {/*Intentionally left blank*/}
 		protected internal virtual void PreStart() {/*Intentionally left blank*/}
 		protected internal virtual void PostStop() {/*Intentionally left blank*/}
-		protected internal virtual void PreRestart(Exception cause, object message)
+		protected internal virtual void PreRestart(Exception cause, object optionalMessage, ActorRef optionalSender)
 		{
 			InternalSelf.UnwatchAndStopChildren();
 		}
@@ -150,21 +150,21 @@ namespace Aktris
 			return _self.CreateActor(ActorCreationProperties.CreateAnonymous(configurator), name);
 		}
 
-		protected AskResult<object> AskAnonymous<TMessage>(TMessage message, Action<TMessage, SenderActorRef> messageHandler, long timeoutMs = Timeout.Infinite)
+		protected AskResult<object> AskAnonymous<TMessage>(TMessage message, Action<TMessage, SenderActorRef> messageHandler, int timeoutMs = Timeout.Infinite)
 		{
 			var actor = CreateAnonymousActor(cfg => cfg.Receive(messageHandler));
 			return actor.Ask(message, Self, timeoutMs);
 		}
 
-		protected AskResult<TResponse> AskAnonymous<TResponse>(Func<TResponse> producer, long timeoutMs = Timeout.Infinite)
+		protected AskResult<TResponse> AskAnonymous<TResponse>(Func<TResponse> producer, int timeoutMs = Timeout.Infinite)
 		{
 			var actor = CreateAnonymousActor(cfg => cfg.Receive<object>((_, sender) => sender.Reply(producer())));
 			var askResult = actor.Ask(TriggerMessage.Instance, Self, timeoutMs);
-			var convertedResultTask = askResult.Task.Then(t => (TResponse)t.Result);
-			return new AskResult<TResponse>(convertedResultTask);
+			var convertedResult= askResult.Transform(r=>(TResponse)r);
+			return convertedResult;
 		}
 
-		protected TResponse AskAnonymousAndWaitForResult<TResponse>(Func<TResponse> producer, long timeoutMs = Timeout.Infinite)
+		protected TResponse AskAnonymousAndWaitForResult<TResponse>(Func<TResponse> producer, int timeoutMs = Timeout.Infinite)
 		{
 			return AskAnonymous<TResponse>(producer, timeoutMs).Response;
 		}
