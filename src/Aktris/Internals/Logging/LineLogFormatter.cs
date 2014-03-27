@@ -25,7 +25,7 @@ namespace Aktris.Internals.Logging
 		{
 			return e.Cause == null
 				? FormatMessage(e, _ErrorFormat, dateFormat)
-				: FormatMessage(e, _ErrorFormatException, dateFormat, e.Cause.StackTrace);
+				: FormatMessage(e, _ErrorFormatException, dateFormat, e.Cause);
 		}
 
 		public static string FormatWarning(WarningLogEvent e, string dateFormat)
